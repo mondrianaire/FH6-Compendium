@@ -11,6 +11,10 @@ lap (X only) to read closely-spaced laps apart.*
 They share ONE selection (`SELECTED_LAP`) so the map, the speed trace, the LAPS list and the new panel all point
 at the same lap. Build order is (1) → (2) → (3); each is independently verifiable.
 
+**Status (2026-09-18):** all three shipped. (1) mini panel `lapInfoHTML()`; (2) hover-to-select in `wireTrace`;
+(3) X-axis zoom — `TRACE_XVIEW` window + `chart(…, x0, x1)` + wheel/drag/dbl-click/fit, verified live (span
+compounds as 1.18ⁿ, speed axis fixed, pan holds span, fit restores full, click-to-pin and hover-select intact).
+
 ### 1. The mini lap info panel — the lap-side mirror of the course info panel
 
 - **What it is.** The structural twin of `courseHeroParts()` (the course info panel: LENGTH / MEDIAN / BEST /

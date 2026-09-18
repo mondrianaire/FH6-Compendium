@@ -677,6 +677,14 @@ let TRACE_KEY = null;
 let TRACE_PICK = null;
 let TRACE_FIT = 0;
 let TRACE_CLS_HI = null;   // click a PI-class swatch in the speed-trace legend to spotlight that class's laps
+// SPEED-TRACE X-AXIS ZOOM (part 3, docs/plan-lap-inspection.md): an x0..x1 window ALONG the lap (metres in
+// course mode, seconds in free roam) that maps to the chart's drawing width. X only — the speed axis never
+// rescales, so two views of one lap agree (unlike a viewBox zoom, which would squash Y and the T-tick labels).
+// `manual` holds the window through a live repaint (mirrors CMAPVIEW.manual); `key` scopes it to one course/run
+// so switching course resets to fit. Wheel zooms around the cursor, drag pans, the "fit" button resets.
+let TRACE_XVIEW = { key: null, x0: 0, x1: 0, manual: false };
+let TRACE_RENDER = null;   // the last trace render object {head,foot,svg,...} — re-called on a window change so a zoom/pan skips the filter/legend recompute
+let _traceRAF = 0;
 // THE 5-PHASE TURN LANGUAGE (Jett 2026-09-10) — the WHERE axis of a corner, coloured the same on
 // the map overlay and in the turn-detail card. Matches the offline analyzer's turn-phases render
 // (gen_segments.py): braking and straight/crest are the connectors, turn-in→mid→exit the corner.
@@ -977,6 +985,7 @@ function paintTrace() {
   if (key === TRACE_KEY && el.firstChild) return;
   TRACE_KEY = key;
   const r = course ? courseTrace(COURSE) : liveRun();
+  TRACE_RENDER = r;   // kept so a zoom/pan can re-run just r.svg() into the trace body (traceRewindow) without a full recompute
   // shell first, so the chart can be drawn at the pixels the shell leaves it
   // A REGION EARNS ITS HEIGHT. With nothing to draw the trace is a 34px strip, not 240px of
   // empty chart; the pixels go to the panes, which is where the data is.
@@ -990,9 +999,42 @@ function paintTrace() {
 }
 window.addEventListener("resize", () => { TRACE_KEY = null; paintTrace(); });
 
-function chart(W, H, padL, padB, smax, vmax) {
-  return { px: (x) => padL + (x / (smax || 1)) * (W - padL - 8), py: (v) => (H - padB) - (v / (vmax || 1)) * (H - padB - 10) };
+function chart(W, H, padL, padB, smax, vmax, x0, x1) {
+  // px maps the X WINDOW [a..b] to the drawing width; default [0..smax] reproduces the un-zoomed transform
+  // exactly, so every existing caller is unaffected. py (speed) never takes the window — the vertical scale is
+  // fixed so a zoom reads the same shape, only wider (part 3, docs/plan-lap-inspection.md).
+  const IW = W - padL - 8, a = x0 || 0, b = (x1 != null ? x1 : (smax || 1)), span = (b - a) || 1;
+  return { px: (x) => padL + ((x - a) / span) * IW, py: (v) => (H - padB) - (v / (vmax || 1)) * (H - padB - 10) };
 }
+// resolve the X window for a render: the manual zoom if it is set for THIS course/run, else fit (full span).
+// Switching course/run (key change) drops the manual window back to fit. Clamped so a stale window can't invert.
+function traceXView(key, smax) {
+  const v = TRACE_XVIEW;
+  if (v.manual && v.key === key) {
+    const x0 = Math.max(0, Math.min(v.x0, smax - smax * 0.01));
+    const x1 = Math.max(x0 + smax * 0.01, Math.min(v.x1, smax));
+    return [x0, x1];
+  }
+  if (v.key !== key) TRACE_XVIEW = { key, x0: 0, x1: smax, manual: false };
+  return [0, smax];
+}
+// a window change (wheel/drag) re-runs only the last render's svg into the trace body — no filter/legend/scope
+// recompute — throttled to one repaint per animation frame so a wheel spin or a drag stays smooth.
+function traceRewindow() {
+  if (_traceRAF || typeof requestAnimationFrame !== "function") { if (!_traceRAF) traceRewindowNow(); return; }
+  _traceRAF = requestAnimationFrame(() => { _traceRAF = 0; traceRewindowNow(); });
+}
+function traceRewindowNow() {
+  const el = $("#trace"); if (!el || !TRACE_RENDER || !TRACE_RENDER.svg) return;
+  const host = el.querySelector(".tbody"); if (!host) return;
+  const W = Math.max(300, host.clientWidth), H = Math.max(80, host.clientHeight);
+  host.innerHTML = TRACE_RENDER.svg(W, H);
+  wireTrace(el);
+  syncTraceFit();   // the "fit" chip lives in the head (not rebuilt here) — reflect the zoom state onto it
+}
+// the "fit" chip is rendered once in the head; a wheel/pan changes the window without a full head rebuild, so
+// its shown/active state is synced here whenever the window moves (mirrors the map's mapfit affordance).
+function syncTraceFit() { const b = document.querySelector("#trace [data-tfit]"); if (b) { const on = TRACE_XVIEW.manual; b.hidden = !on; b.classList.toggle("on", on); } }
 // Split a trace wherever consecutive points don't sit next to each other in arc, so the line never
 // draws a straight streak across the gap: a BACKWARD step (< -30 m) is the start/finish seam a re-anchored
 // loop wraps at; a big FORWARD step (> 60 m) is a coverage gap (a section the lap didn't record). Normal
@@ -1068,7 +1110,7 @@ function modeControls() {
   return `<span class="segctl"><span class="why">paint</span>${[["grip", "grip", "what the tyres did — the axle that let go, and where"], ["speed", "speed", "how fast, coloured across the lap's own range"], ["pedals", "pedals", "what your feet did — throttle in greens, brake in reds, by how hard"]].map(([k, l, tip]) =>
     `<button class="mini ${TRACE_MODE === k ? "on" : ""}" data-tmode="${k}" title="${tip}">${l}</button>`).join("")}
     <button class="mini ${TRACE_ALL ? "on" : ""}" data-tall title="paint every run, not only the foregrounded lap">every run</button>
-    <button class="mini ${RACING_ONLY ? "on" : ""}" data-racing title="show only competitive laps — hide cruise/drift runs far off the class pace, rewound laps, and over/under-covered laps. Off = every lap on record.">racing only</button></span>`;
+    <button class="mini ${RACING_ONLY ? "on" : ""}" data-racing title="show only competitive laps — hide cruise/drift runs far off the class pace, rewound laps, and over/under-covered laps. Off = every lap on record.">racing only</button><button class="mini${TRACE_XVIEW.manual ? " on" : ""}" data-tfit${TRACE_XVIEW.manual ? "" : " hidden"} title="zoomed along the lap — wheel to zoom X, drag to pan; click (or double-click the trace) to fit the whole lap again">⤢ fit</button></span>`;
 }
 
 // THE COURSE-MODE FILTER BAR (Jett 2026-09-11). The historical-data filters (show-preset + the
@@ -1308,7 +1350,8 @@ function courseTrace(c) {
   const svg = (W, H) => {
     if (!match.length) return `<div class="why tempty">every matching lap is hidden — click a chip to show it</div>`;
     const smax = L, vmax = Math.max(...match.flatMap((t) => t.pts.map((q) => q[1]))) * 1.06 || 1;
-    const ch = chart(W, H, 28, 16, smax, vmax);
+    const [vx0, vx1] = traceXView(c.key, smax);
+    const ch = chart(W, H, 28, 16, smax, vmax, vx0, vx1);
     // default (non-"every run") context lines paint by the build's PI class, best emphasised by weight/opacity.
     // A class spotlight (TRACE_CLS_HI) lifts that class's laps and fades the rest -- highlight, not filter.
     // a lit set comes from EITHER the class spotlight (TRACE_CLS_HI) OR a per-lap highlight (sel.hi, the 3-state
@@ -1356,7 +1399,7 @@ function courseTrace(c) {
       <polyline fill="none" stroke="var(--acc2)" stroke-width="6.5" stroke-linejoin="round" stroke-linecap="round" opacity="${liveNow ? ".22" : ".1"}" points="${live.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"/>
       ${paintedLine(live, ch, 3.2, TRACE_MODE, piColor(CUR && CUR.cls), courseSpeedRange(c))}
       ${youMarkSvg(ch.px(lp[0]), ch.py(lp[1]), liveNow)}</g>` : "";
-    return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts))}">${axisSvg(ch, vmax)}${band}${ticks}${lines}${imp}${liveSvg}${cursorSvg(H)}</svg>`;
+    return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-vx0="${vx0.toFixed(2)}" data-vx1="${vx1.toFixed(2)}" data-xkey="${esc(c.key)}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts))}">${axisSvg(ch, vmax)}${band}${ticks}${lines}${imp}${liveSvg}${cursorSvg(H)}</svg>`;
   };
   return { head, foot, svg, hasData: match.length > 0 };
 }
@@ -1378,16 +1421,20 @@ function liveRun() {
     const hasT = pts[0][6] != null, t0 = hasT ? pts[0][6] : 0;
     const P = pts.map((q) => [hasT ? (q[6] - t0) / 1000 : q[0], q[1], q[2], q[3], q[4], null, q[7] ?? null, q[8] ?? null]);   // LIVE.run keeps pedals at [7]/[8]
     const smax = P[P.length - 1][0] || 1, vmax = Math.max(60, ...P.map((q) => q[1])) * 1.06;
-    const ch = chart(W, H, 28, 16, smax, vmax);
+    const [vx0, vx1] = traceXView("run", smax);
+    const ch = chart(W, H, 28, 16, smax, vmax, vx0, vx1);
     // split at a pause: a menu dwell holds the run but leaves a >1.5 s gap in the timestamps, and drawing
     // straight across it would be a flat line over dead time.
     const runs = []; let run = [P[0]];
     for (let i = 1; i < P.length; i++) { if (hasT && P[i][0] - P[i - 1][0] > 1.5) { runs.push(run); run = []; } run.push(P[i]); }
     runs.push(run);
     const body = runs.filter((r) => r.length > 1).map((r) => paintedLine(r, ch, 2.2, TRACE_MODE, piColor(CUR && CUR.cls))).join("");
-    const step = smax <= 20 ? 5 : smax <= 60 ? 10 : smax <= 150 ? 30 : 60;   // second ticks scaled to the window
-    const ticks = hasT ? [...Array(Math.floor(smax / step)).keys()].map((i) => (i + 1) * step).map((s) => `<line x1="${ch.px(s).toFixed(1)}" y1="6" x2="${ch.px(s).toFixed(1)}" y2="${H - 16}" stroke="var(--line)" opacity=".6"/><text x="${ch.px(s).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${s}s</text>`).join("") : "";
-    return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(P))}">${axisSvg(ch, vmax)}${ticks}${body}${cursorSvg(H)}</svg>`;
+    // ticks scale to the VISIBLE span (not the whole run), so a zoom re-spaces them finer instead of leaving one tick
+    const vspan = vx1 - vx0;
+    const step = vspan <= 20 ? 5 : vspan <= 60 ? 10 : vspan <= 150 ? 30 : 60;   // second ticks scaled to the window
+    const tk = []; for (let s = Math.ceil(vx0 / step) * step; s <= vx1 + 1e-6; s += step) if (s > 0) tk.push(s);
+    const ticks = hasT ? tk.map((s) => `<line x1="${ch.px(s).toFixed(1)}" y1="6" x2="${ch.px(s).toFixed(1)}" y2="${H - 16}" stroke="var(--line)" opacity=".6"/><text x="${ch.px(s).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${s}s</text>`).join("") : "";
+    return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-vx0="${vx0.toFixed(2)}" data-vx1="${vx1.toFixed(2)}" data-xkey="run" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(P))}">${axisSvg(ch, vmax)}${ticks}${body}${cursorSvg(H)}</svg>`;
   };
   // points are not a trace: a parked car accrues samples at one spot. The band is only worth
   // 240px when there is real distance under the line.
@@ -1431,17 +1478,37 @@ function wireTrace(el) {
   el.querySelectorAll("[data-clshi]").forEach((b) => b.onclick = () => { const k = b.dataset.clshi; TRACE_CLS_HI = (TRACE_CLS_HI === k) ? null : k; TRACE_KEY = null; paintTrace(); });
   const ta = el.querySelector("[data-tall]"); if (ta) ta.onclick = () => { TRACE_ALL = !TRACE_ALL; VIEW.global.traceAll = TRACE_ALL; viewSave(); try { localStorage.setItem("fh6PaintAll", TRACE_ALL ? "1" : "0"); } catch (e) {} TRACE_KEY = null; paintTrace(); };
   const rc = el.querySelector("[data-racing]"); if (rc) rc.onclick = () => { RACING_ONLY = !RACING_ONLY; VIEW.global.racingOnly = RACING_ONLY; viewSave(); try { localStorage.setItem("fh6RacingOnly", RACING_ONLY ? "1" : "0"); } catch (e) {} TRACE_KEY = null; LEFT_KEY = null; paintTrace(); paintLeft(); if (MODE.suggest === "course" && COURSE) paintRight(); };
+  const ft = el.querySelector("[data-tfit]"); if (ft) ft.onclick = () => traceZoomFit();
   const sv = el.querySelector("svg.tsvg[data-pts]"); if (!sv) return;
   let P = []; try { P = JSON.parse(sv.dataset.pts || "[]"); } catch (e) { P = []; }
   if (!P.length) return;
   const ds = sv.dataset, smax = +ds.smax, vmax = +ds.vmax, padL = +ds.padl, padB = +ds.padb, W = +ds.w, H = +ds.h;
+  // the active X window (part 3): arc/seconds → screen X honours the zoom, so hover, the cursor and the
+  // nearest-lap hit-test all land on the SAME pixels the lines are drawn at. Falls back to the full span.
+  const vx0 = ds.vx0 != null ? +ds.vx0 : 0, vx1 = ds.vx1 != null ? +ds.vx1 : smax, vspan = (vx1 - vx0) || 1, IW = W - padL - 8;
+  const pxOf = (x) => padL + ((x - vx0) / vspan) * IW;               // arc → viewBox X
+  const arcAt = (vx) => vx0 + ((vx - padL) / IW) * vspan;            // viewBox X → arc
   const cur = sv.querySelector(".cur"), read = el.querySelector(".tread");
+  const key = ds.xkey || ((MODE.suggest === "course" && COURSE) ? COURSE.key : "run");   // scopes the manual window — read from the render so the "trace follows you" (live-run-while-latched) case stays consistent
+  // the LIVE window is TRACE_XVIEW (the source of truth), not the closure's vx0/vx1 — those go stale between the
+  // rAF-throttled rewindows, so reading them would make rapid wheel/drag events not compound. Falls back to the
+  // rendered window before the first manual change.
+  const winNow = () => (TRACE_XVIEW.manual && TRACE_XVIEW.key === key) ? [Math.max(0, TRACE_XVIEW.x0), Math.min(smax, TRACE_XVIEW.x1)] : [vx0, vx1];
   sv.onmousemove = (ev) => {
-    const r = sv.getBoundingClientRect(); const vx = ((ev.clientX - r.left) / r.width) * W;
-    const sAt = ((vx - padL) / (W - padL - 8)) * smax;
+    const r = sv.getBoundingClientRect();
+    if (ZDRAG) {   // panning: shift the window opposite the drag by the INCREMENT since the last event (the anchor
+      const vx = ((ev.clientX - r.left) / r.width) * W, [a0, b0] = winNow(), cspan = (b0 - a0) || 1;   // advances so a mid-drag rewindow can't double-apply
+      const dArc = -((vx - ZDRAG.vx) / IW) * cspan; ZDRAG.vx = vx;
+      if (Math.abs(ev.clientX - ZDRAG.cx0) > 3) ZDRAG.moved = true;
+      let a = a0 + dArc, b = b0 + dArc;
+      if (a < 0) { b -= a; a = 0; } if (b > smax) { a -= (b - smax); b = smax; } a = Math.max(0, a);
+      TRACE_XVIEW = { key, x0: a, x1: b, manual: true }; traceRewindow(); return;
+    }
+    const vx = ((ev.clientX - r.left) / r.width) * W;
+    const sAt = arcAt(vx);
     let bi = 0, bd = Infinity; for (let i = 0; i < P.length; i++) { const d = Math.abs(P[i][0] - sAt); if (d < bd) { bd = d; bi = i; } }
     const q = P[bi]; const col = gripInk(q[2] | 0);
-    const px = padL + (q[0] / smax) * (W - padL - 8), py = (H - padB) - (q[1] / vmax) * (H - padB - 10);
+    const px = pxOf(q[0]), py = (H - padB) - (q[1] / vmax) * (H - padB - 10);
     cur.style.display = ""; const ln = cur.querySelector("line"); ln.setAttribute("x1", px); ln.setAttribute("x2", px);
     const c = cur.querySelector("circle"); c.setAttribute("cx", px); c.setAttribute("cy", py); c.setAttribute("fill", col);
     if (read) read.innerHTML = `<b>${Math.round(q[1])} mph</b> at ${Math.round(q[0])} m · <span style="color:${col}" title="${esc(gripOf(q[2] | 0).tip)}">${gripOf(q[2] | 0).word}</span>${q.length > 7 && (q[6] != null || q[7] != null) ? ` · throttle <b>${q[6] ?? 0}%</b> · brake <b>${q[7] ?? 0}%</b>` : ""}`;
@@ -1453,15 +1520,36 @@ function wireTrace(el) {
       let bid = null, bd2 = Infinity;
       for (const lap of TRACE_LAPS) { const pp = lap.pts; if (!pp || !pp.length) continue;
         let li = 0, la = Infinity; for (let i = 0; i < pp.length; i++) { const d = Math.abs(pp[i][0] - sAt); if (d < la) { la = d; li = i; } }
-        const gx = (padL + (pp[li][0] / smax) * (W - padL - 8)) * sx, gy = ((H - padB) - (pp[li][1] / vmax) * (H - padB - 10)) * sy;
+        const gx = pxOf(pp[li][0]) * sx, gy = ((H - padB) - (pp[li][1] / vmax) * (H - padB - 10)) * sy;
         const dd = (gx - cx) ** 2 + (gy - cy) ** 2; if (dd < bd2) { bd2 = dd; bid = lap.id; } }
       const near = (bid && bd2 < 26 * 26) ? bid : null;
       if (near !== HOVER_LAP) { HOVER_LAP = near; refreshLapInfo(); }
     }
   };
   sv.onmouseleave = () => { cur.style.display = "none"; if (read) read.textContent = "hover the trace — it marks that spot on the map"; clearMapMark(); if (HOVER_LAP) { HOVER_LAP = null; refreshLapInfo(); } };
-  sv.onclick = () => { if (HOVER_LAP && String(HOVER_LAP) !== String(SINGLE_LAP)) selectSingleLap(HOVER_LAP); };   // a click PINS the hovered lap: foregrounds it on the trace + map, keeps it in the panel after the mouse leaves
+  sv.onclick = () => { if (ZDRAG && ZDRAG.moved) return; if (HOVER_LAP && String(HOVER_LAP) !== String(SINGLE_LAP)) selectSingleLap(HOVER_LAP); };   // a click PINS the hovered lap; a pan-drag never pins
+  // WHEEL = ZOOM THE X WINDOW around the cursor (part 3). Y (speed) is fixed, so the shape reads the same, only
+  // wider. Zooming past the full span, or out to it, resets to fit. A minimum window keeps ~50x as the ceiling.
+  sv.onwheel = (ev) => {
+    ev.preventDefault();
+    const r = sv.getBoundingClientRect(), vx = ((ev.clientX - r.left) / r.width) * W, [a0, b0] = winNow(), cspan = (b0 - a0) || 1;
+    const f = (vx - padL) / IW, xc = a0 + f * cspan;   // the arc under the cursor, held in place across the zoom
+    let span = cspan * (ev.deltaY > 0 ? 1.18 : 1 / 1.18);
+    const minSpan = Math.max(smax * 0.02, 8);
+    if (span >= smax) { traceZoomFit(); return; }
+    span = Math.max(minSpan, span);
+    let a = xc - f * span, b = a + span;
+    if (a < 0) { b -= a; a = 0; } if (b > smax) { a -= (b - smax); b = smax; } a = Math.max(0, a);
+    TRACE_XVIEW = { key, x0: a, x1: b, manual: true }; traceRewindow();
+  };
+  sv.onmousedown = (ev) => { if (ev.button !== 0) return; const r = sv.getBoundingClientRect(); ZDRAG = { vx: ((ev.clientX - r.left) / r.width) * W, cx0: ev.clientX, moved: false }; };
+  sv.ondblclick = () => traceZoomFit();
 }
+// end a pan wherever the mouse is released (the window may have been rebuilt mid-drag, so listen on the document)
+if (typeof document !== "undefined" && !window._traceZoomWired) { window._traceZoomWired = true;
+  document.addEventListener("mouseup", () => { if (ZDRAG) setTimeout(() => { ZDRAG = null; }, 0); }); }   // defer so onclick can still read ZDRAG.moved
+let ZDRAG = null;
+function traceZoomFit() { TRACE_XVIEW = { key: TRACE_XVIEW.key, x0: 0, x1: 0, manual: false }; TRACE_KEY = null; paintTrace(); }
 
 /* --------------------------------------------------------------- dock */
 // The live dock — the v1 Lab's bottom strip, ported: value tiles from the frame, and the time

@@ -190,7 +190,8 @@ def run(cx, verbose=False, data_dir=None):
                       meta.get("drivetrain"), meta.get("tune_hash"),
                       meta.get("solo") or 0, meta.get("is_race"), meta.get("impacts") or 0, meta.get("void") or 0,
                       meta.get("lap_dist_m"), meta.get("rewinds") or 0, meta.get("pauses") or 0,
-                      meta.get("pause_s") or 0.0, meta.get("stitched") or 0))
+                      meta.get("pause_s") or 0.0, meta.get("stitched") or 0,
+                      meta.get("official") or 0))
         for i, p in enumerate(pts):
             prows.append((lap_id, i,
                           p[0] if len(p) > 0 else None,
@@ -239,7 +240,7 @@ def run(cx, verbose=False, data_dir=None):
                 pts = json.loads(r["pts"])
             except Exception:                            # noqa: BLE001
                 continue
-            key = (r["route_key"], r["cid"], round(r["lap_s"], 2) if r["lap_s"] else None)
+            key = (r["route_key"], r["cid"], round(r["lap_s"], 3) if r["lap_s"] else None)   # thousandths: the game publishes 3 dp
             seen.add(key)
             add_lap(r["route_key"], r["session"], r["cid"], r["t0"], r["lap_s"], pts, dict(r))
         lx.close()
@@ -249,7 +250,7 @@ def run(cx, verbose=False, data_dir=None):
         for cid, t in (m.get("speed_traces") or {}).items():
             if not isinstance(t, dict):
                 continue
-            key = (rk, cid, round(t["lap_s"], 2) if t.get("lap_s") else None)
+            key = (rk, cid, round(t["lap_s"], 3) if t.get("lap_s") else None)
             if key in seen:
                 continue
             seen.add(key)
@@ -294,7 +295,7 @@ def run(cx, verbose=False, data_dir=None):
             "lap_id", "route_key", "session_id", "cid", "container", "hw_hash", "t0", "lap_s",
             "arc_m", "coverage", "is_partial", "build_id", "class", "pi", "drivetrain",
             "tune_hash", "solo", "is_race", "impacts", "void", "lap_dist_m", "rewinds", "pauses", "pause_s",
-            "stitched"], lrows, chunk=2000)
+            "stitched", "official"], lrows, chunk=2000)
         # pedals ride along when the database has the schema-6 columns (rebuild.py migrates first); an older
         # database gets the same rows without them rather than a failed import
         _lp_cols = {r[1] for r in cx.execute("PRAGMA table_info(lap_point)")}

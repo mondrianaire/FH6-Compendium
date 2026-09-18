@@ -2737,7 +2737,10 @@ def main():
             # rows); this closure only supplies what it knows -- the session id and the measured gear ladder.
             gears_seen = len((cars.get(cid_) or {}).get("gears") or [])   # `gears` is the per-gear ladder, so its LENGTH is the box size
             return tune_hash_for(cid_, sid, w_["t0"], gears_seen)
-        def _game_lap_s(w_):
+        def _rewinds_in(w_):
+            return sum(1 for m in _markers if m["kind"] == "rewind" and w_["t0"] - 0.05 <= m["t"] <= w_["t1"] + 0.05)
+
+        def _game_lap_s(w_, rewound=None):
             """The lap's time on the GAME clock, which stops when you pause. None when it cannot be trusted.
 
             `t1 - t0` is WALL time. Pause rows are dropped by the IsRaceOn filter, so two surviving rows straddle
@@ -2759,10 +2762,22 @@ def main():
             span = rs_[-1]["CurrentRaceTime"] - rs_[0]["CurrentRaceTime"]
             if not (3.0 <= span <= 1800.0):
                 return None
+            if rewound is None:
+                rewound = _rewinds_in(w_) > 0
             ll = rs_[-1].get("LastLap") or 0.0
-            if 3.0 <= ll <= 1800.0 and abs(ll - span) <= max(0.5, 0.05 * span):
-                return round(ll, 3)          # the game's own official time, corroborated by its race clock
-            return round(span, 3)
+            ll_ok = 3.0 <= ll <= 1800.0
+            # A REWIND IS EXACTLY WHAT BREAKS THE CORROBORATION (Jett 2026-09-18: "laps with rewind should
+            # still count as long as the official lap time is obtained"). The race-clock span is measured
+            # across the window, and a rewind winds that clock BACK, so span under-reads by however much was
+            # re-driven -- on Shimanoyama lap 1585 the game published 29.420 while the span said 27.571, a
+            # 1.85 s disagreement that blew the 5% tolerance. The old rule then threw away the OFFICIAL number
+            # and kept the derived one, crowning a course record the game never acknowledged. On a rewound lap
+            # the disagreement is evidence against the SPAN, not against LastLap: take the game's time.
+            if ll_ok and (rewound or abs(ll - span) <= max(0.5, 0.05 * span)):
+                return round(ll, 3), True    # the game's own official time
+            if rewound:
+                return None, False           # rewound with no trustworthy official time: no time at all
+            return round(span, 3), False
         def _impacts(pts_):   # grip 4 = the JOLT alphabet (|lat_g| > 3 or SmashableVelDiff > 0). Display only. Count BEFORE thinning.
             return sum(1 for p in pts_ if len(p) > 4 and p[4] == 4)
         def _contacts(w_):
@@ -2823,7 +2838,7 @@ def main():
                 _sess_saw_rivals = any((e.get("solo") is False) for e in ev_out)
                 _solo = 1 if (_ev.get("solo") and not _sess_saw_rivals) else 0
                 _imp = _impacts(pts_w)
-                _lap_s = _game_lap_s(w)
+                _lap_s, _lap_official = _game_lap_s(w)
                 _th = _tune_hash_for(cid_, w)
                 # A LAP BELONGS TO THE COURSE WHOSE LINE IT CROSSED — not to whichever course this loop is on.
                 # This wrote the outer `key`, so every window a car drove was filed under EVERY course that car
@@ -2838,7 +2853,7 @@ def main():
                 # (route_key, session, cid, t0), so a second write of the same lap is an idempotent upsert.
                 _rk = _ev.get("route_key") or key
                 _lap_rows.append({"route_key": _rk, "session": sid, "cid": cid_, "t0": round(w["t0"], 1),
-                                  "lap_s": _lap_s, "arc_m": round(arc_w),
+                                  "lap_s": _lap_s, "official": 1 if _lap_official else 0, "arc_m": round(arc_w),
                                   "build_id": _cr.get("build_id"), "class": _cr.get("class"), "pi": _cr.get("pi"),
                                   "drivetrain": _cr.get("drivetrain"), "solo": _solo,
                                   # is_race = the RAW per-event verdict, NOT the session-adjusted `_solo` (2026-09-17): the
@@ -2862,10 +2877,10 @@ def main():
             if not _full:
                 continue   # no window covered the course: the lap store keeps the partials, the model saves no best trace
             def _bw_key(w):
-                g_ = _game_lap_s(w)
+                g_ = _game_lap_s(w)[0]
                 return g_ if g_ is not None else (w["t1"] - w["t0"])
             bw = min(_full, key=_bw_key)
-            lt = round(_bw_key(bw), 2)
+            lt = round(_bw_key(bw), 3)   # the game publishes thousandths; do not round its number away
             pts_all = _win_arc[id(bw)][1]
             carrec = cars.get(cid_) or {}
             # pts = [arc_m, mph, grip_code, x, z] — the state paints the trace, and x/z lets a hover on the trace

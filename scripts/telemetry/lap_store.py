@@ -59,6 +59,7 @@ def connect(root):
         pause_s REAL DEFAULT 0,                     -- seconds the game clock stood still inside it
         markers TEXT,                               -- JSON: the rewind / pause markers, t relative to lap start
         stitched INTEGER DEFAULT 0,                 -- 1 = the opening came from the previous capture file
+        official INTEGER DEFAULT 0,                 -- 1 = lap_s IS the time the game published (LastLap), not our race-clock span
         UNIQUE (route_key, session, cid, t0))""")
     cx.execute("CREATE INDEX IF NOT EXISTS ix_lap_route ON lap_traces(route_key, cid, lap_s)")
     _migrate(cx)
@@ -76,7 +77,8 @@ def _migrate(cx):
                      ("tune_hash", "tune_hash TEXT"), ("lap_dist_m", "lap_dist_m REAL"),
                      ("rewinds", "rewinds INTEGER DEFAULT 0"), ("pauses", "pauses INTEGER DEFAULT 0"),
                      ("pause_s", "pause_s REAL DEFAULT 0"), ("markers", "markers TEXT"),
-                     ("stitched", "stitched INTEGER DEFAULT 0"), ("is_race", "is_race INTEGER")):
+                     ("stitched", "stitched INTEGER DEFAULT 0"), ("is_race", "is_race INTEGER"),
+                     ("official", "official INTEGER DEFAULT 0")):
         if col not in have:
             cx.execute("ALTER TABLE lap_traces ADD COLUMN " + ddl)
             cx.commit()
@@ -98,15 +100,16 @@ def put_laps(root, rows):
         try:
             cx.executemany(
                 """INSERT INTO lap_traces (route_key, session, cid, t0, lap_s, arc_m, build_id, class, pi, drivetrain, solo, is_race, pts, impacts, void, tune_hash,
-                                        lap_dist_m, rewinds, pauses, pause_s, markers, stitched)
+                                        lap_dist_m, rewinds, pauses, pause_s, markers, stitched, official)
                    VALUES (:route_key,:session,:cid,:t0,:lap_s,:arc_m,:build_id,:class,:pi,:drivetrain,:solo,:is_race,:pts,:impacts,:void,:tune_hash,
-                           :lap_dist_m,:rewinds,:pauses,:pause_s,:markers,:stitched)
+                           :lap_dist_m,:rewinds,:pauses,:pause_s,:markers,:stitched,:official)
                    ON CONFLICT(route_key, session, cid, t0) DO UPDATE SET
                      lap_s=excluded.lap_s, arc_m=excluded.arc_m, pts=excluded.pts, solo=excluded.solo, is_race=excluded.is_race,
                      build_id=excluded.build_id, class=excluded.class, pi=excluded.pi, drivetrain=excluded.drivetrain,
                      impacts=excluded.impacts, void=excluded.void, tune_hash=excluded.tune_hash,
                      lap_dist_m=excluded.lap_dist_m, rewinds=excluded.rewinds, pauses=excluded.pauses,
-                     pause_s=excluded.pause_s, markers=excluded.markers, stitched=excluded.stitched""",
+                     pause_s=excluded.pause_s, markers=excluded.markers, stitched=excluded.stitched,
+                     official=excluded.official""",
                 # re-analysis runs every 20-90 s: a lap re-scored as clean must be able to un-void itself, so
                 # impacts/void are overwritten on conflict like every other re-derived field.
                 [dict(r, pts=json.dumps(r["pts"], separators=(",", ":")),
@@ -116,7 +119,8 @@ def put_laps(root, rows):
                       rewinds=int(r.get("rewinds") or 0), pauses=int(r.get("pauses") or 0),
                       pause_s=float(r.get("pause_s") or 0.0),
                       markers=json.dumps(r["markers"], separators=(",", ":")) if r.get("markers") else None,
-                      stitched=1 if r.get("stitched") else 0) for r in rows])
+                      stitched=1 if r.get("stitched") else 0,
+                      official=1 if r.get("official") else 0) for r in rows])
             cx.commit()
             return len(rows)
         finally:

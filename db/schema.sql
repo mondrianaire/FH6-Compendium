@@ -645,6 +645,10 @@ CREATE TABLE IF NOT EXISTS lap (
   pauses      INTEGER DEFAULT 0,
   pause_s     REAL DEFAULT 0,
   stitched    INTEGER DEFAULT 0,
+  -- OFFICIAL = the game published this lap's time (LastLap), so lap_s IS the game's own number, not our
+  -- race-clock span (2026-09-18). A rewind breaks the span but not the published time, so a rewound lap
+  -- with official = 1 is a real, comparable lap; one with official = 0 has no trustworthy time at all.
+  official    INTEGER DEFAULT 0,
   UNIQUE (route_key, session_id, cid, t0)
 );
 

@@ -4615,7 +4615,11 @@ const lapOrd = (cid) => String(cid || "").split("|")[0] || "?";
 // crowned Shimanoyama at 27.66 s -- 2.7 s faster than the game's own best for that session, because ~84 m of
 // the lap was never driven. A comparable lap is a whole lap; full laps measure 0.98-1.00.
 const LAP_COV_MIN = 0.97;
-const cleanLap = (l) => l && l.t != null && !l.void && !l.partial && !l.rewinds && (l.cov == null || l.cov >= LAP_COV_MIN);
+// OFFICIAL WINS (Jett 2026-09-18): if the game published the lap's time, that IS the lap time and the lap
+// counts - rewinds included, because a rewind corrupts our race-clock span, never the game's own number.
+// With no official time our clock is all we have, so it must be a whole, un-rewound lap.
+const cleanLap = (l) => l && l.t != null && !l.void && !l.partial
+  && (l.official ? true : (!l.rewinds && (l.cov == null || l.cov >= LAP_COV_MIN)));
 // ALIASES (2026-09-16): same (hw_hash, setup_hash) = the same build. If it's been saved under several names,
 // return the OTHER names so the UI can surface them ("also saved as X, Y") instead of silently showing only the
 // newest — self-answering the "why does it call my build that" question. Excludes m's own name; deduped.

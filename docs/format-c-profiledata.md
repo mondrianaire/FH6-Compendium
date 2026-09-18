@@ -23,6 +23,11 @@ below is measured from that file, not inferred. Where something is not yet under
 > the save to a third party, so it happens only on an explicit human approval, never silently and never
 > per-frame.
 
+**Every field, exhaustively:** [`docs/format-c-profiledata-fields.md`](format-c-profiledata-fields.md) — all 714
+typed properties by name with type, size and a sample value, and all 9 SQLite tables with every column, its
+type and how many rows populate it. That file is generated from a decrypt, not written by hand; this one
+explains the structure it inventories.
+
 ## 1. Region map
 
 Whole-file layout of the decrypted blob, with the offsets measured in this capture. Only the header and

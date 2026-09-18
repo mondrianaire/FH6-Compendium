@@ -18,6 +18,16 @@
 "use strict";
 
 const DAEMON = "http://127.0.0.1:8765";
+let PROFILE_STALE = false, PROFILE_READING = false, PROFILE_ERR = null;   // hybrid profile-read (identify-on-equip)
+// USER-APPROVED profile decrypt: reads the currently-equipped tune from C_ProfileData to settle a signature tie.
+// This UPLOADS the save to the crypto tool's backend — only ever called from an explicit button click.
+function profileDecrypt() {
+  if (PROFILE_READING) return;
+  PROFILE_READING = true; PROFILE_ERR = null; try { paintPanel(); } catch (x) {}
+  fetch(DAEMON + "/profile-decrypt", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ approved: true }) })
+    .then((r) => r.json()).catch(() => { PROFILE_READING = false; PROFILE_ERR = "request failed"; try { paintPanel(); } catch (x) {} });
+  // the result arrives asynchronously via the "profile_read" SSE event (decrypt is server-assisted)
+}
 let IDENT = null, LIVE = { cars: [], receiving: false, pps: 0, strip: [], corners: [], frame: null, run: [], runT: 0, lap: null, lapPrev: null, lapT: 0, events: [], _det: {} }, ES = null;
 let CUR = null;          // { ordinal, cid, name, ... }
 let MATCH = null;        // { build, hw, tune } after identification
@@ -95,6 +105,16 @@ function connect() {
       let d = null; try { d = JSON.parse(e.data); } catch (x) { return; }
       if (!CUR || !d || Number(d.ordinal) !== Number(CUR.ordinal)) return;
       clearTimeout(diskT); diskT = setTimeout(() => reread(), 250);
+    });
+    // HYBRID PROFILE READ (identify-on-equip): the daemon notices C_ProfileData changed and offers a
+    // one-click, USER-APPROVED decrypt (nothing uploads until profileDecrypt() is called). See fh6_profile.py.
+    ES.addEventListener("profile_stale", (e) => { PROFILE_STALE = true; try { paintPanel(); } catch (x) {} });
+    ES.addEventListener("profile_read", (e) => {
+      let d = null; try { d = JSON.parse(e.data); } catch (x) {}
+      PROFILE_READING = false;
+      if (d && d.ok) { PROFILE_STALE = false; }   // the ensuing "disk" event re-runs identity, now settled
+      else { PROFILE_ERR = (d && d.err) || "failed"; }
+      try { paintPanel(); } catch (x) {}
     });
     ES.onerror = () => { LIVE.receiving = false; paintHeader(); };
   } catch (err) { LIVE.err = String(err); paintHeader(); }

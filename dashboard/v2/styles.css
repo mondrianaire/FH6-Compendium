@@ -365,6 +365,13 @@ button.stage.act.go:active{transform:translateY(1px)}
 .coursewarn .cw-ic{flex:0 0 auto;font-size:22px;line-height:1;color:var(--warn);filter:drop-shadow(0 0 5px rgba(240,150,40,.7))}
 .coursewarn .cw-txt{flex:1 1 auto}
 .coursewarn .cw-txt b{color:#ffc27a}
+/* one-click "read equipped tune from profile" action inside the warning bar */
+.coursewarn .cw-act{flex:0 0 auto;align-self:center;white-space:nowrap;cursor:pointer;
+  font:700 11px var(--mono);letter-spacing:.03em;color:#0b0e12;background:#ffc27a;
+  border:1px solid var(--warn);border-radius:5px;padding:6px 10px}
+.coursewarn .cw-act:hover{background:#ffd39a}
+.coursewarn .cw-act:disabled{opacity:.6;cursor:default}
+.coursewarn .cw-err{flex:0 0 auto;align-self:center;color:var(--warn);font-size:10px;margin-left:2px}
 @keyframes cw-pulse{0%,100%{box-shadow:0 0 0 0 rgba(240,150,40,.45),0 0 14px rgba(240,150,40,.10)}
   50%{box-shadow:0 0 0 5px rgba(240,150,40,0),0 0 22px rgba(240,150,40,.28)}}
 @media (prefers-reduced-motion:reduce){.coursewarn{animation:none}}

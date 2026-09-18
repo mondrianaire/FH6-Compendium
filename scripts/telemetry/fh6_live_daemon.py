@@ -24,6 +24,10 @@ try:
     import fh6_tune_decode as TUNE  # on-disk tune reader (stdlib); optional
 except Exception:
     TUNE = None
+try:
+    import fh6_profile as PROFILE  # C_ProfileData decode: current-equipped tune + garage corpus; optional
+except Exception:
+    PROFILE = None
 
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 G = 9.80665
@@ -202,6 +206,62 @@ def _recall_equipped(ordn):
             return (_ident_load().get("equipped") or {}).get(str(ordn))
     except Exception:
         return None
+
+
+def _remember_profile_equipped(equipped_by_ord):
+    """Record the CURRENTLY-EQUIPPED tune per ordinal read from the decrypted C_ProfileData (identify-on-equip).
+    Unlike Fold-1 (a save-mtime heuristic), this is the game's own "current car's equipped tune" ground truth —
+    it settles a signature tie even for an EQUIP of an existing tune, which writes no Tuning_* file. Written only
+    by the user-approved /profile-decrypt path. Shape mirrors `equipped`: {<ord>: {ts, at}} under `equipped_profile`."""
+    try:
+        with _IDENT_LOCK:
+            d = _ident_load()
+            ep = d.setdefault("equipped_profile", {})
+            for ordn, ts in (equipped_by_ord or {}).items():
+                if ts:
+                    ep[str(ordn)] = {"ts": str(ts), "at": time.time()}
+            _ident_save(d)
+    except Exception:
+        pass
+
+
+def _recall_profile_equipped(ordn):
+    """The profile-reported currently-equipped tune for this car ({ts, at}), or None. See _remember_profile_equipped."""
+    try:
+        with _IDENT_LOCK:
+            return (_ident_load().get("equipped_profile") or {}).get(str(ordn))
+    except Exception:
+        return None
+
+
+def _profile_decrypt_and_record():
+    """USER-APPROVED profile read (hybrid prompt): decrypt C_ProfileData (uploads to the tool's backend — only
+    reached via an explicit /profile-decrypt {approved:true}), record the current car's equipped tune per ordinal
+    so _pick_meta settles the signature tie (identify-on-equip), then force a disk re-emit + announce the result.
+    Runs in a background thread — the decrypt is server-assisted (seconds). Never uploads without the click."""
+    import tempfile
+    if PROFILE is None:
+        ST.emit("profile_read", {"ok": False, "err": "profile module unavailable"}); return
+    out = os.path.join(tempfile.gettempdir(), "fh6_C_ProfileData.dec")
+    try:
+        src = PROFILE.find_profile_path()
+        if not src:
+            ST.emit("profile_read", {"ok": False, "err": "C_ProfileData not found"}); return
+        PROFILE.decrypt(src, out, approved=True, timeout=120)
+        dec = open(out, "rb").read()
+        eq = PROFILE.current_equipped(dec)
+        by_ord = {}
+        if eq and eq.get("ordinal") and eq.get("tune_ts"):
+            by_ord[str(eq["ordinal"])] = eq["tune_ts"]
+        if by_ord:
+            _remember_profile_equipped(by_ord)
+            ST._disk_dirty = True   # next disk emit re-runs _pick_meta -> settles via the profile fact
+        ST.emit("profile_read", {"ok": True, "equipped": eq, "at": time.time()})
+    except Exception as e:
+        ST.emit("profile_read", {"ok": False, "err": str(e)[:200]})
+    finally:
+        try: os.remove(out)
+        except Exception: pass
 
 def cid(p): return f'{p["CarOrdinal"]}|{p["DrivetrainType"]}|{p["NumCylinders"]}|{p["CarPI"]}'
 NAMES_PATH = os.path.join(ROOT, "data", "car-ordinals.json")
@@ -1316,6 +1376,19 @@ def _pick_meta(metas, ordn, ts_want=None, ts_explicit=False):
                 _remember_equipped(ordn, best)   # FOLD 1: a fresh equip+save IS the last-equipped build — record it durably
     except Exception:
         pass
+    # PROFILE-EQUIPPED SETTLE (2026-09-18): the decrypted C_ProfileData names the CURRENT car's equipped
+    # Tuning_<ord>_<ts> exactly (identify-on-equip, [[fh6-equipped-tune-in-profiledata]]). If a fresh save did
+    # not already settle it, and the profile's equipped ts for this ordinal matches a roster entry
+    # (cyl-consistent), settle to it. This is authoritative for an EQUIP — which writes NO Tuning_* file, so the
+    # fresh_dl/mtime path cannot see it. Setting n_ties=1 here naturally disables the Fold-1 recall below.
+    profiled = False
+    try:
+        pe = _recall_profile_equipped(ordn) if (not fresh_dl and n_ties > 1) else None
+        pr = next((r for r in roster if pe and str(r["ts"]) == str(pe.get("ts"))), None) if pe else None
+        if pr and (not live_cyl or (pr.get("cyl") and int(pr["cyl"]) == int(live_cyl))):
+            best = pr; n_ties = 1; profiled = True
+    except Exception:
+        pass
     # FOLD 1 RECALL -- DURABLE LAST-EQUIPPED MEMORY (Jett 2026-09-17). If a fresh save did not just settle it, but we
     # remember the build last equipped+saved on THIS car, settle to it -- PROVIDED the remembered save still exists on
     # disk, the live car's cylinders still match it, and NO newer cyl-matching save has superseded it (a newer save
@@ -1335,10 +1408,10 @@ def _pick_meta(metas, ordn, ts_want=None, ts_explicit=False):
                 best = rem; n_ties = 1; remembered = True
     except Exception:
         pass
-    return best["_meta"], {"how": ("remembered" if remembered else final_how), "live": live, "live_recent": live_recent, "live_cyl": live_cyl,
+    return best["_meta"], {"how": ("profile" if profiled else "remembered" if remembered else final_how), "live": live, "live_recent": live_recent, "live_cyl": live_cyl,
                            "live_pi": live_pi, "chosen_cyl": best["cyl"], "chosen_pi": best["pi"],
                            "n_saves": len(roster), "n_signature_ties": n_ties,
-                           "fresh_download": fresh_dl, "remembered": remembered,
+                           "fresh_download": fresh_dl, "remembered": remembered, "profiled": profiled,
                            "picked_ok": picked_ok, "stale": stale,
                            "builds": builds, "saves": saves}
 
@@ -2101,6 +2174,15 @@ class H(BaseHTTPRequestHandler):
                     if str(c["ordinal"]) == str(body["ordinal"]): c["name"] = obj["cars"][str(body["ordinal"])]["name"]
         elif self.path.startswith("/reset"):
             reset_session(); ok = True
+        elif self.path.startswith("/profile-decrypt"):
+            # HYBRID prompt: read the currently-equipped tune from C_ProfileData. This UPLOADS the save to the
+            # tool's backend, so it runs ONLY with an explicit {approved:true} from a user click — never silently.
+            if not body.get("approved"):
+                out = json.dumps({"ok": False, "err": "approval required (decrypt uploads the save)"}).encode()
+                self.send_response(400); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(out))); self.end_headers(); self.wfile.write(out); return
+            threading.Thread(target=_profile_decrypt_and_record, daemon=True).start()
+            out = json.dumps({"ok": True, "started": True}).encode()
+            self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(out))); self.end_headers(); self.wfile.write(out); return
         elif (self.path.startswith("/tag") or self.path.startswith("/role")) and ("label" in body or "role" in body):
             n = int(body.get("stint") or ST.stint)
             with ST.lock:
@@ -2485,6 +2567,18 @@ def disk_watcher():
     while True:
         time.sleep(1.5)
         try:
+            # HYBRID profile trigger: when C_ProfileData's mtime moves (an equip / save), ANNOUNCE it so the
+            # dashboard can offer a one-click, user-approved decrypt. We never decrypt/upload here — only notice.
+            if PROFILE is not None:
+                try:
+                    _pmt = PROFILE.profile_mtime()
+                    if _pmt and _pmt != getattr(ST, "_profile_mtime", None):
+                        _first = getattr(ST, "_profile_mtime", None) is None
+                        ST._profile_mtime = _pmt
+                        if not _first:
+                            ST.emit("profile_stale", {"ordinal": getattr(ST, "last_car", None), "mtime": _pmt})
+                except Exception:
+                    pass
             fr = ST.latest; ordn = fr and fr.get("car")
             if ordn:
                 ST.last_car = int(ordn)

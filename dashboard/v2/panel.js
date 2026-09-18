@@ -494,10 +494,21 @@ function paintCourseWarn() {
             : (mb && mb.hw) ? "this build's tune isn't saved"
             : "no saved tune identifies the car";
   el.hidden = false;
+  // ONE-CLICK PROFILE READ (2026-09-18): when several saved builds tie, the decrypted C_ProfileData names the
+  // currently-equipped one exactly — offer it as a hands-free alternative to equip+save. Uploads the save (with
+  // this click as the approval), so it is only shown when it can actually help (a signature tie to resolve).
+  const canProfile = !!(nties && nties > 1);
+  const reading = (typeof PROFILE_READING !== "undefined") && PROFILE_READING;
+  const perr = (typeof PROFILE_ERR !== "undefined") && PROFILE_ERR;
+  const btn = canProfile
+    ? `<button class="cw-act" data-profileread ${reading ? "disabled" : ""} title="Decrypt your profile save (uploads it to the crypto tool's backend — this click is the approval) and read the currently-equipped tune to identify it now, without equip+save">${reading ? "reading profile…" : "⟳ read equipped tune from profile"}</button>${perr ? `<span class="cw-err" title="${esc(String(perr))}">profile read failed</span>` : ""}`
+    : "";
   el.innerHTML = `<span class="cw-ic">⚠</span><span class="cw-txt">`
     + `<b>Tune not identified — laps aren't being recorded to a build.</b> `
     + `${esc(why)}, so nothing on this course can be scored per build or tune. `
-    + `<b>Equip the build and save the tune in-game</b> to record analysable data.</span>`;
+    + `<b>Equip the build and save the tune in-game</b> to record analysable data.</span>${btn}`;
+  const pb = el.querySelector("[data-profileread]");
+  if (pb) pb.onclick = () => { if (typeof profileDecrypt === "function") profileDecrypt(); };
 }
 
 /* -------------------------------------------------------------- trace */

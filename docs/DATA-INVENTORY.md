@@ -105,6 +105,9 @@ ace_triggers.tz` | 14 KB plaintext XML: 36 spheres `race_trigger_zone_rt<route_i
 **The rule this section enforces:** an import is not "done" because a feature works. A source is
 done when every one of its tables or entries is either imported or has a row here saying why not.
 
+Field-level catalogue of these tables (full column lists, row counts, and what every coded value means):
+**`docs/handoff-data-structures.md`** — the written companion to the *FH6 Lab Database ERD* Eraser file.
+
 ## 1. The central database — `data/fh6.db` (107 MB)
 
 | table | rows | what it is |

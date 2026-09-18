@@ -961,13 +961,16 @@ function traceSel(c) {
 
 function paintTrace() {
   const el = $("#trace"); if (!el) return;
-  // FREE-ROAM DRIVING FOLLOWS YOU (Jett 2026-09-18): a course can stay latched (MODE.suggest="course") from a
-  // nearby or stale rivals/timed detection while you are actually free-roaming — the trace then freezes on that
-  // course's static laps as you drive. When the car is genuinely free-roaming and MOVING, show the live run
-  // instead. Gated on MODE.game==="freeroam" (an actual event/rivals lap reads "event"/"menu", and a menu sets
-  // inMenu), so this never steals the event/rivals live overlay or fires the flap the mode-lock guards against.
-  const roaming = MODE.game === "freeroam" && LIVE.frame && LIVE.frame.on && !LIVE.inMenu && (LIVE.frame.mph || 0) > 10;
-  const course = !roaming && MODE.suggest === "course" && COURSE && COURSE.traces && Object.keys(COURSE.traces).length;
+  // THE TRACE FOLLOWS YOU WHEN THE COURSE ISN'T TRACKING YOUR LAP (Jett 2026-09-18): a course can stay latched
+  // (MODE.suggest="course") from a nearby or stale rivals/timed detection — even reported as game "event" — while
+  // you're actually free-roaming or between attempts. The course trace then freezes on a HELD lap (LIVE.lap.live
+  // false) as you drive. So when the car is MOVING but no lap is actively advancing on the located course, show
+  // the live run instead. Keyed on the live lap being live (not MODE.game, which mislabels this as "event"), so a
+  // genuine lap on the course keeps its live overlay and the mode-lock/rivals-flap logic is untouched.
+  const courseLatched = MODE.suggest === "course" && COURSE && COURSE.traces && Object.keys(COURSE.traces).length;
+  const driving = LIVE.frame && LIVE.frame.on && !LIVE.inMenu && (LIVE.frame.mph || 0) > 10;
+  const liveOnCourse = !!(LIVE.lap && LIVE.lap.live && typeof liveLapFor === "function" && liveLapFor(COURSE));
+  const course = courseLatched && !(driving && !liveOnCourse);
   const vc0 = course ? (VIEW.course[COURSE.key] || {}) : null;
   const key = course ? JSON.stringify(["c", COURSE.key, vc0.filters, vc0.preset, vc0.ctx, [...(vc0.hidden || [])], [...(vc0.hi || [])], TRACE_MODE, TRACE_ALL, TRACE_CLS_HI, RACING_ONLY, CUR && CUR.cid, liveClass(), MODE.game, el.clientWidth, liveLapSig(), turnPickSeq(), SINGLE_LAP])
                      : JSON.stringify(["r", LIVE.run.length >> 3, CUR && CUR.cid, TRACE_MODE, el.clientWidth]);

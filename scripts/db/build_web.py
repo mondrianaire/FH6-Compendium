@@ -592,8 +592,22 @@ def main(argv=None):
         # "N of M turns measured" and count the catalogued turns never driven. Measured = len(turns) here.
         _rid = route.get("route_id") if route else None
         n_cat = cx.execute("SELECT COUNT(*) FROM ref_route_turn WHERE route_id=?", (_rid,)).fetchone()[0] if _rid else None
+        # DISPLAYED LENGTH (Jett 2026-09-18): the course model's length_m is the MAX measured drive, so ONE long
+        # outlier inflates it forever (Shimanoyama read 1404 m against a ~1084 m real lap). Show the MEDIAN lap arc
+        # instead -- the same robust length the coverage verdict is judged against (import_telemetry) -- so the card,
+        # the coverage and "N of M laps" all agree. Too few laps to take a median: fall back to the catalogued route
+        # length, else the model length.
+        _disp_len = c["len"]
+        try:
+            _arcs = sorted(r[0] for r in cx.execute("SELECT arc_m FROM lap WHERE route_key=? AND arc_m > 0", (key,)))
+            if len(_arcs) >= 3:
+                _disp_len = _arcs[len(_arcs) // 2]
+            elif route and route.get("length_m"):
+                _disp_len = route["length_m"]
+        except Exception:
+            pass
         total += write(os.path.join(out, "course", re.sub(r"[^A-Za-z0-9_-]", "_", key) + ".json"),
-                       {"key": key, "name": c["name"], "len": c["len"], "rivals": c["rivals"],
+                       {"key": key, "name": c["name"], "len": _disp_len, "rivals": c["rivals"],
                         "path": geo.get("path") or [], "turns": turns, "laps": laps,
                         "traces": traces, "route": route, "naming": naming,
                         "n_turns_catalogued": n_cat, "classGrip": class_grip,

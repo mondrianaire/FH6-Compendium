@@ -142,7 +142,11 @@ def run(cx, verbose=False):
         for r in cx.execute("SELECT event_id, name, kind FROM ref_event WHERE route_id IS NOT NULL"):
             ev_by_name[r["name"]].append((0 if r["kind"] == "rivals" else 1, r["event_id"]))
         cand = defaultdict(list)
-        for r in cx.execute("SELECT track_key, route_id, display_name FROM ref_track_info WHERE route_id IS NOT NULL"):
+        # display_name='' is a catalogue entry objectmodel could not resolve to a ref_string (new
+        # content). It is NOT a name: naming a course "" would be worse than leaving it to the map
+        # tier, so it never becomes a candidate.
+        for r in cx.execute("SELECT track_key, route_id, display_name FROM ref_track_info "
+                            "WHERE route_id IS NOT NULL AND display_name IS NOT NULL AND display_name <> ''"):
             rank = (0 if r["track_key"] in rivals_of else (1 if r["track_key"] in raced else 2), r["track_key"])
             cand[r["route_id"]].append((rank, r["display_name"], r["track_key"]))
         for rid, lst in cand.items():

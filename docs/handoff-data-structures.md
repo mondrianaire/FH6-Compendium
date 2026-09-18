@@ -17,6 +17,7 @@ from the live `data/fh6.db` and the live stores on this machine — not copied f
 | `docs/game-data-refresh.md` | How and when is each game-derived input refreshed? (routines) |
 | **this doc** + the *Lab Database ERD* | What are the structures, and what do their values mean? |
 | `docs/handoff-grip-envelope.md` | What does `lap_point.r_m` mean, how far can it be trusted, and where is it biased? |
+| `docs/formats/` + the *Binary Source Formats* diagram | What do the raw bytes look like before they become a row? |
 
 ## 1. The seven places data lives
 

@@ -7,6 +7,10 @@ A `.bt` is executable documentation: open the file in 010 Editor, run the templa
 either parse or they don't. Prose describing a byte layout doesn't have to add up. A template does —
 which is why writing these found four things the prose had missed (below).
 
+**Visual:** the *FH6 Binary Source Formats* diagram maps all eight to the tables they feed —
+https://app.eraser.io/workspace/EV5zhW3hPU6v4Z7PiZoW?diagram=PV6Xc_TbbQJN9EPKziNM
+(same Eraser file as the *FH6 Lab Database ERD*, so the byte layouts and the schema sit side by side).
+
 ## The templates
 
 | Template | Format | Where it comes from | Verified against |

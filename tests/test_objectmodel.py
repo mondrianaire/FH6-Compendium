@@ -152,8 +152,21 @@ class ObjectModelImportTest(unittest.TestCase):
                          [("Alpha Circuit", 0, "101", 3, "road"), ("Alpha Circuit", 1, "101", 3, "road")])
         self.assertEqual(H.dump(self.cx, "SELECT discipline FROM ref_career_race WHERE race_key=310"), [("road",)])
 
-    def test_unresolved_name_guid_fails_the_stage(self):
+    def test_unresolved_name_guid_leaves_that_entry_unnamed(self):
+        """A single name GUID the string catalogue does not carry (new content) must NOT abort the
+        stage -- that blocked the whole rebuild (28c74c3). It is counted and its entry left unnamed;
+        every other row still imports, and nothing downstream may invent a name for it."""
         self.cx.execute("DELETE FROM ref_string WHERE key_name='IDS_DisplayName_bbbb'")
+        self.cx.commit()
+        counts, notes = om.run(self.cx, self.zip)
+        self.assertEqual(counts["ref_track_info"], 2)
+        self.assertEqual(notes["unresolved_name_strings"], ["CareerTrackInfo.IDS_DisplayName_bbbb"])
+        self.assertEqual(H.dump(self.cx, "SELECT track_key, display_name FROM ref_track_info ORDER BY 1"),
+                         [(24, "Alpha Circuit"), (31, "")])
+
+    def test_empty_ref_string_catalogue_still_fails_the_stage(self):
+        """No catalogue rows at all means gamedb never ran -- every name would be null. Hard fail."""
+        self.cx.execute("DELETE FROM ref_string")
         self.cx.commit()
         with self.assertRaises(ValueError):
             om.run(self.cx, self.zip)

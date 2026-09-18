@@ -37,7 +37,15 @@ sys.path.insert(0, HERE)
 
 import fh6db                                            # noqa: E402
 import export_options                                   # noqa: E402
+import import_diagnosis as _diag                        # noqa: E402  (the deterministic symptom set)
 sys.path.insert(0, os.path.join(ROOT, "scripts", "telemetry"))
+import confidence as _conf                              # noqa: E402
+
+#: symptoms whose detector reads a physical state rather than estimating a tendency, so one
+#: occurrence is the occurrence. Taken from import_diagnosis rather than restated, so adding a
+#: detector there cannot leave the dashboard grading it as a tendency.
+_DET_SYMPTOMS = set(_diag.DET_FAULT_SYMPTOM.values()) | {
+    "Bottoming out (suspension on the stop)"}
 import fh6_tune_decode as _tune                         # noqa: E402  — parts_hash, to attach each build's DRIVEN class
 
 OUT = os.path.join(ROOT, "dashboard", "v2", "api")
@@ -735,9 +743,38 @@ def main(argv=None):
     total += write(os.path.join(out, "world.json"), world)
 
     # ---- diagnosis rollups: what goes wrong, where, for whom ----------------------------
+    # COURSE-LEVEL faults carry the confidence verdict with them, decided HERE rather than in the
+    # browser. The gate is arithmetic that decides what the dashboard is allowed to claim, and a
+    # second implementation in JS would drift from the Python one -- at which point the dashboard
+    # would be recommending a tuning change the analysis had already refused. One implementation,
+    # exported as a verdict the renderer only has to display.
+    by_course = rows(cx, "SELECT * FROM v_diag_by_course")
+    lap_n = {(r["route_key"], r["container"]): r["n"] for r in cx.execute(
+        """SELECT route_key, container, COUNT(*) n FROM lap
+           WHERE coalesce(void,0)=0 AND route_key IS NOT NULL AND container IS NOT NULL
+           GROUP BY 1, 2""")}
+    for r in by_course:
+        # n is every lap this build drove on this course -- the passes that COULD have shown the
+        # fault -- never the count that did. Falling back to laps_affected would make every fault
+        # "100% of laps" the moment the denominator went missing.
+        n = lap_n.get((r["route_key"], r["container"])) or r["laps_affected"]
+        # The denominator must never be smaller than the numerator. It can be: diag_event.container
+        # comes from the analyzer's ctx(), which files every event under the FIRST lap's container
+        # for that car in the session, so a container can be credited with laps it did not drive.
+        # Flagged rather than quietly maxed, so the mis-attribution stays visible.
+        r["denom_suspect"] = 1 if r["laps_affected"] > n else 0
+        n = max(n, r["laps_affected"])
+        a = _conf.assess(r["laps_affected"], n,
+                         evidence_class=("deterministic" if r["symptom"] in _DET_SYMPTOMS
+                                         else "statistical"),
+                         severity=r.get("peak_severity"))
+        r["n_laps"] = n
+        for k in ("verdict", "lo", "hi", "needs_laps", "why", "evidence_class"):
+            r[k] = a[k]
     diag = {
         "by_setup": rows(cx, "SELECT * FROM v_diag_by_setup"),
         "by_turn": rows(cx, "SELECT * FROM v_diag_by_turn"),
+        "by_course": by_course,
         "symptoms": rows(cx, "SELECT symptom, phase, primary_fix, secondary_fix, tertiary_fix, detector, source FROM ref_symptom"),
     }
     total += write(os.path.join(out, "diag.json"), diag)

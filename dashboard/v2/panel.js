@@ -4608,6 +4608,48 @@ function servicesHTML() {
 // in a class section. Picking a class in the filter bar -- or clicking a class here -- FOCUSES it: the
 // other classes collapse to a one-line summary and the chosen one expands to its build table.
 const CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "R", "X"];
+// GEARING FOR THIS COURSE (2026-09-18). A ladder is not right or wrong in the abstract -- it is right
+// or wrong FOR A COURSE, which is why this lives in the course lane and not on the build sheet. The
+// same 10-speed that is correct down a long Rivals road carries a gear it never engages around a
+// 1 km loop, and only the course lane can see that.
+//
+// The verdict is NOT decided here. build_web runs confidence.py over v_diag_by_course and ships
+// `verdict` / `lo` / `hi` / `needs_laps` / `why` with every row, so this function only renders what
+// the analysis already allowed. A row that did not clear the gate must never be drawn as a fix:
+// "watching" and "needs more laps" print the count and say so in as many words.
+function courseGearingHTML() {
+  if (!DIAG || !DIAG.by_course || !COURSE) return "";
+  const conts = new Set(atomicTwins().map((b) => b.c));
+  let rows = DIAG.by_course.filter((r) => r.route_key === COURSE.key && /^Gearing/.test(r.symptom));
+  const mine = rows.filter((r) => conts.has(r.container));
+  const scoped = mine.length > 0;
+  rows = (scoped ? mine : rows).sort((a, b) => (b.lo || 0) - (a.lo || 0));
+  if (!rows.length) {
+    return `<div class="grp"><div class="gh">Gearing for this course <span class="why">· does the ladder fit the lap</span></div>
+      <div class="why" style="padding:4px 6px">no gearing verdict on this course yet — it needs a scanned session (<code>deterministic</code> stage) with laps on this route</div></div>`;
+  }
+  const badge = (v) => v === "report" ? `<span class="chip b">recommended</span>`
+    : v === "watching" ? `<span class="chip w">watching</span>`
+    : v === "not_recurrent" ? `<span class="chip on">ruled out</span>`
+    : `<span class="chip w">need more laps</span>`;
+  const body = rows.map((r) => {
+    const claim = r.verdict === "report"
+      ? `on at least ${Math.round((r.lo || 0) * 100)}% of laps (${r.laps_affected} of ${r.n_laps})`
+      : `${r.laps_affected} of ${r.n_laps} laps so far`;
+    // Only a cleared verdict is allowed to read as an instruction.
+    const right = r.verdict === "report"
+      ? `<span class="chip b">${esc(r.primary_fix || "")}</span>`
+      : `<span class="chip w">${r.needs_laps ? `${r.needs_laps} more lap${r.needs_laps === 1 ? "" : "s"}` : "not a recommendation"}</span>`;
+    return `<div class="frow">
+      <div class="fl"><b>${esc(r.symptom.replace(/^Gearing /, "Gearing "))}</b>
+        <span class="why">${badge(r.verdict)} · ${esc(claim)}</span>
+        <span class="why">${esc(r.why || "")}</span>
+        ${r.verdict === "report" && r.verify_test ? `<span class="why">verify: ${esc(r.verify_test)}</span>` : ""}</div>
+      <div class="fr">${right}</div></div>`;
+  }).join("");
+  return `<div class="grp"><div class="gh">Gearing for this course
+    <span class="why">· does the ladder fit the lap · ${scoped ? "this build" : "every build driven here"} · read from laps already driven, never a top-speed pull</span></div>${body}</div>`;
+}
 function courseStatsHTML() {
   // GENERAL STATISTICS, PER CAR (redesign step 4): scoped to the active lap set, this answers "which car,
   // and how does practice trade for pace" — a most-driven and a quickest headline, a laps×best scatter (one
@@ -4636,7 +4678,8 @@ function courseStatsHTML() {
   const sbal = clog.length ? `<div class="grp"><div class="gh">Session corner balance <span class="why">· ${clog.length} detected corner${clog.length === 1 ? "" : "s"} this session · front / rear grip loss · this session, not the scope</span></div>
     <div class="balbar">${bord.map((k) => `<span style="flex:${bt[k]} 0 0;background:${DGRIP[k].col}" title="${DGRIP[k].word}: ${bt[k]}"></span>`).join("")}</div>
     <div class="ballegend">${bord.map((k) => `<span><i style="background:${DGRIP[k].col}"></i>${DGRIP[k].word} · ${bt[k]} (${Math.round(bt[k] / clog.length * 100)}%)</span>`).join("")}</div></div>` : "";
-  if (!laps.length) return totals + sbal + `<div class="why" style="padding:4px 6px">${allLaps.length ? `no lap in ${scopeTok(ls)} — ${allLaps.length} on the course; widen the filter to see them` : "no laps recorded on this course yet"}</div>`;
+  const gearing = courseGearingHTML();
+  if (!laps.length) return totals + gearing + sbal + `<div class="why" style="padding:4px 6px">${allLaps.length ? `no lap in ${scopeTok(ls)} — ${allLaps.length} on the course; widen the filter to see them` : "no laps recorded on this course yet"}</div>`;
   // per-CAR aggregation (by ordinal) within scope
   const byCar = {};
   laps.forEach((l) => { const o = ordOf(l.cid);
@@ -4673,7 +4716,7 @@ function courseStatsHTML() {
     <td class="mono dim" style="text-align:right">${c.med != null ? lapTime(c.med) : "—"}</td></tr>`).join("");
   const table = `<div class="grp"><div class="gh">by car <span class="why">· ${cars.length} car${cars.length === 1 ? "" : "s"} in ${scopeTok(ls)} · fastest first</span></div>
     <table class="cstat-tbl"><thead><tr><th>car</th><th>laps</th><th>best</th><th>median</th></tr></thead><tbody>${rows}</tbody></table></div>`;
-  return totals + sbal + headline + scatter + table;
+  return totals + gearing + sbal + headline + scatter + table;
 }
 
 // ============ SESSION LAPS + SINGLE-LAP ANALYSIS (course v2, 2026-09-16) ============

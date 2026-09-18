@@ -8,8 +8,11 @@
 //  Category: Game
 // File Mask: *.owt
 //
-// WHERE: <install>/Content/media/openworld/brio/aitracks/Route<id>.owt
-//        One file per defined route. 170 on this install.
+// SOURCE-CATEGORY: game install -- loose binary, readable as-is
+// SOURCE-LOCATION: C:\XboxGames\Forza Horizon 6\Content\media\openworld\brio\aitracks\Route*.owt -- 170 files, one per route
+// SOURCE-READ: no decryption, no container. Read directly; coordinates are already in the
+// SOURCE-READ: telemetry's metre frame, so no transform is needed to compare with a driven lap.
+// SOURCE-READER: scripts/telemetry/fh6_owt.py
 //
 // WHY IT MATTERS: the coordinates are in the SAME METRE FRAME the telemetry
 // reports, so a learned course and a game route compare directly with no

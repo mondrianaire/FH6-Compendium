@@ -19,6 +19,7 @@ variable-length formats -- BXML, .owt, .nav -- need a real parser, not this.
 Exit code 1 if any check fails, so it can gate a commit. READ-ONLY throughout.
 """
 import glob
+import io
 import os
 import re
 import struct
@@ -601,7 +602,52 @@ def check_swatchbin():
     return fails
 
 
-CHECKS = {"tune": check_tune, "dataout": check_dataout,
+def check_paths():
+    """Every template declares its source, and every declared path resolves.
+
+    A template that documents a byte layout but not WHERE the bytes live sends
+    the next agent hunting. This makes the location a checked fact rather than a
+    claim: each .bt must carry SOURCE-CATEGORY / SOURCE-LOCATION / SOURCE-READ /
+    SOURCE-READER, and every SOURCE-LOCATION must glob to at least one real file.
+    A location of "(none ...)" is allowed for the wire format, which has no file.
+    """
+    fails = []
+    bts = sorted(glob.glob(os.path.join(ROOT, "docs", "formats", "*.bt")))
+    if not bts:
+        return ["no .bt templates found"]
+    for p in bts:
+        name = os.path.basename(p)
+        text = io.open(p, encoding="utf-8").read()
+        tags = {}
+        for key in ("SOURCE-CATEGORY", "SOURCE-LOCATION", "SOURCE-READ", "SOURCE-READER"):
+            tags[key] = re.findall(r"^// %s:\s*(.+?)\s*$" % key, text, re.M)
+        missing = [k for k, v in tags.items() if not v]
+        if missing:
+            fails.append("%s declares no %s" % (name, ", ".join(missing)))
+            continue
+
+        resolved = []
+        for loc in tags["SOURCE-LOCATION"]:
+            if loc.startswith("("):
+                resolved.append((loc[:46], "n/a"))
+                continue
+            # strip the trailing " -- note"
+            path = loc.split(" -- ")[0].strip()
+            # relative paths are worktree-relative; absolute ones are literal
+            probe = path if (len(path) > 1 and path[1] == ":") else os.path.join(ROOT, path)
+            hits = glob.glob(probe.replace("\\", "/"), recursive=True)
+            resolved.append((os.path.basename(path) or path, len(hits)))
+            if not hits:
+                fails.append("%s: SOURCE-LOCATION does not resolve on this machine: %s"
+                             % (name, path))
+        cat = tags["SOURCE-CATEGORY"][0]
+        print("  %-26s %s" % (name, cat))
+        for what, n in resolved:
+            print("      %-42s %s" % (what, n if n != "n/a" else "no file (wire format)"))
+    return fails
+
+
+CHECKS = {"paths": check_paths, "tune": check_tune, "dataout": check_dataout,
           "crypto": check_cryptocontainer, "owt": check_owt, "nav": check_nav,
           "str": check_str, "bxml": check_bxml, "swatchbin": check_swatchbin}
 

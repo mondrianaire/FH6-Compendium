@@ -8,8 +8,14 @@
 //  Category: Game
 // File Mask: *.nav
 //
-// WHERE: <install>/Content/media/openworld/brio/aitracks/Route<id>.nav  (170)
-//        plus Brio_00.nav, the free-roam road graph.
+// SOURCE-CATEGORY: game install -- loose binary, readable as-is
+// SOURCE-LOCATION: C:\XboxGames\Forza Horizon 6\Content\media\openworld\brio\aitracks\Route*.nav -- 170 per-route graphs
+// SOURCE-LOCATION: C:\XboxGames\Forza Horizon 6\Content\media\openworld\brio\freeroam\Brio_00.nav -- the FREE-ROAM graph, 1 file
+// SOURCE-READ: Brio_00.nav is in a DIFFERENT folder from the per-route files (freeroam, not
+// SOURCE-READ: aitracks) and is far larger -- 1,532 splines against 1..3 on a route.
+// SOURCE-READ: no decryption. Walk chunk headers to EOF; each chunk's 16-byte footer echoes its header,
+// SOURCE-READ: which is the alignment check. The payload is NOT sequential -- see the note below.
+// SOURCE-READER: scripts/telemetry/fh6_nav.py (surface import: scripts/db/import_surface.py)
 //
 // WHY IT MATTERS: the .owt centre-line gives a corner's SHAPE -- radius, width,
 // banking. It cannot say what the corner is MADE OF, and surface decides which

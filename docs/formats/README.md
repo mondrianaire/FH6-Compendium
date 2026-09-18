@@ -38,6 +38,28 @@ https://app.eraser.io/workspace/EV5zhW3hPU6v4Z7PiZoW?diagram=PV6Xc_TbbQJN9EPKziN
 A `.bt` is the right tool for a byte layout and the wrong tool for everything else. These eight are the
 binary corpus; there is no ninth waiting.
 
+## Source locations
+
+Every template declares four machine-readable tags in its header — `SOURCE-CATEGORY`, `SOURCE-LOCATION`,
+`SOURCE-READ` and `SOURCE-READER`. `check_bt_template.py paths` verifies each one is present **and that
+every declared location actually resolves on this machine**, so a path here is a checked fact, not a claim.
+
+`<install>` = `C:\XboxGames\Forza Horizon 6\Content\media` · `<save>` = `C:\XboxGames\GameSave\pgs\*\*\ContainersRoot`
+
+| Format | Category | Disk location | Reader |
+| --- | --- | --- | --- |
+| [`fh6_bxml.bt`](fh6_bxml.bt) | game install -- PLAIN DEFLATE ZIP, no decryption | `<install>\ObjectModelGame.zip` — 7,121 entries under source/ScribbleData/ | `scripts/telemetry/fh6_bxml.py` |
+| [`fh6_cryptocontainer.bt`](fh6_cryptocontainer.bt) | encrypted envelope -- wraps one player save AND one game-install file | `<save>\User_*\C_ProfileData` — the profile save, 512-byte chunks<br>`<install>\stripped\gamedbRC.slt` — the game DB, 128 KB chunks | `scripts/tools/fh6_local_decrypt/` |
+| [`fh6_dataout_packet.bt`](fh6_dataout_packet.bt) | live wire format -- NO FILE ON DISK | **no file** — UDP datagram; the port is set in-game at Settings › HUD and Gameplay › Data Out<br>`captures/*.csv.gz` — 400 recorded sessions, DECODED to one row per frame | `scripts/telemetry/fh6_dataout_capture.py` |
+| [`fh6_nav.bt`](fh6_nav.bt) | game install -- loose binary, readable as-is | `<install>\openworld\brio\aitracks\Route*.nav` — 170 per-route graphs<br>`<install>\openworld\brio\freeroam\Brio_00.nav` — the FREE-ROAM graph, 1 file | `scripts/telemetry/fh6_nav.py` |
+| [`fh6_route_owt.bt`](fh6_route_owt.bt) | game install -- loose binary, readable as-is | `<install>\openworld\brio\aitracks\Route*.owt` — 170 files, one per route | `scripts/telemetry/fh6_owt.py` |
+| [`fh6_stringtable_str.bt`](fh6_stringtable_str.bt) | game install -- PLAIN DEFLATE ZIP, no decryption | `<install>\stripped\stringtables\EN.zip` — 291 entries = 290 .str + _list.txt | `scripts/telemetry/fh6_strings.py` |
+| [`fh6_swatchbin.bt`](fh6_swatchbin.bt) | game install -- PLAIN DEFLATE ZIP, no decryption | `<install>\ui\textures\data_bound\Upgrade_Parts.zip` — 902 entries, 200x200 mostly<br>`<install>\ui\textures\hires\data_bound\Upgrade_Parts.zip` — 734 entries, 400x400 | `scripts/telemetry/fh6_swatchbin.py` |
+| [`fh6_tune_data.bt`](fh6_tune_data.bt) | player save -- PLAINTEXT (no key, no container) | `<save>\Tuning_*\Data` — 1,526 on this machine | `scripts/telemetry/fh6_tune_decode.py` |
+
+**`C:\XboxGames` is READ-ONLY.** Anything encrypted is decrypted from a COPY, never in place, and the
+plaintext is deleted afterwards — the profile save carries the account XUID and the whole career.
+
 ## Keeping them true
 
 `.bt` files have one real weakness: **nothing in this pipeline can run them.** 010 Editor is commercial,

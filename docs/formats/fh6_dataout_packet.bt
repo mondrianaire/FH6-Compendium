@@ -7,6 +7,14 @@
 //   Purpose: Forza Horizon 6 "Data Out" UDP telemetry packet -- 324 bytes
 //  Category: Game
 //
+// SOURCE-CATEGORY: live wire format -- NO FILE ON DISK
+// SOURCE-LOCATION: (none -- UDP datagram; port set in-game at Settings > HUD and Gameplay > Data Out)
+// SOURCE-LOCATION: captures/*.csv.gz -- 400 recorded sessions, DECODED to one row per frame
+// SOURCE-READ: bind a UDP socket and unpack 324 little-endian bytes. Length identifies the game:
+// SOURCE-READ:   232 = sled only, 311 = FM7, 324 = FH4/FH5/FH6, 331 = FM2023.
+// SOURCE-READ: the capture tool pads a 323-byte datagram with one zero byte before decoding.
+// SOURCE-READER: scripts/telemetry/fh6_dataout_capture.py (and fh6_live_daemon.py, port 8765)
+//
 // THIS IS A WIRE FORMAT, NOT A FILE. One datagram per simulation frame, ~60/s,
 // sent by the game to the address set in
 //   Settings > HUD and Gameplay > (bottom) Data Out

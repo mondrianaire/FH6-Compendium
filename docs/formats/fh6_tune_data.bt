@@ -8,10 +8,11 @@
 //  Category: Game
 // File Mask: Data
 //
-// WHERE IT LIVES (read-only; never write to the save):
-//   C:\XboxGames\GameSave\pgs\u_<id>\<n>\ContainersRoot\Tuning_<ordinal>_<yyyymmddhhmmss>\Data
-//   The sibling `header` carries title/description/creator/XUID/created;
-//   `Thumb.png` is the render. Only `Data` is described here.
+// SOURCE-CATEGORY: player save -- PLAINTEXT (no key, no container)
+// SOURCE-LOCATION: C:\XboxGames\GameSave\pgs\*\*\ContainersRoot\Tuning_*\Data -- 1,526 on this machine
+// SOURCE-READ: read the 598 bytes directly. C:\XboxGames IS READ-ONLY -- never write to a save.
+// SOURCE-READ: siblings in the same folder: `header` (title/creator/XUID/created), `Thumb.png`.
+// SOURCE-READER: scripts/telemetry/fh6_tune_decode.py
 //
 // NOT ENCRYPTED. Unlike the profile save (C_ProfileData) and the game DB
 // (gamedbRC.slt), the tune blob is plaintext on disk -- no key, no container.

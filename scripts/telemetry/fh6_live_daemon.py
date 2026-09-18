@@ -237,12 +237,26 @@ def _recall_profile_equipped(ordn):
 _PROFILE_LOCK = threading.Lock()   # serializes every _profile_decrypt_and_record (auto + manual) — see its docstring
 
 
+_BRIO_SNAPSHOT_TTL = 2 * 3600   # a baseline older than this isn't a trustworthy "previous read" (see below)
+
+
 def _recall_brio_snapshot():
     """The last-seen brio progression map ({"<type>:<route>": "<hex>"}), or {}. Persisted in identity-evidence
-    so the diff survives a daemon restart -- the whole point is comparing THIS read against the previous one."""
+    so the diff survives a daemon restart -- the whole point is comparing THIS read against the previous one.
+
+    STALENESS GUARD (audit 2026-09-18): identity-evidence.json is a TRACKED file, so a fresh worktree (or one
+    that pulled a committed snapshot) would otherwise diff its first read against an hours/days-old baseline and
+    report every route driven anywhere in between as one spurious burst. The snapshot is stamped with the read's
+    wall-clock time; a baseline older than _BRIO_SNAPSHOT_TTL degrades to "no baseline" (re-establish, no diff)
+    rather than a misleading burst. Sibling keys (picked/equipped/gears) all have such a guard; this now matches."""
     try:
         with _IDENT_LOCK:
-            return (_ident_load().get("brio_snapshot") or {})
+            snap = _ident_load().get("brio_snapshot") or {}
+            if isinstance(snap, dict) and "map" in snap and "at" in snap:      # current shape {"at","map"}
+                if (time.time() - float(snap.get("at") or 0)) > _BRIO_SNAPSHOT_TTL:
+                    return {}
+                return snap.get("map") or {}
+            return snap if isinstance(snap, dict) else {}                      # legacy bare-map; rewritten on next persist
     except Exception:
         return {}
 
@@ -251,7 +265,7 @@ def _remember_brio_snapshot(bm):
     try:
         with _IDENT_LOCK:
             d = _ident_load()
-            d["brio_snapshot"] = bm or {}
+            d["brio_snapshot"] = {"at": time.time(), "map": bm or {}}
             _ident_save(d)
     except Exception:
         pass

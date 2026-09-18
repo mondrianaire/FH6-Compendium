@@ -75,7 +75,11 @@ function adoptMode(m) {
   // browse doesn't evaporate the moment it starts (free roam streams "free" every second).
   if (TEMP_COURSE) {
     const real = m.suggest === "course" || m.suggest === "event";
-    const driving = LIVE.frame && LIVE.frame.on && !LIVE.inMenu;
+    // ACTUALLY DRIVING, not merely "on" (Jett 2026-09-18): in FREE ROAM the frame's `on` flag is 1 the whole time,
+    // even parked, so testing `on` alone released the browsed course on the very next frame — a double-clicked
+    // course "went to the course screen and immediately back". A temp course is for studying one while parked, so
+    // hold it until you actually drive AWAY (moving), or the daemon suggests a real course/event.
+    const driving = LIVE.frame && LIVE.frame.on && !LIVE.inMenu && (LIVE.frame.mph || 0) > 10;
     if (!real && !driving) { if (m.game !== undefined) MODE.game = m.game; return; }
     TEMP_COURSE = false;
     if (!real) { COURSE = null; COURSE_KEY = null; }   // drove off into free roam → drop the browsed course
@@ -128,6 +132,7 @@ let BROWSE_SORT_REV = false;       // reverse the sort (click the active sort bu
 let COURSE_MATCH = null;           // { dist, secondKey, secondDist } from the last locateCourse() — how sure the current course is
 let RIGHT_TAB = null;              // null = follow the context; a click pins a tab until the context class changes
 let RIGHT_CTX = null;
+let RIGHT_BROWSER_KEY = null;      // last render key of the Course Browser body — skip the 2 s live rebuild that wiped hover
 let BASELINE = null;
 let LIVEPOS = null;
 
@@ -3236,6 +3241,15 @@ function paintRight() {
                 services: "the three processes the lab runs · start, stop or restart each one" }[cur];
   hd.innerHTML = `<span class="tabs2">${tabs.map((t) => `<button class="${cur === t ? "on" : ""}" data-rt="${t}">${RT_LABEL[t]}</button>`).join("")}</span><span class="why">${esc(why)}</span>`;
   hd.querySelectorAll("[data-rt]").forEach((b) => b.onclick = () => { RIGHT_TAB = b.dataset.rt; rightTabStore()[ctx] = RIGHT_TAB; viewSave(); paintRight(); });
+  // THE COURSE BROWSER IS STATIC (Jett 2026-09-18): its tiles depend only on the browse controls, never on a live
+  // frame — yet paintRight runs every ~2 s and rebuilt #rightBody, which destroyed the hover highlight ("only stays
+  // highlighted for a very short time") and swapped tiles out from under a click. Skip the rebuild when nothing the
+  // browser shows changed; browseSyncTiles() keeps the picked tile's .on state in sync without touching the DOM.
+  if (cur === "browser") {
+    const bkey = JSON.stringify(["browser", BROWSE_FILTER, BROWSE_DEV, BROWSE_SORT, BROWSE_SORT_REV, WORLD && Object.keys(WORLD.routes).length]);
+    if (bkey === RIGHT_BROWSER_KEY && body.querySelector(".tiles")) { browseSyncTiles(); return; }
+    RIGHT_BROWSER_KEY = bkey;
+  }
   body.innerHTML = cur === "lap" ? lapHTML() : cur === "single" ? singleLapHTML() : cur === "corners" ? cornersHTML() : cur === "matrix" ? matrixHTML() : cur === "concl" ? conclusionsHTML() : cur === "build" ? buildDataHTML() : cur === "browser" ? browserHTML() : cur === "services" ? servicesHTML() : statsHTML();
   body.querySelectorAll('[data-act="rebuild"]').forEach((b) => b.onclick = () => requestRebuild("manual"));
   body.querySelectorAll("[data-svcact]").forEach((b) => b.onclick = () => svcAct(b.dataset.svc, b.dataset.svcact));

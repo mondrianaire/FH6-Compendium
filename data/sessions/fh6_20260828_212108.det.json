@@ -1,0 +1,31 @@
+{
+ "session": "fh6_20260828_212108",
+ "built_utc": "2026-09-18T18:25:23Z",
+ "capture": "fh6_20260828_212108.csv.gz",
+ "laps": 1,
+ "findings": [
+  {
+   "fault": "gear-under-revved",
+   "severity": 0.06897686613167328,
+   "detail": "top gear reached only 88% of the 8466 rpm redline (peak 7445); the gear is carried but never used",
+   "fix": "shorten the final drive (raise the ratio) so top gear reaches the power band, or accept it as a cruising gear this course does not need",
+   "measure": {
+    "peak_rpm": 7445,
+    "redline": 8466,
+    "frac": 0.879
+   },
+   "lap_id": 565,
+   "cid": "2866|2|4|800",
+   "route_key": "route:6001",
+   "container": "Tuning_2866_20260828151050",
+   "hw_hash": "5e97240bcaa44c9d"
+  }
+ ],
+ "calibration": {
+  "2866": {
+   "redline": 8466.4462890625,
+   "declared": 9999.9951171875,
+   "radii": {}
+  }
+ }
+}

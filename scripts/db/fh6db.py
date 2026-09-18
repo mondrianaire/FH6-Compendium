@@ -67,7 +67,7 @@ DEFAULT_DB = os.path.join(REPO_ROOT, "data", "fh6.db")
 SCHEMA_PATH = os.path.join(REPO_ROOT, "db", "schema.sql")
 GAMEDB_PATH = r"C:\Users\mondr\Downloads\forza raw data files\FH6_Database.sqlite"
 
-SCHEMA_VERSION = "9"   # 9 = DRIVEN RADIUS (lap_point.r_m from yaw rate; x/z no longer rounded to whole metres, 2026-09-18); 8 = OFFICIAL LAP TIMES (lap.official: the game published this lap_s; a rewound lap with an official time counts, 2026-09-18); 7 = PEAK LATERAL-G (lap_point.lat_g, corner_segment.peak_lat_g, 2026-09-12); 6 = PEDALS ON THE TRACE (lap_point.thr / brk, 0-100 %, 2026-09-11); 2 = COURSE NAMES; 3 = ANCHORS; 4 = the game's EVENT CATALOGUE (2026-09-05); 5 = LAPS AS THE GAME TIMED THEM (lap.lap_dist_m/rewinds/pauses/pause_s/stitched, lap_point.dist_m, lap_marker, 2026-09-06) -- applied by migrate()
+SCHEMA_VERSION = "10"  # 10 = COURSE-LEVEL DIAGNOSIS (v_diag_by_course: faults that belong to the lap, not a turn -- gearing, 2026-09-18); 9 = DRIVEN RADIUS (lap_point.r_m from yaw rate; x/z no longer rounded to whole metres, 2026-09-18); 8 = OFFICIAL LAP TIMES (lap.official: the game published this lap_s; a rewound lap with an official time counts, 2026-09-18); 7 = PEAK LATERAL-G (lap_point.lat_g, corner_segment.peak_lat_g, 2026-09-12); 6 = PEDALS ON THE TRACE (lap_point.thr / brk, 0-100 %, 2026-09-11); 2 = COURSE NAMES; 3 = ANCHORS; 4 = the game's EVENT CATALOGUE (2026-09-05); 5 = LAPS AS THE GAME TIMED THEM (lap.lap_dist_m/rewinds/pauses/pause_s/stitched, lap_point.dist_m, lap_marker, 2026-09-06) -- applied by migrate()
 
 #: The confidence vocabulary. Every `confidence` column in the schema uses exactly these.
 CONFIDENCE = ("proven", "verified", "derived", "read", "unknown")
@@ -425,6 +425,23 @@ V2_VIEWS = {
     FROM ref_rivals_event rv
     JOIN ref_career_race cr ON cr.collection_key = rv.collection_key
     JOIN ref_track_info ti ON ti.track_key = cr.track_key""",
+    # schema 10 -- COURSE-LEVEL DIAGNOSIS. v_diag_by_turn filters turn_id IS NOT NULL, so a fault
+    # that belongs to the whole lap rather than to any corner (gearing) could never reach a
+    # consumer. Registered here as well as in schema.sql because ensure_schema only runs on a
+    # database that has no schema_meta -- a live one gets its new views from migrate(), and a view
+    # added to schema.sql alone would exist on fresh databases and silently not on Jett's.
+    "v_diag_by_course": """CREATE VIEW IF NOT EXISTS v_diag_by_course AS
+  SELECT d.route_key, c.name AS course, d.container, d.hw_hash, d.symptom, s.phase,
+         s.primary_fix, s.secondary_fix, s.verify_test,
+         COUNT(*) AS occurrences,
+         COUNT(DISTINCT d.lap_id) AS laps_affected,
+         ROUND(AVG(d.severity), 3) AS mean_severity,
+         ROUND(MAX(d.severity), 3) AS peak_severity
+    FROM diag_event d
+    JOIN ref_symptom s ON s.symptom = d.symptom
+    LEFT JOIN course c ON c.route_key = d.route_key
+   WHERE d.route_key IS NOT NULL
+   GROUP BY d.route_key, d.container, d.symptom""",
 }
 V2_COLUMNS["session_event"] = [("start_is_line", "INTEGER")]
 # schema 5 -- LAPS AS THE GAME TIMED THEM

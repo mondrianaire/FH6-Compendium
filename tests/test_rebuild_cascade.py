@@ -19,9 +19,19 @@ class ExpandOnlyTest(unittest.TestCase):
     the 2026-09-05 course_route incident was)."""
 
     def test_telemetry_cascades_exactly(self):
+        # `consolidate` joined the chain with the canonical-route work; `deterministic` with the
+        # raw-capture detectors (2026-09-18), which must rebuild their sidecars BEFORE diagnosis
+        # reads them -- an order this assertion is also pinning.
         self.assertEqual(
             rebuild.expand_only(["telemetry"]),
-            ["telemetry", "course_match", "consolidate", "route_names", "corners", "diagnosis"])
+            ["telemetry", "course_match", "consolidate", "route_names", "corners",
+             "deterministic", "diagnosis"])
+
+    def test_deterministic_runs_before_diagnosis(self):
+        """diagnosis reads the .det.json sidecars deterministic writes. Wrong order = silent loss:
+        the sidecars would be one rebuild stale and no one would be told."""
+        got = rebuild.expand_only(["deterministic"])
+        self.assertLess(got.index("deterministic"), got.index("diagnosis"))
 
     def test_routes_cascades_include_surface_chain(self):
         got = rebuild.expand_only(["routes"])

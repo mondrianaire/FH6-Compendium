@@ -1220,6 +1220,25 @@ LEFT JOIN ref_route_turn g ON g.route_id = cr.route_id AND g.turn_id = d.turn_id
 WHERE d.turn_id IS NOT NULL
 GROUP BY d.route_key, d.turn_id, d.symptom;
 
+-- What goes wrong on ONE COURSE for one build, including the faults that belong to no turn.
+-- v_diag_by_turn cannot carry these: it filters turn_id IS NOT NULL, so a whole-lap fault such as
+-- "top gear never used on this course" is invisible to it by construction. Gearing is exactly that
+-- kind of fault -- it is a property of the lap against the ladder, not of any one corner -- and the
+-- course lane is where it has to be answered, because the same ladder can be right for one course
+-- and wrong for the next.
+CREATE VIEW IF NOT EXISTS v_diag_by_course AS
+SELECT d.route_key, c.name AS course, d.container, d.hw_hash, d.symptom, s.phase,
+       s.primary_fix, s.secondary_fix, s.verify_test,
+       COUNT(*) AS occurrences,
+       COUNT(DISTINCT d.lap_id) AS laps_affected,
+       ROUND(AVG(d.severity), 3) AS mean_severity,
+       ROUND(MAX(d.severity), 3) AS peak_severity
+FROM diag_event d
+JOIN ref_symptom s ON s.symptom = d.symptom
+LEFT JOIN course c ON c.route_key = d.route_key
+WHERE d.route_key IS NOT NULL
+GROUP BY d.route_key, d.container, d.symptom;
+
 -- What a given setup keeps doing wrong, wherever it happens.
 CREATE VIEW IF NOT EXISTS v_diag_by_setup AS
 SELECT d.container, t.tune_name, t.ordinal, r.full_name AS car, d.symptom, s.phase,

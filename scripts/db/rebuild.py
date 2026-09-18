@@ -48,6 +48,7 @@ STAGES = [
     ("route_names", "import_route_names.py", "derive course and route names from map identity + catalogue length; evidence in course_event"),
     ("corners", "import_corners.py", "what every lap did at every road-derived turn"),
     ("observations", "import_observations.py", "human evidence, name grading, clone readiness"),
+    ("deterministic", "import_deterministic.py", "raw captures -> per-session deterministic sidecars (gearing, brake lock, bottoming)"),
     ("diagnosis", "import_diagnosis.py", "failure catalogue x detectors, placed on turns"),
     ("field_catalog", "import_field_catalog.py", "field-level knowledge as data: catalogue, gating relationships, reliability tiers"),
 ]
@@ -60,13 +61,14 @@ DOWNSTREAM = {
     "gamedb": ["objectmodel", "events"],
     "objectmodel": ["events", "route_names"],
     "events": ["route_names"],
-    "telemetry": ["course_match", "consolidate", "route_names", "corners", "diagnosis"],
+    "telemetry": ["course_match", "consolidate", "route_names", "corners", "deterministic", "diagnosis"],
     "routes": ["anchors", "surface", "course_match", "consolidate", "route_names", "corners", "diagnosis"],
     "anchors": ["course_match", "consolidate", "route_names", "corners", "diagnosis"],
     "surface": ["route_names"],
     "course_match": ["consolidate", "route_names", "corners", "diagnosis"],
     "consolidate": ["route_names", "corners", "diagnosis"],
     "corners": ["diagnosis"],
+    "deterministic": ["diagnosis"],
 }
 
 #: import_run.kind values that predate a rename and mean a STAGES name.

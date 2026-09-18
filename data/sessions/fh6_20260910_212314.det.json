@@ -1,0 +1,179 @@
+{
+ "session": "fh6_20260910_212314",
+ "built_utc": "2026-09-18T18:37:57Z",
+ "capture": "fh6_20260910_212314.csv.gz",
+ "laps": 2,
+ "findings": [
+  {
+   "fault": "gear-never-reached",
+   "severity": 0.3333333333333333,
+   "detail": "gear 6 never engaged (the build has 6); the ladder is taller than this course can use",
+   "fix": "shorten the final drive (raise the ratio) until top gear comes in before the fastest point of the lap",
+   "measure": {
+    "top_gear_built": 6,
+    "top_gear_used": 5
+   },
+   "lap_id": 1221,
+   "cid": "3603|2|8|700",
+   "route_key": "route:2061",
+   "container": "Tuning_3603_20260814115502",
+   "hw_hash": "9ca9273b3aa79179"
+  },
+  {
+   "fault": "bottoming",
+   "severity": 0.8488515615463261,
+   "t": 2314.83,
+   "x": -582.593017578125,
+   "z": 6014.568359375,
+   "detail": "FR suspension on the stop (travel 0.994) at 56 mph",
+   "fix": "front ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "FR",
+    "travel": 0.994,
+    "mph": 56.2
+   },
+   "lap_id": 1221,
+   "cid": "3603|2|8|700",
+   "route_key": "route:2061",
+   "container": "Tuning_3603_20260814115502",
+   "hw_hash": "9ca9273b3aa79179"
+  },
+  {
+   "fault": "bottoming",
+   "severity": 0.5121270418167119,
+   "t": 2340.91,
+   "x": -898.19970703125,
+   "z": 6397.541015625,
+   "detail": "FL suspension on the stop (travel 0.980) at 118 mph",
+   "fix": "front ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "FL",
+    "travel": 0.9805,
+    "mph": 118.2
+   },
+   "lap_id": 1221,
+   "cid": "3603|2|8|700",
+   "route_key": "route:2061",
+   "container": "Tuning_3603_20260814115502",
+   "hw_hash": "9ca9273b3aa79179"
+  },
+  {
+   "fault": "bottoming",
+   "severity": 0.7253492474555974,
+   "t": 2340.92,
+   "x": -898.247802734375,
+   "z": 6397.88720703125,
+   "detail": "FR suspension on the stop (travel 0.989) at 118 mph",
+   "fix": "front ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "FR",
+    "travel": 0.989,
+    "mph": 118.1
+   },
+   "lap_id": 1221,
+   "cid": "3603|2|8|700",
+   "route_key": "route:2061",
+   "container": "Tuning_3603_20260814115502",
+   "hw_hash": "9ca9273b3aa79179"
+  },
+  {
+   "fault": "bottoming",
+   "severity": 0.6278569102287297,
+   "t": 2340.96,
+   "x": -898.5380249023438,
+   "z": 6400.005859375,
+   "detail": "RL suspension on the stop (travel 0.985) at 118 mph",
+   "fix": "rear ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "RL",
+    "travel": 0.9851,
+    "mph": 117.8
+   },
+   "lap_id": 1221,
+   "cid": "3603|2|8|700",
+   "route_key": "route:2061",
+   "container": "Tuning_3603_20260814115502",
+   "hw_hash": "9ca9273b3aa79179"
+  },
+  {
+   "fault": "bottoming",
+   "severity": 0.558910727500916,
+   "t": 2340.97,
+   "x": -898.6356201171875,
+   "z": 6400.732421875,
+   "detail": "RR suspension on the stop (travel 0.982) at 118 mph",
+   "fix": "rear ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "RR",
+    "travel": 0.9824,
+    "mph": 117.9
+   },
+   "lap_id": 1221,
+   "cid": "3603|2|8|700",
+   "route_key": "route:2061",
+   "container": "Tuning_3603_20260814115502",
+   "hw_hash": "9ca9273b3aa79179"
+  },
+  {
+   "fault": "bottoming",
+   "severity": 0.6093392372131352,
+   "t": 2357.83,
+   "x": -1166.3482666015625,
+   "z": 6837.36865234375,
+   "detail": "FR suspension on the stop (travel 0.984) at 118 mph",
+   "fix": "front ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "FR",
+    "travel": 0.9844,
+    "mph": 118.1
+   },
+   "lap_id": 1221,
+   "cid": "3603|2|8|700",
+   "route_key": "route:2061",
+   "container": "Tuning_3603_20260814115502",
+   "hw_hash": "9ca9273b3aa79179"
+  }
+ ],
+ "calibration": {
+  "4354": {
+   "redline": 7275.99462890625,
+   "declared": 7999.9951171875,
+   "radii": {}
+  },
+  "3414": {
+   "redline": 8513.365234375,
+   "declared": 8999.9951171875,
+   "radii": {
+    "FL": 0.46164980597593086,
+    "FR": 0.4585060255569536,
+    "RL": 0.4650621181730923,
+    "RR": 0.47406676654770696
+   }
+  },
+  "3908": {
+   "redline": 12258.494140625,
+   "declared": 12999.9931640625,
+   "radii": {
+    "FL": 0.33213101983046656,
+    "FR": 0.3154843109998096,
+    "RL": 0.3787763048671826,
+    "RR": 0.3664548178426167
+   }
+  },
+  "3603": {
+   "redline": 8469.0185546875,
+   "declared": 8999.9951171875,
+   "radii": {}
+  },
+  "3722": {
+   "redline": 16568.7421875,
+   "declared": 16999.990234375,
+   "radii": {
+    "FL": 6.203715854081193,
+    "FR": -8.018908200629491e-07,
+    "RL": 0.00014391179789818617,
+    "RR": 0.000143911875562999
+   }
+  }
+ }
+}

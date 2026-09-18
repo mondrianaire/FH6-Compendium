@@ -1,0 +1,738 @@
+{
+ "session": "fh6_20260901_181109",
+ "built_utc": "2026-09-18T18:28:52Z",
+ "capture": "fh6_20260901_181109.csv.gz",
+ "laps": 2,
+ "findings": [
+  {
+   "fault": "gear-under-revved",
+   "severity": 0.2010572270787244,
+   "detail": "top gear reached only 84% of the 10000 rpm redline (peak 8397); the gear is carried but never used",
+   "fix": "shorten the final drive (raise the ratio) so top gear reaches the power band, or accept it as a cruising gear this course does not need",
+   "measure": {
+    "peak_rpm": 8397,
+    "redline": 10000,
+    "frac": 0.84
+   },
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.572052176810651,
+   "t": 612.43,
+   "x": -4971.125,
+   "z": 675.2760620117188,
+   "detail": "front locked at full pedal, 7 samples over 0.04 s from 32 mph; worst wheel turning at 56% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.564,
+    "samples": 7,
+    "held_s": 0.043,
+    "entry_mph": 32.4
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.541215477980804,
+   "t": 612.49,
+   "x": -4971.90185546875,
+   "z": 674.9349975585938,
+   "detail": "front locked at full pedal, 6 samples over 0.03 s from 31 mph; worst wheel turning at 58% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.579,
+    "samples": 6,
+    "held_s": 0.031,
+    "entry_mph": 30.7
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.4643672182529568,
+   "t": 612.57,
+   "x": -4972.79638671875,
+   "z": 674.54150390625,
+   "detail": "front locked at full pedal, 4 samples over 0.02 s from 28 mph; worst wheel turning at 62% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.618,
+    "samples": 4,
+    "held_s": 0.02,
+    "entry_mph": 28.4
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.48271673485874644,
+   "t": 612.63,
+   "x": -4973.4736328125,
+   "z": 674.24267578125,
+   "detail": "front locked at full pedal, 5 samples over 0.03 s from 27 mph; worst wheel turning at 61% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.609,
+    "samples": 5,
+    "held_s": 0.028,
+    "entry_mph": 26.7
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.5480576983960674,
+   "t": 651.68,
+   "x": -5049.09228515625,
+   "z": 581.7174682617188,
+   "detail": "front locked at full pedal, 15 samples over 0.09 s from 40 mph; worst wheel turning at 58% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.576,
+    "samples": 15,
+    "held_s": 0.095,
+    "entry_mph": 40.0
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.40668540615848325,
+   "t": 651.82,
+   "x": -5048.9599609375,
+   "z": 579.4407958984375,
+   "detail": "front locked at full pedal, 6 samples over 0.04 s from 36 mph; worst wheel turning at 65% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.647,
+    "samples": 6,
+    "held_s": 0.036,
+    "entry_mph": 36.0
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-all-four",
+   "severity": 0.46893274414019936,
+   "t": 651.88,
+   "x": -5048.904296875,
+   "z": 578.50341796875,
+   "detail": "all four locked at full pedal, 20 samples over 0.12 s from 34 mph; worst wheel turning at 62% of road speed",
+   "fix": "brake pressure down a step",
+   "measure": {
+    "end": "all four",
+    "worst_ratio": 0.616,
+    "samples": 20,
+    "held_s": 0.123,
+    "entry_mph": 34.0
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.566833128904813,
+   "t": 652.03,
+   "x": -5048.7763671875,
+   "z": 576.3440551757812,
+   "detail": "front locked at full pedal, 7 samples over 0.04 s from 29 mph; worst wheel turning at 57% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.567,
+    "samples": 7,
+    "held_s": 0.044,
+    "entry_mph": 29.0
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.5179912742113868,
+   "t": 652.09,
+   "x": -5048.7314453125,
+   "z": 575.5895385742188,
+   "detail": "front locked at full pedal, 8 samples over 0.04 s from 27 mph; worst wheel turning at 59% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.591,
+    "samples": 8,
+    "held_s": 0.044,
+    "entry_mph": 27.1
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-all-four",
+   "severity": 0.30025455770441445,
+   "t": 669.94,
+   "x": -5056.3671875,
+   "z": 362.4997253417969,
+   "detail": "all four locked at full pedal, 11 samples over 0.07 s from 50 mph; worst wheel turning at 70% of road speed",
+   "fix": "brake pressure down a step",
+   "measure": {
+    "end": "all four",
+    "worst_ratio": 0.7,
+    "samples": 11,
+    "held_s": 0.065,
+    "entry_mph": 50.0
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.4131930806189097,
+   "t": 670.19,
+   "x": -5057.5361328125,
+   "z": 357.4083557128906,
+   "detail": "front locked at full pedal, 8 samples over 0.05 s from 43 mph; worst wheel turning at 64% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.643,
+    "samples": 8,
+    "held_s": 0.047,
+    "entry_mph": 42.9
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.31709657908889466,
+   "t": 670.27,
+   "x": -5057.9248046875,
+   "z": 355.9819030761719,
+   "detail": "front locked at full pedal, 4 samples over 0.02 s from 40 mph; worst wheel turning at 69% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.691,
+    "samples": 4,
+    "held_s": 0.022,
+    "entry_mph": 40.1
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.3648961288987418,
+   "t": 670.3,
+   "x": -5058.078125,
+   "z": 355.4354553222656,
+   "detail": "front locked at full pedal, 4 samples over 0.02 s from 39 mph; worst wheel turning at 67% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.668,
+    "samples": 4,
+    "held_s": 0.022,
+    "entry_mph": 39.0
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.4667026531467944,
+   "t": 670.34,
+   "x": -5058.23291015625,
+   "z": 354.8937683105469,
+   "detail": "front locked at full pedal, 5 samples over 0.03 s from 38 mph; worst wheel turning at 62% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.617,
+    "samples": 5,
+    "held_s": 0.028,
+    "entry_mph": 38.0
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.3029891837113019,
+   "t": 670.38,
+   "x": -5058.419921875,
+   "z": 354.2511291503906,
+   "detail": "front locked at full pedal, 4 samples over 0.02 s from 37 mph; worst wheel turning at 70% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.699,
+    "samples": 4,
+    "held_s": 0.02,
+    "entry_mph": 36.7
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.3540724318087227,
+   "t": 670.41,
+   "x": -5058.57177734375,
+   "z": 353.7333068847656,
+   "detail": "front locked at full pedal, 4 samples over 0.02 s from 36 mph; worst wheel turning at 67% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.673,
+    "samples": 4,
+    "held_s": 0.023,
+    "entry_mph": 35.6
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.42569686467359613,
+   "t": 670.45,
+   "x": -5058.75,
+   "z": 353.13214111328125,
+   "detail": "front locked at full pedal, 4 samples over 0.02 s from 34 mph; worst wheel turning at 64% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.637,
+    "samples": 4,
+    "held_s": 0.018,
+    "entry_mph": 34.4
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.38713237190872074,
+   "t": 670.49,
+   "x": -5058.89306640625,
+   "z": 352.6505432128906,
+   "detail": "front locked at full pedal, 3 samples over 0.01 s from 33 mph; worst wheel turning at 66% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.656,
+    "samples": 3,
+    "held_s": 0.014,
+    "entry_mph": 33.3
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.33946257098123955,
+   "t": 670.53,
+   "x": -5059.060546875,
+   "z": 352.08868408203125,
+   "detail": "front locked at full pedal, 3 samples over 0.01 s from 32 mph; worst wheel turning at 68% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.68,
+    "samples": 3,
+    "held_s": 0.012,
+    "entry_mph": 32.1
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.40301869270126556,
+   "t": 670.55,
+   "x": -5059.16943359375,
+   "z": 351.7230529785156,
+   "detail": "front locked at full pedal, 4 samples over 0.02 s from 31 mph; worst wheel turning at 65% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.648,
+    "samples": 4,
+    "held_s": 0.018,
+    "entry_mph": 31.3
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.446452772934234,
+   "t": 670.59,
+   "x": -5059.3271484375,
+   "z": 351.1953430175781,
+   "detail": "front locked at full pedal, 9 samples over 0.06 s from 30 mph; worst wheel turning at 63% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.627,
+    "samples": 9,
+    "held_s": 0.055,
+    "entry_mph": 30.1
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.34828973777430994,
+   "t": 670.66,
+   "x": -5059.576171875,
+   "z": 350.362060546875,
+   "detail": "front locked at full pedal, 4 samples over 0.02 s from 28 mph; worst wheel turning at 68% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.676,
+    "samples": 4,
+    "held_s": 0.017,
+    "entry_mph": 28.2
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.5207149037406276,
+   "t": 670.69,
+   "x": -5059.69384765625,
+   "z": 349.96771240234375,
+   "detail": "front locked at full pedal, 4 samples over 0.02 s from 27 mph; worst wheel turning at 59% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.59,
+    "samples": 4,
+    "held_s": 0.017,
+    "entry_mph": 27.3
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.5372706132430916,
+   "t": 670.73,
+   "x": -5059.8056640625,
+   "z": 349.5951843261719,
+   "detail": "front locked at full pedal, 4 samples over 0.02 s from 26 mph; worst wheel turning at 58% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.581,
+    "samples": 4,
+    "held_s": 0.02,
+    "entry_mph": 26.4
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.5760689666664855,
+   "t": 670.76,
+   "x": -5059.9150390625,
+   "z": 349.2298583984375,
+   "detail": "front locked at full pedal, 3 samples over 0.01 s from 25 mph; worst wheel turning at 56% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.562,
+    "samples": 3,
+    "held_s": 0.012,
+    "entry_mph": 25.5
+   },
+   "shallow_excursions": 3,
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "bottoming",
+   "severity": 1.0,
+   "t": 593.81,
+   "x": -5004.58984375,
+   "z": 274.31195068359375,
+   "detail": "FR suspension on the stop (travel 1.000) at 136 mph",
+   "fix": "front ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "FR",
+    "travel": 1.0,
+    "mph": 135.7
+   },
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "bottoming",
+   "severity": 1.0,
+   "t": 593.84,
+   "x": -5002.5556640625,
+   "z": 274.5553283691406,
+   "detail": "RR suspension on the stop (travel 1.000) at 136 mph",
+   "fix": "rear ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "RR",
+    "travel": 1.0,
+    "mph": 135.8
+   },
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "bottoming",
+   "severity": 0.5799392461776738,
+   "t": 596.2,
+   "x": -4863.83251953125,
+   "z": 314.41259765625,
+   "detail": "FR suspension on the stop (travel 0.983) at 140 mph",
+   "fix": "front ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "FR",
+    "travel": 0.9832,
+    "mph": 139.7
+   },
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "bottoming",
+   "severity": 0.6691763401031499,
+   "t": 597.79,
+   "x": -4798.595703125,
+   "z": 388.6259765625,
+   "detail": "FR suspension on the stop (travel 0.987) at 132 mph",
+   "fix": "front ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "FR",
+    "travel": 0.9868,
+    "mph": 132.4
+   },
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "bottoming",
+   "severity": 0.885402619838715,
+   "t": 598.49,
+   "x": -4786.2119140625,
+   "z": 426.3251647949219,
+   "detail": "FR suspension on the stop (travel 0.995) at 124 mph",
+   "fix": "front ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "FR",
+    "travel": 0.9954,
+    "mph": 124.0
+   },
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "bottoming",
+   "severity": 1.0,
+   "t": 598.58,
+   "x": -4786.46142578125,
+   "z": 430.8077087402344,
+   "detail": "RR suspension on the stop (travel 1.000) at 96 mph",
+   "fix": "rear ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "RR",
+    "travel": 1.0,
+    "mph": 95.8
+   },
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "bottoming",
+   "severity": 1.0,
+   "t": 598.6,
+   "x": -4786.583984375,
+   "z": 431.36114501953125,
+   "detail": "FL suspension on the stop (travel 1.000) at 95 mph",
+   "fix": "front ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "FL",
+    "travel": 1.0,
+    "mph": 94.9
+   },
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  },
+  {
+   "fault": "bottoming",
+   "severity": 0.9055147171020512,
+   "t": 599.12,
+   "x": -4795.404296875,
+   "z": 449.3199157714844,
+   "detail": "FR suspension on the stop (travel 0.996) at 81 mph",
+   "fix": "front ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "FR",
+    "travel": 0.9962,
+    "mph": 80.7
+   },
+   "lap_id": 1390,
+   "cid": "3852|2|4|700",
+   "route_key": "route:131",
+   "container": "Tuning_3852_20260901210823",
+   "hw_hash": "f6f49897d2e9b1d0"
+  }
+ ],
+ "calibration": {
+  "3852": {
+   "redline": 9999.9951171875,
+   "declared": 9999.9951171875,
+   "radii": {
+    "FL": 0.2658516377066187,
+    "FR": 0.2657802046503686,
+    "RL": 0.2775670019049897,
+    "RR": 0.27744875950749304
+   }
+  }
+ }
+}

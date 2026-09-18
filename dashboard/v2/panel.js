@@ -495,12 +495,18 @@ function paintIdBar() {
   const reach = !!m;
   const tone = g.tone;   // acc = identified, warn = ambiguous/importing, bad = nothing on disk
   el.dataset.tone = tone;
+  // THE ONE CANONICAL STATE (Jett 2026-09-18): the chip presents exactly the three identity states via
+  // stateOf() — UNKNOWN / KNOWN·NOT CLONED / KNOWN·EDITABLE — the single source of truth the A/B gate reads.
+  // gateStrip still supplies the tuned per-state DETAIL copy (g.detail); it no longer owns the chip label.
+  const S3 = stateOf(st, matchQuality(CUR.match));
+  const s3cls = S3.tone === "ok" ? "on" : S3.tone === "bad" ? "b" : (S3.state === "spec" || g.spec) ? "spec" : S3.tone === "dim" ? "w" : "w";
+  el.dataset.state = S3.state;   // hook for canAB-gated affordances (e.g. A/B entry)
   el.innerHTML = `
     <span class="idb-pi">${piBadge(CUR.cls, CUR.pi)}</span>
     <span class="idb-car" title="${esc(carNm)}">${esc(carNm)}</span>
     <span class="idb-sep">│</span>
     ${tune ? `<span class="idb-build" title="${esc(tune)}">${rs.key === "resolved" ? `<b class="tick">✓</b> ` : ""}${esc(shedName(tune, 32))}</span>` : `<span class="idb-build empty">${g.spec ? "event spec tune — temporary" : CUR.disk ? "unnamed save" : "no save on disk"}</span>`}
-    <span class="idb-chip chip ${tone === "acc" ? "on" : g.spec ? "spec" : tone === "bad" ? "b" : "w"}">${esc((g.ident || "").replace(/^[^A-Za-z]+/, ""))}</span>
+    <span class="idb-chip chip ${s3cls}" title="${esc(S3.detail && S3.detail.why || "")}">${esc(S3.label)}${S3.importing ? " ·  importing" : ""}</span>
     <span class="idb-hint why" title="${esc(rs.hint || "")}">${esc(rs.hint || g.detail || "")}</span>
     ${g.sheet === "filled" ? `<button class="idb-sheet" data-act="sheet">🔓 Build sheet ▸</button>`
       : (g.sheet === "outline" && reach) ? `<button class="idb-sheet outline" data-act="sheet">🔓 Build sheet ▸</button>`
@@ -1956,7 +1962,13 @@ function paintHeader() {
     if (act === "sheet") openSheet();
     else if (act === "base") setBaseline(st.twin);
     else if (act === "rebuild") requestRebuild("manual");
-    else if (act === "ab") abOverlay();
+    else if (act === "ab") {
+      // A/B REQUIRES STATE 3 (Jett 2026-09-18): only an editable (self-made / cloned+saved) build can enter A/B.
+      // The primary button is only offered in an editable state, but a stale click after the car flipped to
+      // unknown/known must not open the overlay — the canAB gate is the single authority.
+      if (stateOf().canAB) abOverlay();
+      else { const o = bp.textContent; bp.textContent = "NEEDS AN EDITABLE BUILD — CLONE + SAVE"; setTimeout(() => { bp.textContent = o; }, 2200); }
+    }
     else if (act === "pick") { const el = document.querySelector("#alerts .picker"); if (el) el.scrollIntoView({ block: "nearest" }); }
     else if (act === "copycmd") { try { navigator.clipboard.writeText("python scripts/telemetry/fh6_live_daemon.py"); bp.textContent = "COPIED"; } catch (e) { /* no clipboard */ } }
   };

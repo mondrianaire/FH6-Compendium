@@ -52,6 +52,7 @@ CLI
 import argparse
 import math
 import os
+import re
 import sqlite3
 import struct
 import sys
@@ -508,8 +509,52 @@ def ensure_columns(cx, table, cols):
     return added
 
 
+#: INDEXES. Unlike columns, views and tables, these need NO hand-maintained list: every
+#: CREATE INDEX in schema.sql is already IF NOT EXISTS, so replaying them is idempotent and
+#: an index added to schema.sql alone can no longer go missing on a live database. That gap
+#: is how ix_corner_segment came to be declared but absent, leaving corner_segment (68k rows)
+#: with no index at all until 2026-09-18.
+_INDEX_RE = re.compile(
+    r"CREATE\s+(?:UNIQUE\s+)?INDEX\s+IF\s+NOT\s+EXISTS\s+(\w+)\s+ON\s+(\w+)\s*\([^;]*?\)\s*;",
+    re.I | re.S)
+
+
+def schema_indexes(schema_path=None):
+    """[(index_name, table_name, ddl)] for every index declared in db/schema.sql."""
+    sp = schema_path or SCHEMA_PATH
+    with open(sp, "r", encoding="utf-8") as fh:
+        sql = fh.read()
+    return [(m.group(1), m.group(2), m.group(0)) for m in _INDEX_RE.finditer(sql)]
+
+
+def missing_indexes(cx, schema_path=None):
+    """Indexes schema.sql declares that this database does not have (and could)."""
+    have = {r[0] for r in cx.execute(
+        "SELECT name FROM sqlite_master WHERE type='index' AND name IS NOT NULL")}
+    out = []
+    for name, table, ddl in schema_indexes(schema_path):
+        if name in have:
+            continue
+        if not has_table(cx, table):        # the index cannot exist before its table
+            continue
+        out.append((name, table, ddl))
+    return out
+
+
+def ensure_indexes(cx, schema_path=None):
+    """Create any index schema.sql declares and this database lacks. Returns the count."""
+    n = 0
+    for name, table, ddl in missing_indexes(cx, schema_path):
+        cx.execute(ddl)
+        n += 1
+    return n
+
+
 def migrate(cx):
-    """Bring a live database up to SCHEMA_VERSION. Idempotent; commits. Returns (columns, tables) added."""
+    """Bring a live database up to SCHEMA_VERSION. Idempotent; commits.
+
+    Returns (columns, objects) added, where objects counts tables, views AND indexes.
+    """
     n_cols = 0
     for table, cols in V2_COLUMNS.items():
         if has_table(cx, table):
@@ -523,6 +568,7 @@ def migrate(cx):
         if not cx.execute("SELECT 1 FROM sqlite_master WHERE type='view' AND name=?", (name,)).fetchone():
             cx.execute(ddl)
             n_tabs += 1
+    n_tabs += ensure_indexes(cx)
     if meta_get(cx, "schema_version") != SCHEMA_VERSION:
         meta_set(cx, "schema_version", SCHEMA_VERSION)
     cx.commit()
@@ -539,6 +585,7 @@ def missing_v2(cx):
     out += [t for t in V2_TABLES if not has_table(cx, t)]
     out += [v for v in V2_VIEWS if not cx.execute(
         "SELECT 1 FROM sqlite_master WHERE type='view' AND name=?", (v,)).fetchone()]
+    out += ["index %s" % n for n, _t, _d in missing_indexes(cx)]
     return out
 
 

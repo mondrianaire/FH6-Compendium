@@ -324,7 +324,8 @@ def main(argv=None):
         fh6db.ensure_schema(cx)
         n_cols, n_tabs = fh6db.migrate(cx)
         if n_cols or n_tabs:
-            print("migrated: +%d columns, +%d tables (schema_version %s)" % (n_cols, n_tabs, fh6db.SCHEMA_VERSION))
+            print("migrated: +%d columns, +%d tables/views/indexes (schema_version %s)"
+                  % (n_cols, n_tabs, fh6db.SCHEMA_VERSION))
         cx.close()
         todo = STAGE_NAMES if not a.only else (list(a.only) if a.no_cascade else expand_only(a.only))
         if a.only and not a.no_cascade:

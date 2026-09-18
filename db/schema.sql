@@ -695,7 +695,11 @@ CREATE TABLE IF NOT EXISTS corner_obs (
   score      REAL,
   PRIMARY KEY (lap_id, turn_id)
 ) WITHOUT ROWID;
-CREATE INDEX IF NOT EXISTS ix_corner_turn ON corner_obs(route_key, turn_id, apex_mph);
+CREATE INDEX IF NOT EXISTS ix_corner_turn ON corner_obs(route_key, turn_id, apex_mph  -- the PATH RADIUS the car drove at this point, metres, from yaw rate (r = v/omega) at full capture rate
+  -- (schema 9). Geometry cannot supply it: x/z were rounded to whole metres and at 4 m spacing that is a
+  -- ~14 deg heading error per step. NULL while straight or stopped, and on every lap analysed before it.
+  r_m         REAL,
+);
 
 -- corner_obs cut finer: what each lap did in each of the 5 WHERE-phases of a turn (braking, turn-in,
 -- mid, exit, straight), samples bucketed by projecting each onto the route's segment spans. This is

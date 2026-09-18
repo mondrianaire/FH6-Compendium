@@ -67,7 +67,7 @@ DEFAULT_DB = os.path.join(REPO_ROOT, "data", "fh6.db")
 SCHEMA_PATH = os.path.join(REPO_ROOT, "db", "schema.sql")
 GAMEDB_PATH = r"C:\Users\mondr\Downloads\forza raw data files\FH6_Database.sqlite"
 
-SCHEMA_VERSION = "8"   # 8 = OFFICIAL LAP TIMES (lap.official: the game published this lap_s; a rewound lap with an official time counts, 2026-09-18); 7 = PEAK LATERAL-G (lap_point.lat_g, corner_segment.peak_lat_g, 2026-09-12); 6 = PEDALS ON THE TRACE (lap_point.thr / brk, 0-100 %, 2026-09-11); 2 = COURSE NAMES; 3 = ANCHORS; 4 = the game's EVENT CATALOGUE (2026-09-05); 5 = LAPS AS THE GAME TIMED THEM (lap.lap_dist_m/rewinds/pauses/pause_s/stitched, lap_point.dist_m, lap_marker, 2026-09-06) -- applied by migrate()
+SCHEMA_VERSION = "9"   # 9 = DRIVEN RADIUS (lap_point.r_m from yaw rate; x/z no longer rounded to whole metres, 2026-09-18); 8 = OFFICIAL LAP TIMES (lap.official: the game published this lap_s; a rewound lap with an official time counts, 2026-09-18); 7 = PEAK LATERAL-G (lap_point.lat_g, corner_segment.peak_lat_g, 2026-09-12); 6 = PEDALS ON THE TRACE (lap_point.thr / brk, 0-100 %, 2026-09-11); 2 = COURSE NAMES; 3 = ANCHORS; 4 = the game's EVENT CATALOGUE (2026-09-05); 5 = LAPS AS THE GAME TIMED THEM (lap.lap_dist_m/rewinds/pauses/pause_s/stitched, lap_point.dist_m, lap_marker, 2026-09-06) -- applied by migrate()
 
 #: The confidence vocabulary. Every `confidence` column in the schema uses exactly these.
 CONFIDENCE = ("proven", "verified", "derived", "read", "unknown")
@@ -434,7 +434,8 @@ V2_COLUMNS["lap"] = [("lap_dist_m", "REAL"), ("rewinds", "INTEGER DEFAULT 0"), (
 # schema 8 -- OFFICIAL LAP TIMES: the game published this lap's time (LastLap), so lap_s is its number, not our
 # race-clock span. A rewind breaks the span but not the published time (Jett 2026-09-18).
 V2_COLUMNS["lap"].append(("official", "INTEGER DEFAULT 0"))
-V2_COLUMNS["lap_point"] = [("dist_m", "REAL"),
+V2_COLUMNS["lap_point"] = [("r_m", "REAL"),   # schema 9: driven radius from yaw rate (2026-09-18)
+                           ("dist_m", "REAL"),
                            ("thr", "INTEGER"), ("brk", "INTEGER"),   # schema 6: throttle / brake 0-100 % at the point (Jett 2026-09-11)
                            ("lat_g", "REAL")]                        # schema 7: peak |lat_g| surviving the 4 m resample step (2026-09-12)
 # the per-phase grip MIX (2026-09-10): sample counts across the 5 grip states, so a turn shows its

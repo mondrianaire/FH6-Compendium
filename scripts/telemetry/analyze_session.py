@@ -2368,9 +2368,17 @@ def main():
             # 7th / 8th columns: the driver's PEDALS (Accel / Brake, 0-255), continuous like speed (Jett 2026-09-11:
             # "indicate brake and throttle measurements throughout the run" -- recorded from now on, straight from
             # the capture's own inputs; laps analysed before this carry none and read "no pedal data").
+            # 10th column: the PATH RADIUS the car actually drove, r = v / omega, straight from the telemetry at
+            # full rate (2026-09-18, schema 9). Geometry cannot supply this: stored x/z are rounded to whole
+            # metres, and at 4 m spacing that rounding is a ~14 deg heading error per step, which fabricates tight
+            # curvature (a +3.3 g median error against recorded lat_g). Yaw rate needs no differencing and no
+            # rounding. None while straight (omega below the floor) or stopped.
             if grip: return [(r["PosX"], r["PosZ"], r["speed_mph"], grip_code(r), r.get("PosY", 0.0), r.get("DistanceTraveled", 0.0),
                               r.get("Accel", 0) or 0, r.get("Brake", 0) or 0,
-                              (lambda g: g if g <= 3.0 else 0.0)(abs(r.get("lat_g") or 0.0))) for r in rows_]   # 9th col: |lat_g| in g, >3 g dropped as an IMPACT not grip (matches the corner detector's threshold), schema 7
+                              (lambda g: g if g <= 3.0 else 0.0)(abs(r.get("lat_g") or 0.0)),
+                              (lambda v, w: (v / w) if (w > 0.02 and v > 1.0) else None)(
+                                  (r["speed_mph"] or 0.0) * 0.44704, abs(r.get("yaw_rate_dps") or 0.0) * math.pi / 180.0)
+                              ) for r in rows_]   # 9th col: |lat_g| in g, >3 g dropped as an IMPACT not grip (matches the corner detector's threshold), schema 7
             return [(r["PosX"], r["PosZ"], r["speed_mph"]) for r in rows_]
         def resample(pts, step=4.0):   # -> list of PIECES; a jump > 150 m between consecutive rows (respawn / rewind / teleport) starts a new piece
             pieces = []; cur = [pts[0]] if pts else []
@@ -2403,7 +2411,13 @@ def main():
                     # to the frames the checkpoint actually spans.
                     _lat = ((max(abs(pc[k][8]) for k in range(min(j_prev, j), min(len(pc), j + 2))),)
                             if len(pc[j]) > 8 and len(pc[j + 1]) > 8 else ())
-                    P_.append(_base + _cat + _ele + _dst + _ped + _lat)
+                    # the driven radius over the same frames, median of those that had a real curve (schema 9)
+                    _rad = ()
+                    if len(pc[j]) > 9 and len(pc[j + 1]) > 9:
+                        _rs = [pc[k][9] for k in range(min(j_prev, j), min(len(pc), j + 2))
+                               if pc[k][9] is not None and 5.0 < pc[k][9] < 5000.0]
+                        _rad = (statistics.median(_rs),) if _rs else (None,)
+                    P_.append(_base + _cat + _ele + _dst + _ped + _lat + _rad)
                     j_prev = j
                     s_ += step
                 out.append(P_)
@@ -2802,12 +2816,16 @@ def main():
             odometer, zeroed at the lap's first point; None on traces resampled without it. Pedals 0-100 % (schema 6);
             lat_g in g (peak |lateral g|, schema 7), None when the points carry none. Older 5-9-column rows still read."""
             d0 = all_[0][6] if all_ and len(all_[0]) > 6 else None
-            return [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0]), round(p[1]),
+            # x/z keep ONE DECIMAL (2026-09-18): they were rounded to whole metres, and at 4 m spacing that
+            # quantisation is a ~14 deg heading error per step -- enough to fabricate curvature. 11th field is
+            # the driven radius in m (schema 9), None while straight.
+            return [[round(p[2]), round(p[3], 1), (p[4] if len(p) > 4 else 0), round(p[0], 1), round(p[1], 1),
                      round(p[5], 1) if len(p) > 5 else None,
                      (round(p[6] - d0) if (d0 is not None and len(p) > 6) else None),
                      (round(p[7] / 2.55) if len(p) > 8 else None),
                      (round(p[8] / 2.55) if len(p) > 8 else None),
-                     (round(p[9], 3) if len(p) > 9 else None)] for p in pts_]
+                     (round(p[9], 3) if len(p) > 9 else None),
+                     (round(p[10], 1) if (len(p) > 10 and p[10] is not None) else None)] for p in pts_]
         def _thin(pts_, n):
             # Thin to ~n points but NEVER drop an impact: the map/trace draw their impact markers from these very
             # points, so a thinned-out hit would vanish from the map while the stored `impacts` count still claimed it.

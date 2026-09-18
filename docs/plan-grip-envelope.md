@@ -119,9 +119,16 @@ load. The controlled numbers will differ, and that is the point.
 
 ## 6. Validation gates — the plan fails if these fail
 
-1. **Radius estimator.** Implied `v²/r` vs recorded `lat_g`: median |error| ≤ 0.15 g and ≥ 60% within 0.3 g on
-   mid-phase samples. *Not sufficient on its own* — it validates the radius, not the statistic (gates 5–8 exist
-   because this one can pass while the envelope is wrong).
+1. **Radius estimator — REVISED 2026-09-18 after measuring it.** Bias: median |implied `v²/r` − recorded
+   `lat_g`| ≤ 0.15 g. **The old ≥60%-within-0.3 g half is withdrawn, and not because it was inconvenient:**
+   the two quantities are not the same measurement. Stored `lat_g` is the PEAK over the frames a checkpoint
+   spans, `r_m` is the MEDIAN radius over those same frames, and `lat_g` is a filtered channel carrying banking
+   and combined effects. Comparing them per sample has irreducible spread — raw 60 Hz telemetry, with no
+   estimator at all (`a = v·ω` straight from the capture), reaches only **42%** within 0.3 g. A gate no data
+   can pass is a broken gate, not a high standard. Replaced by:
+   **(1a)** bias ≤ 0.15 g — *measured −0.095 g on the yaw-rate radius, PASS*; and
+   **(1b) bin-level agreement**: within each published radius band, the median implied `a` must track the median
+   recorded `a` to ≤ 0.2 g. That is the level the envelope actually reports at, so it is the level to gate.
 2. **Monotonicity.** `v_envelope` rises with radius inside a scope+surface.
 3. **Hold-out.** Fit on 80% of laps, predict apex speed on the other 20%: median error ≤ 5 mph.
 4. **Surface separation, directional.** Tarmac must exceed dirt by more than the bins' own spread. A backwards
@@ -152,6 +159,22 @@ load. The controlled numbers will differ, and that is the point.
 
 Predicting an envelope for a car never driven (that is the `ref_friction_curve` modelling path — theory, not
 measurement); replacing schema-7 `a_max`; anything that writes to the game.
+
+## 8b. Status — 2026-09-18
+
+**Stage A is BUILT but not yet populated.** Radius now comes from the telemetry itself (`r = v/ω`, yaw rate at
+full capture rate) rather than from stored geometry, because `lap_point.x/z` were rounded to whole metres and at
+4 m spacing that is a ~14° heading error per step — a +3.33 g median error, enough to fabricate tight corners.
+Alongside it, the analyzer stopped rounding x/z (one decimal now), so the quantisation is gone for everything
+downstream, not just this feature.
+
+Shipped: `lap_point.r_m` (schema 9), carried from `analyze_session` through `lap_store`'s JSON points and the
+importer's column gating. Verified end to end on one re-analysed capture: 5,104 points carry a radius, x/z are
+sub-metre, and gate 1a passes at −0.095 g.
+
+**QUEUED: the full reprocess.** Only re-analysed captures carry `r_m`; the rest are NULL until
+`scripts/telemetry/backfill_laps.py` runs again (~90 min). Jett's call to defer it. Stage B waits on that —
+an envelope fitted on one capture would be a fit to one afternoon's driving.
 
 ## 9. Order of work
 

@@ -2957,7 +2957,28 @@ function presentScale(svg, vw, sc) {
 // turn marker still fires pickTurn. Pan/zoom moves only the viewBox window — the dataset projection the live
 // dot / trail read is untouched, so nothing desyncs.
 const CMAPVIEW = { svg: null, manual: false, vb: null, drag: null, wired: null, W: 0, H: 0 };
-function cmapApply() { const m = CMAPVIEW; if (m.svg && m.vb) m.svg.setAttribute("viewBox", `${m.vb.x.toFixed(1)} ${m.vb.y.toFixed(1)} ${m.vb.w.toFixed(1)} ${m.vb.h.toFixed(1)}`); }
+function cmapApply() { const m = CMAPVIEW; if (m.svg && m.vb) m.svg.setAttribute("viewBox", `${m.vb.x.toFixed(1)} ${m.vb.y.toFixed(1)} ${m.vb.w.toFixed(1)} ${m.vb.h.toFixed(1)}`); cmapScaleMarks(); }
+// TURN MARKERS HOLD A CONSTANT SCREEN SIZE ON ZOOM (Jett 2026-09-18): the circles + number labels are drawn in
+// user space, so the viewBox zoom blew them into giant blobs that hid the very traces you zoomed in to read.
+// Counter-scale each marker's radius and the label's font-size by the zoom factor (vb.w / W) so they keep their
+// fit-view size and the (now non-scaling-stroke) traces show through. Base sizes are cached per node in data-*
+// so repeated zooms compound from the base, not the last scaled value; a re-render restores the base and re-caches.
+function cmapScaleMarks() {
+  const m = CMAPVIEW; if (!m.svg) return;
+  const k = (m.vb && m.W) ? (m.vb.w / m.W) : 1;
+  m.svg.querySelectorAll(".cturn circle").forEach((c) => {
+    if (c.dataset.r0 == null) c.dataset.r0 = c.getAttribute("r");
+    c.setAttribute("r", (+c.dataset.r0 * k).toFixed(2));
+    if (c.dataset.sw0 == null) c.dataset.sw0 = c.getAttribute("stroke-width") || "1";
+    c.setAttribute("stroke-width", (+c.dataset.sw0 * k).toFixed(2));
+  });
+  m.svg.querySelectorAll(".cturn text").forEach((t) => {
+    if (t.dataset.f0 == null) t.dataset.f0 = parseFloat(t.getAttribute("font-size"));
+    t.setAttribute("font-size", (+t.dataset.f0 * k).toFixed(2));
+    if (t.dataset.sw0 == null) t.dataset.sw0 = t.getAttribute("stroke-width") || "3";
+    t.setAttribute("stroke-width", (+t.dataset.sw0 * k).toFixed(2));   // keep the dark halo proportional to the shrunk glyph
+  });
+}
 function cmapFitSync() {
   const m = CMAPVIEW, host = m.svg && m.svg.parentNode; if (!host) return;
   let btn = host.querySelector(":scope > .mapfit");

@@ -912,7 +912,7 @@ function paintTrace() {
   const el = $("#trace"); if (!el) return;
   const course = MODE.suggest === "course" && COURSE && COURSE.traces && Object.keys(COURSE.traces).length;
   const vc0 = course ? (VIEW.course[COURSE.key] || {}) : null;
-  const key = course ? JSON.stringify(["c", COURSE.key, vc0.filters, vc0.preset, vc0.ctx, [...(vc0.hidden || [])], [...(vc0.hi || [])], TRACE_MODE, TRACE_ALL, TRACE_CLS_HI, RACING_ONLY, CUR && CUR.cid, liveClass(), MODE.game, el.clientWidth, liveLapSig(), turnPickSeq()])
+  const key = course ? JSON.stringify(["c", COURSE.key, vc0.filters, vc0.preset, vc0.ctx, [...(vc0.hidden || [])], [...(vc0.hi || [])], TRACE_MODE, TRACE_ALL, TRACE_CLS_HI, RACING_ONLY, CUR && CUR.cid, liveClass(), MODE.game, el.clientWidth, liveLapSig(), turnPickSeq(), SINGLE_LAP])
                      : JSON.stringify(["r", LIVE.run.length >> 3, CUR && CUR.cid, TRACE_MODE, el.clientWidth]);
   if (key === TRACE_KEY && el.firstChild) return;
   TRACE_KEY = key;
@@ -1196,7 +1196,13 @@ function courseTrace(c) {
   const best = match.find((t) => !notTimed(t)) || null;
   const mine = match.filter((t) => CUR && t.cid === CUR.cid);
   const cur = mine.find((t) => !notTimed(t)) || mine[0] || null;
-  const fore = cur || best || match[0] || null;
+  // A PICKED LAP OWNS THE TRACE (2026-09-18): when you select a lap, it becomes the FOREGROUND line — the
+  // glow treatment below that was reserved for "your" lap — and everything else recedes. Without this the
+  // biggest element on the screen was identical for two different laps, and only the right pane's numbers
+  // moved. Falls back to the live/your lap, then the best, exactly as before when nothing is picked.
+  const pickedId = SINGLE_LAP ? String(SINGLE_LAP) : (LB_SEL.size === 1 ? [...LB_SEL][0] : null);
+  const picked = pickedId ? (match.find((t) => String(t.id) === pickedId) || null) : null;
+  const fore = picked || cur || best || match[0] || null;
   // THE ACTIVE (LIVE, in-progress) LAP: drawn on top, grip-painted, updating in real time as you drive it. It is
   // the whole lap (LIVE.lap, not the 90 s LIVE.run), and a pause or the end-of-event menu HOLDS it as "last run"
   // until the next lap starts -- the moment a driver stops to read it is not the moment it may vanish (handoff §4).
@@ -1241,9 +1247,9 @@ function courseTrace(c) {
     // A class spotlight (TRACE_CLS_HI) lifts that class's laps and fades the rest -- highlight, not filter.
     // a lit set comes from EITHER the class spotlight (TRACE_CLS_HI) OR a per-lap highlight (sel.hi, the 3-state
     // chip). When anything is lit, everything else recedes — highlight, not filter (every lap stays drawn).
-    const clsHi = TRACE_CLS_HI, lapHi = sel.hi, anyHi = !!clsHi || lapHi.size > 0;
+    const clsHi = TRACE_CLS_HI, lapHi = sel.hi, anyHi = !!clsHi || lapHi.size > 0 || !!picked;
     const lines = match.map((t) => {
-      if (t === cur) return "";
+      if (t === cur || t === picked) return "";   // both are drawn last, on top (below)
       if (TRACE_ALL) return paintedLine(t.pts, ch, t === best ? 1.4 : 0.9, TRACE_MODE, piColor(t.class));
       const isLit = (clsHi && t.class === clsHi) || lapHi.has(String(t.id));
       const other = anyHi && !isLit, lit = anyHi && isLit;
@@ -1251,7 +1257,11 @@ function courseTrace(c) {
       const op = lit ? 0.98 : other ? 0.1 : (t === best ? 0.95 : 0.5);
       return plainLine(t.pts, ch, piColor(t.class), w, op, notTimed(t));
     }).join("")
-      + (cur ? paintedLine(cur.pts, ch, 2.4, TRACE_MODE, piColor(cur.class)) : "");
+      // the PICKED lap on top: an accent glow under its grip-painted line, thicker than any context lap —
+      // the same "this is the subject" idiom the course map uses for the isolated trace.
+      + (picked ? `<polyline class="tpick-glow" fill="none" stroke="var(--acc2)" stroke-width="7" stroke-linejoin="round" stroke-linecap="round" opacity=".3" points="${picked.pts.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"/>`
+        + paintedLine(picked.pts, ch, 3, TRACE_MODE, piColor(picked.class), courseSpeedRange(c)) : "")
+      + (cur && cur !== picked ? paintedLine(cur.pts, ch, 2.4, TRACE_MODE, piColor(cur.class)) : "");
     const tsel = turnPickSeq();
     // the selected turn: highlight its tick (accent, bold) + wash a translucent band over its stretch of the
     // trace (from the midpoint to the previous turn to the midpoint to the next) so its extent reads at a glance
@@ -4756,6 +4766,7 @@ function selectSingleLap(id) {
   // move the left list's own highlight in place (the list persists across right-pane repaints)
   const lb = $("#leftBody");
   if (lb) lb.querySelectorAll(".sesl-row[data-single]").forEach((r) => r.classList.toggle("on", r.dataset.single === k));
+  TRACE_KEY = null; paintTrace();                   // the trace draws the picked lap as its foreground line
   paintRight();
 }
 // select a session lap from the left list: isolate its line on the course map + open Single-lap on the right

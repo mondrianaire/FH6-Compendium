@@ -266,7 +266,8 @@ def check_invariants(cx):
                 fail("I13-catalogue", "%d Rivals events have no route_id although the catalogue binds them (events ran before objectmodel?)" % n_unbound)
         if "route_names" in ran:
             n_unnamed = _one(cx, """SELECT COUNT(*) FROM ref_route r WHERE r.name IS NULL
-                                    AND r.route_id IN (SELECT route_id FROM ref_track_info)""")
+                                    AND r.route_id IN (SELECT route_id FROM ref_track_info
+                                                       WHERE display_name IS NOT NULL AND display_name <> '')""")
             if n_unnamed:
                 fail("I13-catalogue", "%d catalogued routes carry no name after route_names" % n_unnamed)
             last = cx.execute("SELECT notes FROM import_run WHERE kind='route_names' AND ok=1 ORDER BY started_utc DESC LIMIT 1").fetchone()

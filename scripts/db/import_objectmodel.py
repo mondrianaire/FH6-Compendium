@@ -17,8 +17,11 @@ The chain Rivals event -> collection -> career race -> track -> route resolves e
 Rivals names to exactly one route id (verified 88/88 on the shipped data). The route's display
 name is the CareerTrackInfo string, so ref_route can be named by the game rather than derived.
 
-Every string reference is a CHECKED join against ref_string, the same rule import_events.py uses:
-a name GUID that does not resolve fails the stage. Descriptions may be missing (placeholders).
+Every string reference is a CHECKED join against ref_string. An EMPTY ref_string catalogue fails the
+stage outright (gamedb has not run). An INDIVIDUAL name GUID that does not resolve -- new content the
+string catalogue has not caught up with -- is counted in notes['unresolved_name_strings'] and its entry
+is left unnamed rather than aborting the rebuild (2026-09-13, 28c74c3); nothing downstream may invent a
+name for it. Descriptions may be missing (placeholders).
 
 Run:  python scripts/db/import_objectmodel.py [--db PATH] [--zip PATH] [-v]
 """
@@ -247,7 +250,7 @@ def run(cx, zip_path=ZIP_PATH, verbose=False):
         chain.setdefault(r["name"], set()).add(r["route_id"])
     multi = {k: sorted(v) for k, v in chain.items() if len(v) != 1}
     notes = {"rivals_names": len(chain), "rivals_names_one_route": sum(1 for v in chain.values() if len(v) == 1),
-             "rivals_names_ambiguous": multi}
+             "rivals_names_ambiguous": multi, "unresolved_name_strings": sorted(set(misses))}
     if verbose:
         print("  rivals names %d, resolving to one route %d, ambiguous %s"
               % (notes["rivals_names"], notes["rivals_names_one_route"], multi or "none"))

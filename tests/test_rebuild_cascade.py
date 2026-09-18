@@ -21,7 +21,7 @@ class ExpandOnlyTest(unittest.TestCase):
     def test_telemetry_cascades_exactly(self):
         self.assertEqual(
             rebuild.expand_only(["telemetry"]),
-            ["telemetry", "course_match", "route_names", "corners", "diagnosis"])
+            ["telemetry", "course_match", "consolidate", "route_names", "corners", "diagnosis"])
 
     def test_routes_cascades_include_surface_chain(self):
         got = rebuild.expand_only(["routes"])

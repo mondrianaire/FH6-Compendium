@@ -761,7 +761,7 @@ def ingest(p, t_mono):
             else:
                 fr = max(max(abs(r["slip"]["FL"][2]), abs(r["slip"]["FR"][2])) for r in on)
                 rr = max(max(abs(r["slip"]["RL"][2]), abs(r["slip"]["RR"][2])) for r in on)
-                imp = any(abs(r["lat"]) > 3.0 or r["smash"] > 0 for r in on)
+                imp = any(r["smash"] > 0 for r in on)   # true contact only; kerb/terrain jolts (|lat|>3) are not impacts (matches analyze_session grip_code, 2026-09-18)
                 st = "impact" if imp else ("both" if fr > 1 and rr > 1 else "front" if fr > 1 else "rear" if rr > 1 else "calm")
                 e = {"t": s_prev, "state": st, "car": on[-1]["cid"], "mph": round(sum(r["mph"] for r in on) / len(on)), "f": round(fr, 2), "r": round(rr, 2), "g": round(max(abs(r["lat"]) for r in on), 2)}
             with ST.lock: ST.strip.append(e)

@@ -3423,7 +3423,7 @@ function paintRight() {
     body.querySelectorAll(".lap-rows [data-turn]").forEach((b) => b.onclick = () => pickTurn(+b.dataset.turn));
   }
   if (cur === "single") {
-    body.querySelectorAll("[data-single]").forEach((b) => b.onclick = () => { SINGLE_LAP = b.dataset.single; paintRight(); });
+    body.querySelectorAll("[data-single]").forEach((b) => b.onclick = () => selectSingleLap(b.dataset.single));
     body.querySelectorAll(".sl-row[data-turn]").forEach((r) => r.onclick = () => pickTurn(r.dataset.turn));
     body.querySelectorAll("[data-deltaref]").forEach((b) => b.onclick = () => { DELTA_REF = b.dataset.deltaref; try { localStorage.setItem("fh6DeltaRef", DELTA_REF); } catch (e) {} paintRight(); });
   }
@@ -4745,12 +4745,23 @@ function lapBrowserHTML() {
 }
 // back-compat alias: the left-pane render + Single-lap still call sessionListHTML()
 function sessionListHTML() { return lapBrowserHTML(); }
+// ONE PICK, ONE MEANING (2026-09-18): picking a lap ANYWHERE — the left list row or the Single-lap picker
+// chips — must move every surface that shows a lap, or two screens differ only in a few numbers and the change
+// is invisible. Before this, the chips set SINGLE_LAP and repainted the right pane only: the course map kept
+// lifting the previous lap and the list kept its highlight on it. Both paths now land here.
+function selectSingleLap(id) {
+  const k = String(id);
+  SINGLE_LAP = k;
+  LB_SEL = new Set([k]); applyLapPick();            // lift this lap on the course + corner maps, dim the rest
+  // move the left list's own highlight in place (the list persists across right-pane repaints)
+  const lb = $("#leftBody");
+  if (lb) lb.querySelectorAll(".sesl-row[data-single]").forEach((r) => r.classList.toggle("on", r.dataset.single === k));
+  paintRight();
+}
 // select a session lap from the left list: isolate its line on the course map + open Single-lap on the right
 function pickSessionLap(id) {
-  SINGLE_LAP = String(id);
-  LB_SEL = new Set([String(id)]); applyLapPick();   // lift this lap's line on the course map, dim the rest
   RIGHT_TAB = "single"; try { rightTabStore()[rightContext()] = "single"; } catch (e) {}
-  viewSave(); paintRight();
+  viewSave(); selectSingleLap(id);
 }
 // per-lap MIN speed through a turn (the slowest point) — the metric the pool scores rank on (higher = better).
 function turnMinByLap(t) {

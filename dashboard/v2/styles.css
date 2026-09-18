@@ -1399,6 +1399,11 @@ body.fixed .trace .lchip.livenow.last{box-shadow:none}
 .sess-when{color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sl-pick{display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:2px 6px}
 .sl-pick .why{margin-right:2px} .sl-pick .mini{padding:1px 7px;font-size:11px}
+/* THE LAP YOU ARE READING (2026-09-18): the picker marked the current chip with .on, but .mini.on was only
+   ever styled inside the two legends — so the chip looked like every other one and two different laps drew
+   near-identical screens. The selected lap is the subject of the whole pane; it gets the accent, filled. */
+.sl-pick .mini.on{background:var(--acc2);border-color:var(--acc2);color:#04121f;font-weight:700}
+.sl-pick .mini.on:hover{color:#04121f}
 .sl-hd,.sl-row{display:grid;grid-template-columns:1.5fr 0.7fr 2.2fr;gap:8px;align-items:center;padding:5px 8px}
 .sl-hd{font:600 8.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line)}
 .sl-badges{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
@@ -1431,7 +1436,9 @@ body.fixed .trace .lchip.livenow.last{box-shadow:none}
 .sesl-rows{display:flex;flex-direction:column;max-height:150px;overflow-y:auto}
 .sesl-row{display:grid;grid-template-columns:28px 1fr 1fr;gap:8px;align-items:center;padding:3px 6px;border-bottom:1px solid var(--line2);cursor:pointer;font-size:12px}
 .sesl-row:hover{background:var(--panel2)}
-.sesl-row.on{background:rgba(78,163,255,.14);box-shadow:inset 3px 0 0 var(--acc2)}
+/* the selected row has to survive a 30-row list read at a glance: a 14% tint did not (2026-09-18) */
+.sesl-row.on{background:rgba(78,163,255,.22);box-shadow:inset 3px 0 0 var(--acc2)}
+.sesl-row.on .sesl-t{color:var(--ink)} .sesl-row.on .sesl-rk{color:var(--acc2)}
 .sesl-rk{color:var(--dim)} .sesl-t{font-weight:700} .sesl-t.best{color:var(--acc)} .sesl-d{color:var(--mut);text-align:right}
 /* LAP BROWSER (2026-09-17): per-course sortable/filterable lap database in the left pane; Session is one preset */
 .lb-h{flex-wrap:wrap;gap:6px}

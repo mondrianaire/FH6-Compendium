@@ -2886,7 +2886,14 @@ def main():
                                   # event's own RacePosition said race (solo False) / solo (solo True) / unknown (None).
                                   # This is the clean mode flag for Rivals-only filtering; `_solo` is guard-downgraded and must not group.
                                   "is_race": (1 if _ev.get("solo") is False else (0 if _ev.get("solo") is True else None)),
-                                  "impacts": _imp, "void": 1 if (_contacts(w) and _solo) else 0,
+                                  # FH6 does NOT invalidate a lap time on contact (Jett 2026-09-18): a Rivals time
+                                  # set with a barrier/smashable clip still counts and still beats the rival, so a
+                                  # smashable hit must NOT void the time — it only leaves the `impacts` count as
+                                  # information. Voiding here struck out legitimate rival-beating touge laps (e.g.
+                                  # Hakone), the same over-voiding of fast laps the grip-4 narrowing in _contacts()
+                                  # above already fought. `void` is now reserved for a genuinely un-timeable lap
+                                  # (none produced here); partial / rewind / coverage remain their own fields.
+                                  "impacts": _imp, "void": 0,  # was: 1 if (_contacts(w) and _solo) else 0
                                   "tune_hash": _th,
                                   "pts": _pts_out(_thin(pts_w, 300), pts_w),
                                   "lap_dist_m": round(pts_w[-1][6] - pts_w[0][6]) if len(pts_w[0]) > 6 else None,

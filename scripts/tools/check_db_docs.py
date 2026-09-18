@@ -17,8 +17,17 @@ What it checks:
      failed (ALTER TABLE appends, schema.sql declares inline -- benign, but you
      want to know before trusting SELECT *).
   4. Every table is documented in handoff-data-structures.md, with the right
-     column list. ("Never forget a store.")
-  5. Row counts quoted in the docs are still true.
+     column list.
+  5. Row counts quoted in the docs are still true (reported, not failed -- the
+     DB is written continuously; --refresh rewrites them, --strict gates).
+  6. Every NON-BINARY source in the SOURCE REGISTRY declares its category,
+     disk location, read instructions and reader -- and the location resolves.
+     The binary ones do the same inside docs/formats/*.bt, checked by
+     scripts/tools/check_bt_template.py paths.
+  7. Two-way store reconciliation: every store tracked under data/ is
+     documented here, which is the rule this inventory exists to enforce
+     ("when a store is added, add it here in the same commit") and which
+     nothing checked until now. It found three on its first run.
 
     python scripts/tools/check_db_docs.py            # everything
     python scripts/tools/check_db_docs.py schema     # just one section
@@ -26,6 +35,7 @@ What it checks:
 Exit code 1 if any check fails. READ-ONLY: opens the live DB in read-only mode
 and never writes to it.
 """
+import glob
 import io
 import os
 import re
@@ -61,6 +71,10 @@ def cols(conn, t):
     return [r[1] for r in conn.execute('pragma table_info("%s")' % t)]
 
 
+MIGRATIONS = io.open(os.path.join(ROOT, "scripts", "db", "fh6db.py"),
+                     encoding="utf-8").read()
+
+
 def check_schema():
     """schema.sql executes, and declares exactly what the live DB has."""
     fails = []
@@ -81,10 +95,20 @@ def check_schema():
                   % (missing_live, extra_live))
         else:
             print("  match")
-        # A declared index the live DB lacks is a real defect: queries that the
-        # schema promises are cheap are doing full scans.
+        # A declared object the live DB lacks is only a DEFECT when nothing will
+        # ever create it. schema.sql runs on a FRESH database only, so an
+        # addition also has to be registered in fh6db.py's migrate(). If it is,
+        # the object is merely PENDING -- it appears on the next rebuild, and
+        # flagging it would cry wolf at another agent's in-flight work. If it is
+        # not, the object exists on fresh databases and silently nowhere else,
+        # which is the failure fh6db.py's own comments warn about.
         for n in missing_live:
-            fails.append("%s '%s' is declared in schema.sql but MISSING from the live DB" % (kind, n))
+            if n in MIGRATIONS:
+                print("      '%s' is pending: registered in migrate(), applies on the next rebuild" % n)
+            else:
+                fails.append("%s '%s' is declared in schema.sql, MISSING from the live DB, and NOT "
+                             "registered in migrate() -- it will never be created on an existing DB"
+                             % (kind, n))
         for n in extra_live:
             fails.append("%s '%s' exists live but is not declared in schema.sql" % (kind, n))
 
@@ -207,7 +231,101 @@ def check_counts(strict=False, refresh=False):
     return fails
 
 
-CHECKS = {"schema": check_schema, "handoff": check_handoff, "counts": check_counts}
+def _registry():
+    """Parse the SOURCE REGISTRY block out of DATA-INVENTORY.md into records."""
+    text = io.open(INVENTORY, encoding="utf-8").read()
+    recs, cur = [], None
+    for line in text.splitlines():
+        m = re.match(r"^SOURCE-([A-Z-]+):\s*(.*)$", line)
+        if not m:
+            continue
+        key, val = m.group(1), m.group(2).strip()
+        if key == "NAME":
+            cur = {"NAME": val, "LOC": [], "OPT": [], "READ": [], "CATEGORY": "", "READER": ""}
+            recs.append(cur)
+        elif cur is None:
+            continue
+        elif key == "LOCATION":
+            cur["LOC"].append(val)
+        elif key == "LOCATION-OPTIONAL":
+            cur["OPT"].append(val)
+        elif key == "READ":
+            cur["READ"].append(val)
+        else:
+            cur[key] = val
+    return recs
+
+
+def check_sources():
+    """Every non-binary source declares its category/location/read, and resolves."""
+    fails = []
+    recs = _registry()
+    if not recs:
+        return ["DATA-INVENTORY.md has no SOURCE REGISTRY block"]
+    for r in recs:
+        if not r["CATEGORY"]:
+            fails.append("%s declares no SOURCE-CATEGORY" % r["NAME"])
+        if not r["LOC"] and not r["OPT"]:
+            fails.append("%s declares no SOURCE-LOCATION" % r["NAME"])
+        if not r.get("READER"):
+            fails.append("%s declares no SOURCE-READER" % r["NAME"])
+
+        shown = []
+        for loc, required in [(l, True) for l in r["LOC"]] + [(l, False) for l in r["OPT"]]:
+            if loc.startswith("("):
+                shown.append((loc[:38], "no file"))
+                continue
+            probe = loc if (len(loc) > 1 and loc[1] == ":") else os.path.join(ROOT, loc)
+            hits = glob.glob(probe.replace("\\", "/"), recursive=True)
+            shown.append((loc, len(hits) if hits else ("MISSING" if required else "absent here")))
+            if required and not hits:
+                fails.append("%s: SOURCE-LOCATION does not resolve: %s" % (r["NAME"], loc))
+        print("  %-32s %s" % (r["NAME"], r["CATEGORY"][:46]))
+        for loc, n in shown:
+            print("      %-58s %s" % (loc[:58], n))
+    print("  %d sources registered" % len(recs))
+    return fails
+
+
+def check_stores():
+    """Two-way: every tracked store is documented, every documented path exists.
+
+    This is the rule DATA-INVENTORY.md exists to enforce -- "when a store is
+    added, add it here in the same commit" -- which nothing checked until now.
+    """
+    import subprocess
+    fails = []
+    try:
+        out = subprocess.run(["git", "ls-files", "data/"], cwd=ROOT,
+                             capture_output=True, text=True, timeout=60).stdout
+    except Exception as e:
+        return ["could not list tracked files: %s" % e]
+    tracked = [l for l in out.splitlines() if l]
+    root_files = [p for p in tracked if p.count("/") == 1]
+    doc = io.open(INVENTORY, encoding="utf-8").read()
+
+    # 1. tracked -> documented (skip backup dumps: transient, not stores)
+    undocumented = [p for p in root_files
+                    if not os.path.basename(p).startswith("_")
+                    and os.path.basename(p) not in doc]
+    print("  %d tracked files at data/ root, %d undocumented" % (len(root_files), len(undocumented)))
+    for p in undocumented:
+        print("      %s" % p)
+    if undocumented:
+        fails.append("tracked stores missing from DATA-INVENTORY.md: %s"
+                     % ", ".join(os.path.basename(p) for p in undocumented))
+
+    # 2. tracked backup directories are not stores and should not be in git
+    backups = sorted({p.split("/")[1] for p in tracked
+                      if p.count("/") > 1 and p.split("/")[1].startswith("_backup")})
+    if backups:
+        print("  NOTE: %d _backup* director%s tracked in git (transient dumps, not stores): %s"
+              % (len(backups), "y is" if len(backups) == 1 else "ies are", ", ".join(backups)))
+    return fails
+
+
+CHECKS = {"schema": check_schema, "handoff": check_handoff, "counts": check_counts,
+          "sources": check_sources, "stores": check_stores}
 
 if __name__ == "__main__":
     argv = sys.argv[1:]

@@ -42,6 +42,15 @@ GRIP_MULT   = 2.10     # Traction_Road -> usable longitudinal mu multiplier (lau
 TIRE_LOAD   = 0.950    # loaded rolling radius as a fraction of the unloaded geometric radius
 CG_FRAC     = 0.46     # CG height as a fraction of body Height (launch weight transfer: h_cg = CG_FRAC*Height)
 LAUNCH_RPM_FRAC = 1.0  # launch clamps engine to the peak-torque rpm until the real rpm passes it
+# gear-ratio slider norm -> physical ratio (empirically fit over 144 stock-FD tunes, median residual 0.02):
+# physical = GEAR_A + GEAR_B*norm. Lets a saved tune's gearing (stored as norms) drive the sim.
+GEAR_A = 0.4532
+GEAR_B = 5.5793
+AERO_DRAG_K = 0.55     # added downforce -> added drag: aero_drag_mult = 1 + AERO_DRAG_K*(df_total_kgf/mass_kg)
+
+
+def physical_gear(norm):
+    return GEAR_A + GEAR_B * norm
 
 
 def q1(cx, sql, args=()):
@@ -118,6 +127,29 @@ def load_car(ordinal):
     }
 
 
+def tune_car(base_car, container, fx):
+    """Override the stock car with a saved TUNE's gearing + mass + aero (the engine stays stock for now).
+    fx is an open read-only fh6.db connection. Returns a modified copy; falls back to stock where a value
+    is missing. final_drive + downforce are physical values in tune_slider; per-gear ratios are stored as
+    norms in tune_gear and converted with physical_gear()."""
+    car = dict(base_car)
+    sl = {r["slider"]: r["value"] for r in fx.execute(
+        "SELECT slider, value FROM tune_slider WHERE container=?", (container,))}
+    if sl.get("final_drive"):
+        car["final_drive"] = sl["final_drive"]
+    gr = fx.execute("SELECT gear, ratio FROM tune_gear WHERE container=? ORDER BY gear", (container,)).fetchall()
+    phys = [physical_gear(g["ratio"]) for g in gr if g["ratio"] is not None]
+    if len(phys) >= 3:
+        car["gears"] = phys
+    m = fx.execute("SELECT mass_kg FROM tune_container WHERE container=?", (container,)).fetchone()
+    if m and m["mass_kg"]:
+        car["mass"] = m["mass_kg"]
+    df_kgf = (sl.get("front_downforce") or 0.0) + (sl.get("rear_downforce") or 0.0)   # total downforce, kgf
+    car["aero_drag_mult"] = 1.0 + AERO_DRAG_K * (df_kgf / max(200.0, car["mass"]))     # more wing -> more drag -> lower top speed
+    car["_tune_df_kgf"] = df_kgf
+    return car
+
+
 def torque_at(curve, rpm):
     """Linear-interpolated engine torque (Nm) at an rpm; 0 below 0 or above the table."""
     if rpm <= 0:
@@ -158,7 +190,7 @@ def top_speed_fast(car, drag_unit=None, drive_eff=None, r_tire=None):
         rpm = (v / r) * ratio * 60.0 / (2 * math.pi)
         tq = torque_at(car["curve"], min(rpm, car["rev_ceiling"])) * car["game_torque_scale"]
         f_eng = tq * ratio * drive_eff / r
-        return f_eng - drag_unit * car["drag"] * car["game_drag_scale"] * v * v - roll
+        return f_eng - drag_unit * car["drag"] * car["game_drag_scale"] * car.get("aero_drag_mult", 1.0) * v * v - roll
 
     lo, hi = 1.0, v_rev
     if fnet(hi) > 0:
@@ -239,7 +271,7 @@ def simulate(car, r_tire=None, dt=0.001, tmax=60.0, drag_unit=None, drive_eff=No
                 f_eng = 0.0
             f_drive = min(f_eng, f_traction)
 
-        f_drag = drag_unit * car["drag"] * car["game_drag_scale"] * v * v
+        f_drag = drag_unit * car["drag"] * car["game_drag_scale"] * car.get("aero_drag_mult", 1.0) * v * v
         f_roll = ROLL_CRR * m * G if v > 0.1 else 0.0
         m_eff = m * (1 + ROT_INERTIA)
         a = (f_drive - f_drag - f_roll) / m_eff

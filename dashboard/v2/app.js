@@ -173,6 +173,8 @@ async function accelData() {
 // a per-car acceleration / top-speed chart: speed vs time, gear-shift markers, the key figures vs the game's own.
 function accelChartHTML(rec) {
   const tr = rec.trace || []; if (tr.length < 3) return null;
+  const isTune = rec.final_drive != null;                 // a per-tune record carries its gearing/aero
+  const refLbl = (rec.ref && rec.ref.src === "stock") ? "stock" : "game";
   const W = 660, H = 230, padL = 40, padB = 26, padT = 12, padR = 14;
   const tmax = Math.ceil(tr[tr.length - 1][0] / 2) * 2, vmax = Math.ceil((rec.top_mph || 200) / 20) * 20;
   const px = (t) => padL + (t / (tmax || 1)) * (W - padL - padR);
@@ -206,18 +208,24 @@ function accelChartHTML(rec) {
     <text x="${W - padR}" y="${(py(rec.top_mph) - 4).toFixed(1)}" text-anchor="end" font-size="9" fill="var(--dim)">top ${rec.top_mph} mph</text>
   </svg>`;
   const cmp = (sim, ref, u, lo) => `<div class="accel-fig"><b>${sim == null ? "—" : sim}${u}</b>`
-    + (ref != null ? `<span class="why">game ${ref}${u}${sim != null ? ` · ${lo ? (sim <= ref ? "" : "+") : (sim >= ref ? "+" : "")}${((sim - ref)).toFixed(u === "s" ? 1 : 0)}` : ""}</span>` : "") + `</div>`;
+    + (ref != null ? `<span class="why">${refLbl} ${ref}${u}${sim != null ? ` · ${lo ? (sim <= ref ? "" : "+") : (sim >= ref ? "+" : "")}${((sim - ref)).toFixed(u === "s" ? 1 : 0)}` : ""}</span>` : "") + `</div>`;
   const figs = `<div class="accel-figs">
     <div class="accel-cell"><span class="accel-k">0-60 mph</span>${cmp(rec.t60, rec.ref && rec.ref.t60, "s", true)}</div>
     <div class="accel-cell"><span class="accel-k">0-100 mph</span>${cmp(rec.t100, rec.ref && rec.ref.t100, "s", true)}</div>
     <div class="accel-cell"><span class="accel-k">¼ mile</span>${cmp(rec.tqmile, rec.ref && rec.ref.tqmile, "s", true)}</div>
     <div class="accel-cell"><span class="accel-k">¼ trap</span>${cmp(rec.trap_mph, rec.ref && rec.ref.trap_mph, "", false)}</div>
     <div class="accel-cell"><span class="accel-k">top speed</span>${cmp(rec.top_mph, rec.ref && rec.ref.top_mph, "", false)}</div></div>`;
+  const fdChip = isTune
+    ? `<span class="chip" title="final drive from this tune vs stock">FD ${rec.final_drive}${rec.stock_fd && Math.abs(rec.final_drive - rec.stock_fd) > 0.02 ? ` <span class="dim">· stock ${rec.stock_fd}</span>` : ""}</span>`
+      + (rec.df_kgf ? `<span class="chip" title="total downforce from this tune">${n0(rec.df_kgf)} kgf aero</span>` : "")
+    : `<span class="chip w">stock config</span>`;
+  const cap = isTune
+    ? `This tune's gearing, mass and aero are applied; dashes compare to <b>stock</b>. The engine torque curve is still stock (engine upgrades are next), so a built engine reads low on power.`
+    : `Simulated from the game's own physics values (torque curve, gearing, mass, drag, tire). Validated against the game's built-in figures: ~6% on top speed, ~16% on 0-60.`;
   return `<div class="panel accel"><div class="chips" style="margin-bottom:6px"><b>Modeled acceleration</b>
-    <span class="chip">WOT 0→top</span><span class="chip w">stock config</span></div>
+    <span class="chip">WOT 0→top</span>${fdChip}</div>
     ${svg}${figs}
-    <div class="why" style="margin-top:6px">Simulated from the game's own physics values (torque curve, gearing, mass, drag, tire).
-    Validated against the game's built-in figures: ~6% on top speed, ~16% on 0-60. Per-build (this tune's engine + gearing) is next.</div></div>`;
+    <div class="why" style="margin-top:6px">${cap}</div></div>`;
 }
 async function showBuild(hw) {
   const host = $("#detail");
@@ -231,8 +239,9 @@ async function showBuild(hw) {
     ${t0.locked ? '<span class="chip w">downloaded, locked</span>' : '<span class="chip">own save</span>'}
     <span class="chip mono">${esc(hw.slice(0, 8))}</span></div></div>`));
 
-  // modeled acceleration for this car (stock config), from the precomputed sim
-  try { const ac = await accelData(); const rec = ac.cars && ac.cars[String(b.ordinal)];
+  // modeled acceleration: this tune's gearing/aero if we have it, else the car's stock curve
+  try { const ac = await accelData();
+    const rec = (ac.tunes && t0.container && ac.tunes[t0.container]) || (ac.cars && ac.cars[String(b.ordinal)]);
     if (rec) { const h = accelChartHTML(rec); if (h) host.append(el(h)); } } catch (e) { /* chart is optional */ }
 
   // parts, grouped by the menu area you would walk in the shop

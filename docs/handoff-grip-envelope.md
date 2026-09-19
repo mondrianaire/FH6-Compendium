@@ -110,6 +110,52 @@ Wording ships as measured, e.g. *"+0.21 g optimistic — body slip makes `r = v/
 This does not retire the real fix. A slip-corrected radius (§4) removes the bias at source and would drive
 `bias_g` toward zero on its own; until then the column is how the envelope stays honest.
 
+## 5b. Stage B — BUILT 2026-09-19, and gate 3 fails
+
+`grip_envelope` (schema 11) is declared in `schema.sql` + `V2_TABLES` and computed inside
+`import_corners.py`, so it inherits the `corners` stage's cascade and a session import cannot leave it
+stale. 73 bins over `(class, surface, radius_band)`, **24 publishable**, built in 0.11 s.
+
+**Gates 2, 5, 6 PASS.** Monotonic within every scope+surface (B: 49.5 → 102.3 mph, C: 50.0 → 103.4,
+S2: 70.8 → 133.9); zero `grip = 4`; no published p90 over 2 % saturated; every published bin ≥ 8 laps.
+
+**Gate 4 is NOT TESTABLE.** Dirt has 32 samples over 9 bins and not one clears the sample gate. Tarmac
+vs dirt cannot be compared on this corpus — the envelope is tarmac-only in practice. `mixed` (16 bins)
+and `unknown` (14) are computed and stored but not published: `mixed` blends two grip regimes along one
+route, `unknown` has no `road_class` at all. The real fix is per-SAMPLE surface from `ref_route_surface`,
+which is per route POINT, not a better route-level label.
+
+**Gate 3 FAILS — median hold-out error 6.2 mph against a ≤ 5 mph gate**, and the diagnosis matters more
+than the number. The signed error is **+4.9 mph, over-predicting 76 % of held-out samples**, which is
+what a p90 upper bound is *supposed* to do — the gate as written asks the envelope to predict TYPICAL
+apex speed, the same category error as gate 1's withdrawn second half.
+
+But the well-posed test does not rescue it. Held-out **coverage** of `v_envelope_mph`:
+
+| Fitted quantile | Nominal | Achieved |
+| --- | ---: | ---: |
+| p90 (shipped) | 90 % | **76.2 %** |
+| p95 | 95 % | 83.7 % |
+| p99 | 99 % | 89.3 % |
+
+**`sqrt(a_p90 · r)` is not the p90 of speed.** Within a band a sample can be fast at low g or slow at
+high g, so the two distributions do not map; the derived speed under-covers. `a_p50` and `a_p90` are
+sound grip statistics — `v_envelope_mph` is the part that fails validation.
+
+**Consequence: Stage C stays blocked.** The plan says the UI ships only after every gate passes, and the
+speed column is not calibrated. Do not surface `v_envelope_mph` yet. Either publish `a_p90` alone as a
+grip figure, or compute the speed bound directly as the p90 of observed speed at that radius rather than
+deriving it from g — that is the open question, and it is a real one, not a formality.
+
+**Saturation nulls the p90, not the row.** `lat_g` is censored at 3.00 g and classes A and S1 run
+3.0–12.1 % saturated in every band, so their p90 is unknowable — but their medians (2.07–2.41 g) sit far
+below the ceiling and stay sound. An early cut of this discarded both and silently lost the two biggest
+classes in the corpus.
+
+**`bias_g` is measured per row** (§5), and measuring it per row was right: the 50–80 m bias is not one
+number. S1 reads **+0.315**, S2 **+0.270**, A **+0.019**. A single frozen +0.212 would have been wrong
+for every one of them.
+
 ## 6. What a future agent must know
 
 - **The envelope sample definition keeps only 4% of samples** (7,240 of 182,343): no brake, throttle ≤ 50,

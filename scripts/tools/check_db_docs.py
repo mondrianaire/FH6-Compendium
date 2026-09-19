@@ -106,7 +106,13 @@ def check_schema():
         # not, the object exists on fresh databases and silently nowhere else,
         # which is the failure fh6db.py's own comments warn about.
         for n in missing_live:
-            if n in MIGRATIONS:
+            # INDEXES are migrated generically: ensure_indexes() parses every CREATE INDEX out
+            # of schema.sql and replays the missing ones, so no index NAME ever appears in
+            # fh6db.py. Without this, every newly declared index would be misreported as
+            # broken -- which is exactly what happened to ix_grip_envelope on 2026-09-19.
+            if kind == "index" and "def ensure_indexes" in MIGRATIONS:
+                print("      '%s' is pending: ensure_indexes() replays it from schema.sql" % n)
+            elif n in MIGRATIONS:
                 print("      '%s' is pending: registered in migrate(), applies on the next rebuild" % n)
             else:
                 fails.append("%s '%s' is declared in schema.sql, MISSING from the live DB, and NOT "

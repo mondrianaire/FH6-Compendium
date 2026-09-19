@@ -28,17 +28,19 @@ G = 9.80665
 MPH = 2.2369362921  # m/s -> mph
 QMILE_M = 402.336   # quarter mile in metres
 
-# ---- GLOBAL constants ------------------------------------------------------------------------------
-# PROVISIONAL: fitted to the Sesto Elemento's Sim* oracle (2026-09-18) as the first calibration point.
-# These are meant to be GLOBAL (one set for the whole fleet), so the next step is to re-fit them across
-# many cars at once and confirm they hold; GRIP_MULT in particular is high here because Traction_Road
-# under-states launch grip vs the compound's friction-curve peak (a fleet fit may replace it with the
-# friction curve directly). Run with --fit to re-fit for any one car.
-DRIVE_EFF   = 0.87     # driveline efficiency (emergent in-game; fitted). AWD here.
-DRAG_UNIT   = 0.0029   # F_drag = DRAG_UNIT * BodyAeroLongitudinalDrag * GameDragScale * v^2  (internal-unit -> N)
+# ---- GLOBAL constants (FLEET-CALIBRATED 2026-09-18, scripts/sim/fleet_fit.py) -----------------------
+# ONE set for the whole fleet, fit by coordinate descent against Data_Car.Sim* over 118 cars on the
+# DRAG/POWER/GEARING metrics (top speed, 1/4-mile time, 1/4-mile trap), which the model captures well:
+# ~6% median top-speed error, ~8-10% on the 1/4 mile. Fitting was deliberately NOT done on 0-60 / 0-100:
+# those are launch-dominated (~27% median) and need a per-car friction-curve + weight-transfer launch model
+# we do not have yet -- that is the identified next improvement. GRIP_MULT (launch) is held provisional.
+# Run --fit to re-fit any ONE car (a single car reaches ~2%; the fleet trades that for one universal set).
+DRIVE_EFF   = 0.90     # driveline efficiency (emergent in-game; global fit)
+DRAG_UNIT   = 0.00208  # F_drag = DRAG_UNIT * BodyAeroLongitudinalDrag * GameDragScale * v^2  (internal-unit -> N)
 ROLL_CRR    = 0.013    # rolling-resistance coefficient
 ROT_INERTIA = 0.05     # rotating-mass fraction added to inertial mass (lumped; refine per-gear from MomentInertia)
-GRIP_MULT   = 1.84     # Traction_Road -> usable longitudinal mu multiplier (launch traction cap)
+GRIP_MULT   = 1.80     # Traction_Road -> usable longitudinal mu multiplier (launch cap; PROVISIONAL, not fleet-fit)
+TIRE_LOAD   = 0.950    # loaded rolling radius as a fraction of the unloaded geometric radius
 LAUNCH_RPM_FRAC = 1.0  # launch clamps engine to the peak-torque rpm until the real rpm passes it
 
 
@@ -70,6 +72,19 @@ def load_car(ordinal):
     # curve sampled uniformly at 100 rpm from 0; value is peak-normalised -> Nm = v*scale
     curve = [(tc["v%d" % i] or 0.0) * scale for i in range(n)]   # index i == i*100 rpm
     redline = cam["RedlineRPM"]
+    # REV CEILING: the engine can spin PAST the redline (the shift point) in top gear until the torque
+    # curve dies. The last sample is the closed-throttle drag "limiter" (goes sharply negative); the rev
+    # limit is the last rpm the curve is still meaningfully positive. Used only where there is no gear to
+    # upshift into (top gear at top speed) -- lower gears still upshift at the redline.
+    peak_nm = max(curve[:int(redline / 100) + 1] or [1.0])
+    rev_ceiling = redline
+    pk = max(range(len(curve)), key=lambda i: curve[i])
+    for i in range(pk, len(curve)):
+        if curve[i] <= 0.15 * peak_nm:      # torque has collapsed -> hard limiter
+            rev_ceiling = i * 100
+            break
+    else:
+        rev_ceiling = (len(curve) - 1) * 100
 
     # stock transmission = lowest-Id transmission for the drivetrain (base 6-speed here)
     tr = q1(gx, "SELECT * FROM List_UpgradeDrivetrainTransmission WHERE DrivetrainID=? ORDER BY Id LIMIT 1",
@@ -83,13 +98,14 @@ def load_car(ordinal):
     return {
         "name": car["display_name"], "ordinal": ordinal, "drivetype": car["drivetype"],
         "mass": mass, "weight_dist": dc["WeightDistribution"],
-        "curve": curve, "torque_scale": scale, "redline": redline,
+        "curve": curve, "torque_scale": scale, "redline": redline, "rev_ceiling": rev_ceiling,
         "game_torque_scale": dc["GameTorqueScale"],
         "gears": gears, "final_drive": fd, "shift_t": shift_t,
         "drag": dc["BodyAeroLongitudinalDrag"], "game_drag_scale": dc["GameDragScale"],
         "df_front": dc["BodyAeroForwardDownforceFront"], "df_rear": dc["BodyAeroForwardDownforceRear"],
         "traction": dc["Traction_Road"],
-        "rear_tire_mm": car["rear_tire_mm"], "rear_rim_in": car["rear_rim_in"],
+        # rear tire geometry -> rolling radius (unloaded); the loaded radius is ~2% less, folded into the fit
+        "tire_w": dc["RearTireWidthMM"], "tire_aspect": dc["RearTireAspect"], "wheel_dia_in": dc["RearWheelDiameterIN"],
         # the game's OWN physics outputs = our oracle
         "sim_top_ms": dc["SimTopSpeed"], "sim_qmile_s": dc["SimTimeQuarterMile"],
         "sim_qmile_trap_ms": dc["SimSpeedQuarterMile"],
@@ -110,10 +126,45 @@ def torque_at(curve, rpm):
 
 def rolling_radius_from_topspeed(car):
     """The car tops out at redline in top gear, so r = v_top * (top_gear*FD) / redline_radps.
-    This uses ONE oracle number (SimTopSpeed) to pin r, then everything else is validated."""
+    A cross-check only; the sim uses the GEOMETRIC radius below (catalogued, no oracle needed)."""
     top_ratio = car["gears"][-1] * car["final_drive"]
     redline_radps = car["redline"] * 2 * math.pi / 60.0
     return car["sim_top_ms"] * top_ratio / redline_radps
+
+
+def rolling_radius_geometric(car):
+    """Loaded rolling radius from the rear tire size (all catalogued): rim radius + sidewall height, times
+    TIRE_LOAD for tire deflection under load. No oracle number used -> works for the whole fleet."""
+    r_unloaded = (car["wheel_dia_in"] * 25.4 / 2 + car["tire_w"] * (car["tire_aspect"] / 100.0)) / 1000.0
+    return r_unloaded * TIRE_LOAD
+
+
+def top_speed_fast(car, drag_unit=None, drive_eff=None, r_tire=None):
+    """Terminal velocity in top gear by a force-balance root-find (fast; no long integration).
+    top = min(v where F_wheel(v)=drag+roll, v at the rev ceiling in top gear)."""
+    drag_unit = DRAG_UNIT if drag_unit is None else drag_unit
+    drive_eff = DRIVE_EFF if drive_eff is None else drive_eff
+    r = r_tire if r_tire else rolling_radius_geometric(car)
+    ratio = car["gears"][-1] * car["final_drive"]
+    v_rev = car["rev_ceiling"] * 2 * math.pi / 60.0 / ratio * r      # speed at the rev ceiling in top gear
+    roll = ROLL_CRR * car["mass"] * G
+
+    def fnet(v):
+        rpm = (v / r) * ratio * 60.0 / (2 * math.pi)
+        tq = torque_at(car["curve"], min(rpm, car["rev_ceiling"])) * car["game_torque_scale"]
+        f_eng = tq * ratio * drive_eff / r
+        return f_eng - drag_unit * car["drag"] * car["game_drag_scale"] * v * v - roll
+
+    lo, hi = 1.0, v_rev
+    if fnet(hi) > 0:
+        return v_rev                                                # rev-limited before drag stops it
+    for _ in range(60):
+        mid = 0.5 * (lo + hi)
+        if fnet(mid) > 0:
+            lo = mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
 
 
 def simulate(car, r_tire=None, dt=0.001, tmax=60.0, drag_unit=None, drive_eff=None, grip_mult=None):
@@ -122,8 +173,8 @@ def simulate(car, r_tire=None, dt=0.001, tmax=60.0, drag_unit=None, drive_eff=No
     grip_mult = GRIP_MULT if grip_mult is None else grip_mult
     m = car["mass"]
     gs, fd, gts, ts = car["gears"], car["final_drive"], car["game_torque_scale"], car["torque_scale"]
-    curve, redline = car["curve"], car["redline"]
-    r = r_tire if r_tire else rolling_radius_from_topspeed(car)
+    curve, redline, rev_ceiling = car["curve"], car["redline"], car["rev_ceiling"]
+    r = r_tire if r_tire else rolling_radius_geometric(car)
     awd = (car["drivetype"] or "").upper() == "AWD"
     rwd = (car["drivetype"] or "").upper() == "RWD"
     # normal load fraction on the driven axle for the traction cap
@@ -141,9 +192,9 @@ def simulate(car, r_tire=None, dt=0.001, tmax=60.0, drag_unit=None, drive_eff=No
     def engine_force(v, g):
         rpm = rpm_of(v, g)
         rpm = max(rpm, peak_torque_rpm * LAUNCH_RPM_FRAC if v < 3 else rpm)  # launch clamp
-        if rpm > redline:
+        if rpm > rev_ceiling:                       # hard limiter (torque has collapsed); top gear can rev past redline
             return 0.0, rpm
-        tq = torque_at(curve, min(rpm, redline)) * ts_scale
+        tq = torque_at(curve, min(rpm, rev_ceiling)) * ts_scale
         return tq * gs[g] * fd * drive_eff / r, rpm
 
     ts_scale = gts  # GameTorqueScale multiplies the whole curve
@@ -222,7 +273,7 @@ def _err(car, s):
     return e
 
 
-def fit_globals(car, r):
+def fit_globals(car, r):  # r = geometric rolling radius
     """Grid-search the three GLOBAL constants (grip, drive-eff, drag-unit) to the oracle. Coarse then fine."""
     best = None
     grid = [(gm, de, du)
@@ -253,7 +304,7 @@ def main():
     ap.add_argument("--trace", action="store_true", help="print the WOT speed curve (time, mph, gear)")
     a = ap.parse_args()
     car = load_car(a.ordinal)
-    r = rolling_radius_from_topspeed(car)
+    r = rolling_radius_geometric(car)
     gm, de, du = GRIP_MULT, DRIVE_EFF, DRAG_UNIT
     if a.fit:
         gm, de, du = fit_globals(car, r)
@@ -263,7 +314,7 @@ def main():
     print("   mass %.0f kg · %d gears %s · FD %.2f · redline %.0f · peak %.0f Nm · GTS %.2f · drag %.1f"
           % (car["mass"], len(car["gears"]), [round(x, 2) for x in car["gears"]], car["final_drive"],
              car["redline"], car["torque_scale"], car["game_torque_scale"], car["drag"]))
-    print("   derived rolling radius: %.4f m" % r)
+    print("   geometric rolling radius: %.4f m (top-speed cross-check %.4f)" % (r, rolling_radius_from_topspeed(car)))
     print("   constants%s: grip x%.2f (mu=%.2f) · drive-eff %.2f · drag-unit %.5f · Crr %.3f · rot %.2f"
           % (" [FITTED]" if a.fit else "", gm, car["traction"] * gm, de, du, ROLL_CRR, ROT_INERTIA))
     print()

@@ -1487,11 +1487,26 @@ function slipTile(f) {
   // at the peak (0.85-1.20) is what a skidpad wants; under it there is speed left, over it the tyre slides
   const paint = (v, ink) => v >= 0.85 && v <= 1.2 ? "var(--acc)" : v > 1.2 ? ink : "var(--mut)";
   const bar = (v, ink) => `<i style="width:${Math.max(0, Math.min(100, v / 1.6 * 100)).toFixed(0)}%;background:${paint(v, ink)}"></i>`;
-  return `<div class="dt slip" title="axle slip: the higher axle is the limiting one. 1.00 is the tyre's own limit -- ` +
-    `hold it at 0.85-1.20 for a grip measurement. Under that there is speed left; over it the tyre is sliding.">` +
+  // THE SPEED TO AIM FOR. Lateral g goes as v^2 at a fixed radius, and up near the peak the tyre's force is
+  // close enough to linear in slip, so the speed that would put this axle AT 1.00 is v * sqrt(1/slip).
+  // Only shown while slip is already within 0.7-1.4, where that is a +-20% correction rather than a guess:
+  // extrapolating from slip 0.46 would have claimed 80 mph on a car that turned out to hold about 1.9 g.
+  const yaw = Math.abs(+f.yaw || 0), mph = +f.mph || 0, slip = Math.max(fr, rr);
+  const r_m = yaw > 3 && mph > 5 ? (mph * 0.44704) / (yaw * Math.PI / 180) : null;
+  // 0.7-1.6 matches the band skidpad.py scores as usable, and is at most a -21% / +20% correction. Past the
+  // limit is exactly when the number is wanted, so the upper end must not blank out.
+  const tgt = (slip >= 0.7 && slip <= 1.6 && mph > 10) ? mph * Math.sqrt(1 / slip) : null;
+  const cue = slip < 0.85 ? ["FASTER", "var(--acc2)"] : slip <= 1.2 ? ["HOLD IT", "var(--acc)"] : ["EASE OFF", "var(--bad)"];
+  const foot = r_m
+    ? `${Math.round(r_m)} m circle · ${tgt ? `aim <b style="color:${cue[1]}">${Math.round(tgt)}</b> mph` : "—"}`
+    : "not cornering";
+  return `<div class="dt slip" title="axle slip: the higher axle is the limiting one, and 1.00 is the tyre's own ` +
+    `limit. Hold it at 0.85-1.20 and the run scores clean -- under that there is speed left, over it the tyre ` +
+    `is sliding and the reading comes out low. The aim speed is what would put that axle at 1.00 on the circle ` +
+    `you are currently driving.">` +
     `<div><span>F</span>${bar(fr, DGRIP.front.ink)}<b style="color:${paint(fr, DGRIP.front.ink)}">${fr.toFixed(2)}</b></div>` +
     `<div><span>R</span>${bar(rr, DGRIP.rear.ink)}<b style="color:${paint(rr, DGRIP.rear.ink)}">${rr.toFixed(2)}</b></div>` +
-    `<em>axle slip · 1.00 = limit</em></div>`;
+    `<em class="slipcue" style="color:${cue[1]}">${r_m ? cue[0] : "axle slip"} · <span>${foot}</span></em></div>`;
 }
 function dockTiles(f) {
   if (!f) return `<span class="why">waiting for telemetry…</span>`;

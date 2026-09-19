@@ -51,6 +51,25 @@ nothing in the dashboard renders from this.
       The way forward is a better measurement -- more laps per build, or one controlled constant-radius run
       per build, which would hand us a clean a_max directly.
 
+  RE-CHECKED AGAINST SKIDPAD TRUTH (2026-09-18, two builds measured on a circle rather than estimated
+  from laps). This is the number the whole chain was after, and for a road compound the physics simply
+  works -- no per-compound constant, no calibration at all:
+
+    build    compound              predicted   measured   ratio
+    Exocet   13 Racing Slick          2.23 g     2.31 g    1.035     <- 3.5% out, uncalibrated
+    Cobra    48 Offroad Race          1.03 g     1.49 g    1.446     <- 45% under
+
+    Balance called correctly on BOTH: predicted front-limited, measured front-limited.
+
+  The offroad miss has a visible cause rather than being noise: that part declares
+  TireModelName = "Offroad" in ref_part.data, i.e. the game runs a DIFFERENT tyre model for it, so
+  reading its asphalt lateral curve the way a road compound's is read is probably not the same thing.
+
+  Two builds is two points, and they were matched to their history by car ordinal and PI rather than by a
+  verified tune hash, so this is a strong hint and not a validated model. The test that matters next is more
+  ROAD-compound builds: if the ratio stays near 1.0 across them, a build's grip ceiling is predictable from
+  its parts and sliders with no driving at all.
+
 Read-only. Prints the ablation; renders nothing.
 """
 import json

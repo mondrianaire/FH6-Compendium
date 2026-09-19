@@ -740,6 +740,10 @@ CREATE TABLE IF NOT EXISTS corner_segment (
   grip_hist  TEXT,                    -- JSON [calm,front,rear,both,impact] sample counts -> the true grip mix
   time_s     REAL,
   peak_lat_g REAL,                    -- peak |lateral g| in this phase for this lap (schema 7, 2026-09-12) -> grip-ceiling rating
+  -- schema 12: the DRIVEN radius through this phase (median of lap_point.r_m). The turn's catalogued
+  -- ref_route_turn.radius_m is the road's fitted CENTRE-LINE and misses recorded lat_g by a median
+  -- 0.39 g, so grip_envelope is looked up by THIS, never by the catalogued radius.
+  med_r_m    REAL,
   PRIMARY KEY (lap_id, turn_id, segment)
 ) WITHOUT ROWID;
 CREATE INDEX IF NOT EXISTS ix_corner_segment ON corner_segment(route_key, turn_id, segment);

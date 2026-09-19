@@ -1783,3 +1783,9 @@ body.fixed #pRight > .body:has(.tstat){overflow-y:auto}
 .dt.slip .slipprog b{font-size:9.5px}
 /* the rest of the dock jittered for the same reason -- digits of different widths */
 #dockTiles .dt b{font-variant-numeric:tabular-nums}
+
+/* Radius envelope (Stage C, 2026-09-19): sits beside `grip used` in the turn title bar. Deliberately
+   quieter than the grip-ceiling row -- it is a LOWER BOUND from other people's laps, not a measurement
+   of this pass, and must not read as the louder of the two. */
+.tsum-env .tg-pct { color: var(--ink); }
+.tsum-env .tg-thinnote { color: #e3b341; }

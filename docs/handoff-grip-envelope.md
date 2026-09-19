@@ -163,6 +163,31 @@ classes in the corpus.
 number. S1 reads **+0.315**, S2 **+0.270**, A **+0.019**. A single frozen +0.212 would have been wrong
 for every one of them.
 
+## 5c. Stage C — BUILT 2026-09-19
+
+One line in the turn drill-down, beside `grip used`. Rendered with real data (Edamame Circuit, S1 scope,
+turn T548):
+
+> **radius envelope · 120 mph · carried at 80 m · your best 1 mph under ·
+> +0.32 g optimistic — body slip makes `r = v/ω` read tight**
+
+The §1 vocabulary is enforced in the output, not just intended: the line says **"has carried"**, the
+tooltip says **"A LOWER BOUND, not the car's maximum: nothing here separates the car's limit from the
+hardest anyone drove"**, and the words *ceiling* and *grip limit* appear nowhere in it — they belong to
+`turnGripCeiling()`, which stays a separate row so grip never grows a second source of truth.
+
+**The bias renders from the column.** `biasNote` is written into the line and the tooltip verbatim; the UI
+neither invents a caveat nor drops one. That is the §5 decision made physical.
+
+**Looked up by the DRIVEN radius, never the catalogued one.** `corner_segment.med_r_m` (schema 12) is the
+median `lap_point.r_m` through the phase. The turn's `ref_route_turn.radius_m` is the road's fitted
+centre-line and misses recorded `lat_g` by a median 0.39 g (§2), so using it would have re-introduced the
+error Stage A exists to avoid. The bound is quoted at the band midpoint and projected with `v·√(r/r_mid)`.
+
+**Honest by construction.** `turnRadiusEnvelope()` returns a REASON, never a number, for every case it
+cannot answer — unit-tested on all seven: mixed scope, unknown class, dirt (no publishable rows), mixed
+road, radius outside 15–200 m, no driven radius, and the normal case.
+
 ## 6. What a future agent must know
 
 - **The envelope sample definition keeps only 4% of samples** (7,240 of 182,343): no brake, throttle ≤ 50,

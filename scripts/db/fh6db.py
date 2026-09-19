@@ -68,7 +68,7 @@ DEFAULT_DB = os.path.join(REPO_ROOT, "data", "fh6.db")
 SCHEMA_PATH = os.path.join(REPO_ROOT, "db", "schema.sql")
 GAMEDB_PATH = r"C:\Users\mondr\Downloads\forza raw data files\FH6_Database.sqlite"
 
-SCHEMA_VERSION = "11"  # 11 = GRIP ENVELOPE (grip_envelope: lateral g a class holds per radius band, with its MEASURED bias_g; a lower bound, never a limit, 2026-09-19); 10 = COURSE-LEVEL DIAGNOSIS (v_diag_by_course: faults that belong to the lap, not a turn -- gearing, 2026-09-18); 9 = DRIVEN RADIUS (lap_point.r_m from yaw rate; x/z no longer rounded to whole metres, 2026-09-18); 8 = OFFICIAL LAP TIMES (lap.official: the game published this lap_s; a rewound lap with an official time counts, 2026-09-18); 7 = PEAK LATERAL-G (lap_point.lat_g, corner_segment.peak_lat_g, 2026-09-12); 6 = PEDALS ON THE TRACE (lap_point.thr / brk, 0-100 %, 2026-09-11); 2 = COURSE NAMES; 3 = ANCHORS; 4 = the game's EVENT CATALOGUE (2026-09-05); 5 = LAPS AS THE GAME TIMED THEM (lap.lap_dist_m/rewinds/pauses/pause_s/stitched, lap_point.dist_m, lap_marker, 2026-09-06) -- applied by migrate()
+SCHEMA_VERSION = "12"  # 12 = DRIVEN RADIUS PER PHASE (corner_segment.med_r_m: the radius the car took, so the envelope is looked up by the driven line and never by the catalogued centre-line, 2026-09-19); 11 = GRIP ENVELOPE (grip_envelope: lateral g a class holds per radius band, with its MEASURED bias_g; a lower bound, never a limit, 2026-09-19); 10 = COURSE-LEVEL DIAGNOSIS (v_diag_by_course: faults that belong to the lap, not a turn -- gearing, 2026-09-18); 9 = DRIVEN RADIUS (lap_point.r_m from yaw rate; x/z no longer rounded to whole metres, 2026-09-18); 8 = OFFICIAL LAP TIMES (lap.official: the game published this lap_s; a rewound lap with an official time counts, 2026-09-18); 7 = PEAK LATERAL-G (lap_point.lat_g, corner_segment.peak_lat_g, 2026-09-12); 6 = PEDALS ON THE TRACE (lap_point.thr / brk, 0-100 %, 2026-09-11); 2 = COURSE NAMES; 3 = ANCHORS; 4 = the game's EVENT CATALOGUE (2026-09-05); 5 = LAPS AS THE GAME TIMED THEM (lap.lap_dist_m/rewinds/pauses/pause_s/stitched, lap_point.dist_m, lap_marker, 2026-09-06) -- applied by migrate()
 
 #: The confidence vocabulary. Every `confidence` column in the schema uses exactly these.
 CONFIDENCE = ("proven", "verified", "derived", "read", "unknown")
@@ -469,7 +469,7 @@ V2_COLUMNS["lap_point"] = [("r_m", "REAL"),   # schema 9: driven radius from yaw
 # the per-phase grip MIX (2026-09-10): sample counts across the 5 grip states, so a turn shows its
 # TYPICAL grip, not the single worst moment. grip_state also switches meaning here to the modal state.
 # peak_lat_g (schema 7, 2026-09-12): the peak |lat_g| in that phase for that lap -> the grip-ceiling rating.
-V2_COLUMNS["corner_segment"] = [("grip_hist", "TEXT"), ("peak_lat_g", "REAL")]
+V2_COLUMNS["corner_segment"] = [("grip_hist", "TEXT"), ("peak_lat_g", "REAL"), ("med_r_m", "REAL")]
 V2_TABLES["lap_marker"] = """CREATE TABLE IF NOT EXISTS lap_marker (
   lap_id   INTEGER NOT NULL REFERENCES lap(lap_id) ON DELETE CASCADE,
   i        INTEGER NOT NULL,

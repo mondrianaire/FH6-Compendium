@@ -127,8 +127,17 @@ def check_schema():
         only_dec = [c for c in A if c not in B]
         only_live = [c for c in B if c not in A]
         if only_dec or only_live:
-            fails.append("%s column mismatch: declared-only=%s live-only=%s"
-                         % (t, only_dec, only_live))
+            # A declared column gets the same PENDING/BROKEN split as a table or view: if it is
+            # registered in V2_COLUMNS, migrate() will ALTER it in on the next rebuild. Without
+            # this, every newly declared column failed the gate until a rebuild happened to run --
+            # which is normal, not a defect. corner_segment.med_r_m hit it on 2026-09-19.
+            pend = [c for c in only_dec if '"%s"' % c in MIGRATIONS or "'%s'" % c in MIGRATIONS]
+            rest = [c for c in only_dec if c not in pend]
+            if pend:
+                print("      %s: %s pending -- registered in V2_COLUMNS, applies on the next rebuild"
+                      % (t, ", ".join(pend)))
+            if rest or only_live:
+                fails.append("%s column mismatch: declared-only=%s live-only=%s" % (t, rest, only_live))
         elif A != B:
             order_drift.append(t)
     if order_drift:

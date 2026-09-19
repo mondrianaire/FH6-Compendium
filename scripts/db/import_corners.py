@@ -267,6 +267,11 @@ def run(cx, verbose=False):
     # so a `--only corners` run against a not-yet-migrated DB degrades to no-column rather than crashing.
     _has_lat = "lat_g" in {r[1] for r in cx.execute("PRAGMA table_info(lap_point)")}
     _seg_has_lat = "peak_lat_g" in {r[1] for r in cx.execute("PRAGMA table_info(corner_segment)")}
+    # schema 12: the DRIVEN radius per phase. The turn's catalogued radius_m is the road's fitted
+    # centre-line, NOT the line the car took -- it misses recorded lat_g by a median 0.39 g -- so the
+    # radius envelope must be looked up by what was driven, and that is this column.
+    _has_r = "r_m" in {r[1] for r in cx.execute("PRAGMA table_info(lap_point)")}
+    _seg_has_r = "med_r_m" in {r[1] for r in cx.execute("PRAGMA table_info(corner_segment)")}
     for co in courses:
         turns = [dict(t) for t in cx.execute("""
             SELECT turn_id, seq, apex_x, apex_z, radius_m, width_m, bank_deg, kind, angle_deg
@@ -285,6 +290,7 @@ def run(cx, verbose=False):
         laps = cx.execute("SELECT lap_id FROM lap WHERE route_key=?", (co["route_key"],)).fetchall()
         for lp in laps:
             pts = cx.execute("SELECT i, arc_m, mph, grip, x, z" + (", lat_g" if _has_lat else "")
+                             + (", r_m" if _has_r else "")
                              + " FROM lap_point WHERE lap_id=? ORDER BY i", (lp["lap_id"],)).fetchall()
             if len(pts) < 8:
                 skipped += 1
@@ -360,9 +366,16 @@ def run(cx, verbose=False):
                             slat = [s["lat_g"] for s in ss if s["lat_g"] is not None]
                             if slat:
                                 speak = round(max(slat), 3)
+                        # MEDIAN, not mean: a phase can clip one transitional sample whose r = v/omega
+                        # reads far off, and a mean would carry it into the band lookup.
+                        smedr = None
+                        if _has_r:
+                            sr = sorted(x["r_m"] for x in ss if x["r_m"] is not None)
+                            if sr:
+                                smedr = round(sr[len(sr) // 2], 2)
                         seg_rows.append((lp["lap_id"], stid, co["route_key"], sname, len(ss),
                                          smphs[0], smphs[-1], min(smphs), round(savg, 1),
-                                         gstate, ghist, round(ssecs, 3) if ssecs else None, speak))
+                                         gstate, ghist, round(ssecs, 3) if ssecs else None, speak, smedr))
     with cx:
         cx.execute("DELETE FROM corner_obs")
         n = fh6db.upsert_many(cx, "corner_obs", [
@@ -372,8 +385,12 @@ def run(cx, verbose=False):
         if fh6db.has_table(cx, "corner_segment"):
             cx.execute("DELETE FROM corner_segment")
             _cs_cols = ["lap_id", "turn_id", "route_key", "segment", "n_samples", "entry_mph", "exit_mph",
-                        "min_mph", "mean_mph", "grip_state", "grip_hist", "time_s"] + (["peak_lat_g"] if _seg_has_lat else [])
-            _cs_rows = seg_rows if _seg_has_lat else [r[:12] for r in seg_rows]
+                        "min_mph", "mean_mph", "grip_state", "grip_hist", "time_s"]                 + (["peak_lat_g"] if _seg_has_lat else []) + (["med_r_m"] if _seg_has_r else [])
+            _cs_rows = seg_rows
+            if not _seg_has_r:
+                _cs_rows = [r[:13] for r in _cs_rows]
+            if not _seg_has_lat:
+                _cs_rows = [r[:12] for r in _cs_rows]
             m = fh6db.upsert_many(cx, "corner_segment", _cs_cols, _cs_rows, chunk=5000)
     counts = {"corner_obs": n, "corner_segment": m, "_laps_skipped": skipped}
     counts.update(build_envelope(cx, verbose))

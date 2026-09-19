@@ -327,6 +327,25 @@ def main(argv=None):
                                         "aMax": round(_pctl(_bv, 0.90), 3), "p10": round(_pctl(_bv, 0.10), 3), "n": len(_bv)})
         class_grip[_cls] = _entry
 
+    # RADIUS ENVELOPE (grip_envelope, schema 11). How fast a class actually carried a given DRIVEN
+    # radius: the p90 of observed speed in the band, projected to the band midpoint. Class property,
+    # course-independent, so compute once and stamp on every course -- same as classGrip above.
+    # NOT a ceiling and NOT a limit: it is a LOWER BOUND, bounded by the hardest anyone drove, and the
+    # UI must say so. `grip used` (classGrip) remains the authority on how hard a corner WAS driven.
+    radius_env = {}
+    if fh6db.has_table(cx, "grip_envelope"):
+        for _r in cx.execute("""SELECT scope_key, surface, radius_band, r_mid_m, a_p50, a_p90,
+                                       v_envelope_mph, bias_g, bias_note, n_samples, n_laps
+                                  FROM grip_envelope WHERE publishable = 1 AND scope = 'class'
+                                 ORDER BY scope_key, surface, r_mid_m"""):
+            radius_env.setdefault(_r["scope_key"], {}).setdefault(_r["surface"], []).append({
+                "band": _r["radius_band"], "rMid": _r["r_mid_m"],
+                "aP50": _r["a_p50"], "aP90": _r["a_p90"], "vMph": _r["v_envelope_mph"],
+                # the bias travels as DATA (handoff-grip-envelope.md §5): the UI renders what this
+                # says and may neither invent a caveat nor drop one.
+                "biasG": _r["bias_g"], "biasNote": _r["bias_note"],
+                "n": _r["n_samples"], "nLaps": _r["n_laps"]})
+
     # ================================================================================================
     # A DECLARED NAME IS NOT A VERIFIED ROAD (2026-09-18). A course keyed route:<id> takes that route's
     # NAME from the declaration -- an event id in routes.json -- which is the strongest naming evidence
@@ -493,11 +512,14 @@ def main(argv=None):
             route["path"] = [[r["x"], r["z"]] for r in cx.execute(
                 "SELECT x, z FROM ref_route_point WHERE route_id=? ORDER BY i",
                 (route["route_id"],))]
-            rr = cx.execute("SELECT length_m, is_loop FROM ref_route WHERE route_id=?",
+            rr = cx.execute("SELECT length_m, is_loop, road_class FROM ref_route WHERE route_id=?",
                             (route["route_id"],)).fetchone()
             if rr:
                 route["length_m"] = rr["length_m"]
                 route["is_loop"] = rr["is_loop"]
+                # which envelope surface this course reads against. 'mixed'/None are NOT published
+                # surfaces, so the drill-down says why rather than guessing a row.
+                route["road_class"] = rr["road_class"]
         # DEFINITIONAL FALLBACK: a course keyed route:<id> IS game route <id> -- the catalogue matcher assigned
         # that key off the start/finish line + path, so the identity is already settled by the key. The owt
         # geometric re-match (course_route) gates its verdict on COVERAGE so it will not attach lap RECORDS to a
@@ -620,8 +642,10 @@ def main(argv=None):
         # requiring a pass to cover the turn's full phase set (a pass sampled in fewer phases sums a smaller
         # turnT and must not be crowned fastest), and a crash corner reads as impact grip + a slow, low rank.
         _seg = _cl.defaultdict(lambda: _cl.defaultdict(list))
-        _cs_peakg = "peak_lat_g" in {r[1] for r in cx.execute("PRAGMA table_info(corner_segment)")}   # schema 7
-        _pg = ", cs.peak_lat_g" if _cs_peakg else ""
+        _cs_cols = {r[1] for r in cx.execute("PRAGMA table_info(corner_segment)")}
+        _cs_peakg = "peak_lat_g" in _cs_cols                                   # schema 7
+        _cs_medr = "med_r_m" in _cs_cols                                       # schema 12
+        _pg = (", cs.peak_lat_g" if _cs_peakg else "") + (", cs.med_r_m" if _cs_medr else "")
         for sr in cx.execute("SELECT cs.turn_id, cs.segment, cs.entry_mph, cs.min_mph, cs.exit_mph, "
                              "cs.grip_state, cs.time_s, cs.grip_hist, cs.mean_mph, cs.lap_id" + _pg +
                              " FROM corner_segment cs WHERE cs.route_key = ?", (key,)):
@@ -631,7 +655,8 @@ def main(argv=None):
                 _gh = None
             _seg[sr["turn_id"]][sr["segment"]].append(
                 [sr["lap_id"], sr["entry_mph"], sr["min_mph"], sr["exit_mph"], sr["grip_state"],
-                 sr["time_s"], _gh, sr["mean_mph"], (sr["peak_lat_g"] if _cs_peakg else None)])
+                 sr["time_s"], _gh, sr["mean_mph"], (sr["peak_lat_g"] if _cs_peakg else None),
+                 (sr["med_r_m"] if _cs_medr else None)])
         for t in turns:
             po = _seg.get(t.get("id"))
             if po:
@@ -758,7 +783,7 @@ def main(argv=None):
                        {"key": key, "name": c["name"], "len": _disp_len, "rivals": c["rivals"],
                         "path": geo.get("path") or [], "turns": turns, "laps": laps,
                         "traces": traces, "route": route, "naming": naming, "hits": hits,
-                        "n_turns_catalogued": n_cat, "classGrip": class_grip,
+                        "n_turns_catalogued": n_cat, "classGrip": class_grip, "radiusEnvelope": radius_env,
                         # when this history was built, so the course view can stamp the comparison it feeds
                         # ("history built 10:44") instead of leaving freshness to the status bar (handoff §3)
                         "built_at": fh6db.utcnow()})

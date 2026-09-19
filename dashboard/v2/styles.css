@@ -1727,13 +1727,23 @@ body.fixed #pRight > .body:has(.tstat){overflow-y:auto}
 .svcbtns{margin-left:auto;display:flex;gap:4px}
 .mini.svcb{min-width:62px}
 
-/* AXLE SLIP in the dock -- 1.00 is the tyre's limit, so this is the instrument a skidpad is driven by */
-.dt.slip{display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:168px}
+/* AXLE SLIP in the dock -- 1.00 is the tyre's limit, so this is the instrument a skidpad is driven by.
+   FIXED width and tabular figures: the cue text changes length constantly ("not cornering" vs
+   "✓ GOT IT 9s 63m"), and on a flex row that shoved every tile to its right back and forth on every
+   frame. Nothing in here may resize with its content. */
+.dt.slip{display:flex;flex-direction:column;justify-content:center;gap:2px;
+  width:186px;min-width:186px;max-width:186px;overflow:hidden}
 .dt.slip>div{display:flex;align-items:center;gap:5px}
-.dt.slip span{font:700 9px var(--mono);color:var(--dim);width:8px}
+.dt.slip span{font:700 9px var(--mono);color:var(--dim)}
+.dt.slip>div>span{width:8px;flex:0 0 8px}
 .dt.slip i{display:block;height:7px;border-radius:3px;transition:width .08s linear}
 .dt.slip>div>i{flex:1 1 auto;background:var(--mut)}
-.dt.slip b{font:700 12px var(--mono);min-width:34px;text-align:right}
-.dt.slip em{font-style:normal;font:700 9px var(--mono);letter-spacing:.06em;white-space:nowrap}
+.dt.slip>div>b{font:700 12px var(--mono);font-variant-numeric:tabular-nums;
+  width:38px;flex:0 0 38px;text-align:right}
+.dt.slip em{font-style:normal;font:700 9px var(--mono);letter-spacing:.04em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
 .dt.slip em span{font-weight:400;color:var(--dim)}
-.dt.slip em b{font-size:11px}
+.dt.slip .slipprog{color:var(--mut)}
+.dt.slip .slipprog b{font-size:9.5px}
+/* the rest of the dock jittered for the same reason -- digits of different widths */
+#dockTiles .dt b{font-variant-numeric:tabular-nums}

@@ -1485,6 +1485,19 @@ function paintDock() {
 // banked. This mirrors skidpad.py's own gates frame by frame and counts the qualifying seconds, so the dock
 // can say GOT IT the moment the run would score -- and say WHY it is not counting when it is not.
 let SKID = { t0: null, tLast: null, dir: null, rs: [] };
+// WHAT THE CAR STILL NEEDS (Jett 2026-09-18: "there is no feedback of how much data is necessary or that a
+// car has been successfully analyzed"). A run banking is not the goal -- a CAR is done when it has a
+// qualifying run each way, because the two directions are what cancel a cambered surface. Kept per car id
+// for the session so switching cars and coming back does not lose the progress.
+const SKID_DONE = {};                       // cid -> {L: best seconds, R: best seconds}
+const SKID_NEED = 4.0, SKID_GOOD = 8.0;     // the analyser's own minimum, and a comfortable one
+function skidProgress(f, held, steady, slip) {
+  const cid = f.cid || "?";
+  const d = (SKID_DONE[cid] = SKID_DONE[cid] || { L: 0, R: 0 });
+  const dir = (+f.yaw || 0) > 0 ? "L" : "R";
+  if (steady && held >= SKID_NEED && slip >= 0.85 && slip <= 1.6 && held > d[dir]) d[dir] = held;
+  return d;
+}
 function skidHold(f, r_m, slip) {
   const t = +f.t;
   const brake = (f.brk | 0) > 12, lat = Math.abs(+f.lat || 0), lon = Math.abs(+f.lon || 0);
@@ -1507,26 +1520,31 @@ function slipTile(f) {
   const bar = (v, ink) => `<i style="width:${Math.max(0, Math.min(100, v / 1.6 * 100)).toFixed(0)}%;background:${paint(v, ink)}"></i>`;
   const yaw = Math.abs(+f.yaw || 0), mph = +f.mph || 0, slip = Math.max(fr, rr);
   const r_m = yaw > 3 && mph > 5 ? (mph * 0.44704) / (yaw * Math.PI / 180) : null;
-  // 0.7-1.6 matches the band skidpad.py scores as usable, and is at most a -21% / +20% correction. Past the
-  // limit is exactly when the number is wanted, so the upper end must not blank out.
   const tgt = (slip >= 0.7 && slip <= 1.6 && mph > 10) ? mph * Math.sqrt(1 / slip) : null;
   const h = skidHold(f, r_m, slip);
+  const d = skidProgress(f, h.held, h.steady, slip);
   let cue, col;
-  if (!r_m) { cue = "NOT CORNERING"; col = "var(--dim)"; }
-  else if (slip < 0.85) { cue = "FASTER"; col = "var(--acc2)"; }
-  else if (slip > 1.6) { cue = "TOO FAST"; col = "var(--bad)"; }
-  else if (!h.steady) { cue = "STEADY THE CIRCLE"; col = "var(--w, #e3b341)"; }
-  else if (h.held >= 8) { cue = `✓ GOT IT · ${h.held.toFixed(0)} s`; col = "var(--acc)"; }
-  else if (h.held >= 4) { cue = `✓ BANKED · ${h.held.toFixed(1)} s`; col = "var(--acc)"; }
-  else { cue = `HOLD · ${h.held.toFixed(1)} s`; col = "var(--acc)"; }
-  const foot = r_m ? `${Math.round(r_m)} m${tgt ? ` · aim ${Math.round(tgt)} mph` : ""}${slip > 1.25 && slip <= 1.6 ? " · ease a touch" : ""}` : "";
-  return `<div class="dt slip" title="axle slip: the higher axle is the limiting one, and 1.00 is the tyre's own ` +
-    `limit. The counter runs only while this frame would COUNT for skidpad.py -- steady radius, one direction, ` +
-    `no brake, slip 0.85-1.6. Four seconds banks the run; eight is comfortably better. Then turn round and ` +
-    `do it the other way.">` +
+  if (!r_m) { cue = "not cornering"; col = "var(--dim)"; }
+  else if (slip < 0.85) { cue = `FASTER${tgt ? " → " + Math.round(tgt) : ""}`; col = "var(--acc2)"; }
+  else if (slip > 1.6) { cue = `TOO FAST${tgt ? " → " + Math.round(tgt) : ""}`; col = "var(--bad)"; }
+  else if (!h.steady) { cue = "STEADY THE CIRCLE"; col = "#e3b341"; }
+  else if (h.held >= SKID_GOOD) { cue = `✓ GOT IT ${h.held.toFixed(0)}s`; col = "var(--acc)"; }
+  else if (h.held >= SKID_NEED) { cue = `✓ BANKED ${h.held.toFixed(1)}s`; col = "var(--acc)"; }
+  else { cue = `HOLD ${h.held.toFixed(1)} / ${SKID_NEED.toFixed(0)}s`; col = "var(--acc)"; }
+  // the car's own progress: a tick per direction, and the car is finished when both are in
+  const mark = (k) => d[k] >= SKID_GOOD ? `<b style="color:var(--acc)">${k}✓</b>`
+    : d[k] >= SKID_NEED ? `<b style="color:var(--acc)">${k}✓</b>` : `<b style="color:var(--dim)">${k}·</b>`;
+  const done = d.L >= SKID_NEED && d.R >= SKID_NEED;
+  const prog = done ? `<b style="color:var(--acc)">CAR DONE</b> L${d.L.toFixed(0)}s R${d.R.toFixed(0)}s`
+                    : `${mark("L")} ${mark("R")} <span>need ${SKID_NEED.toFixed(0)}s each way</span>`;
+  return `<div class="dt slip" title="axle slip -- the higher axle is the limiting one and 1.00 is the tyre's ` +
+    `own limit. The counter runs only while this frame would COUNT when the capture is scored: steady radius, ` +
+    `one direction, no brake, slip 0.85-1.6. ${SKID_NEED} s banks a run and the CAR is finished once both ` +
+    `directions have one, which is what cancels a cambered surface.">` +
     `<div><span>F</span>${bar(fr, DGRIP.front.ink)}<b style="color:${paint(fr, DGRIP.front.ink)}">${fr.toFixed(2)}</b></div>` +
     `<div><span>R</span>${bar(rr, DGRIP.rear.ink)}<b style="color:${paint(rr, DGRIP.rear.ink)}">${rr.toFixed(2)}</b></div>` +
-    `<em class="slipcue" style="color:${col}">${cue}${foot ? ` · <span>${foot}</span>` : ""}</em></div>`;
+    `<em class="slipcue" style="color:${col}">${cue}${r_m ? ` <span>${Math.round(r_m)}m</span>` : ""}</em>` +
+    `<em class="slipprog">${prog}</em></div>`;
 }
 function dockTiles(f) {
   if (!f) return `<span class="why">waiting for telemetry…</span>`;

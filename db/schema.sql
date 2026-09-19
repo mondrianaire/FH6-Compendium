@@ -774,7 +774,11 @@ CREATE TABLE IF NOT EXISTS grip_envelope (
   -- composed each phase (plan A8).
   a_p50         REAL,               -- g
   a_p90         REAL,               -- g; NULL when the bin is saturated (see pct_saturated)
-  v_envelope_mph REAL,              -- sqrt(a_p90 * r_mid); NULL whenever a_p90 is
+  -- MEASURED p90 of observed speed, projected to r_mid_m (v ~ sqrt(r) at constant lateral g),
+  -- NOT derived from a_p90. sqrt(a_p90 * r) is not the p90 of speed and under-covered: 76.2 %
+  -- of held-out samples against a nominal 90 %, where this reads 88.5 %. Independent of the
+  -- lat_g ceiling, so saturated bins get a bound too. Project it with v * sqrt(r / r_mid).
+  v_envelope_mph REAL,
 
   pct_saturated REAL NOT NULL,      -- share of samples >= 2.9 g. lat_g is censored at 3.00 g, so a bin
                                     -- over 2 % publishes no p90 -- the true p90 is unknowable there

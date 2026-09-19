@@ -516,7 +516,7 @@ V2_TABLES["grip_envelope"] = """CREATE TABLE IF NOT EXISTS grip_envelope (
   -- composed each phase (plan A8).
   a_p50         REAL,               -- g
   a_p90         REAL,               -- g; NULL when the bin is saturated (see pct_saturated)
-  v_envelope_mph REAL,              -- sqrt(a_p90 * r_mid); NULL whenever a_p90 is
+  v_envelope_mph REAL,              -- MEASURED p90 of observed speed at r_mid_m, not derived from a_p90
 
   pct_saturated REAL NOT NULL,      -- share of samples >= 2.9 g. lat_g is censored at 3.00 g, so a bin
                                     -- over 2 % publishes no p90 -- the true p90 is unknowable there

@@ -105,6 +105,11 @@ _MPS = 0.44704              # mph -> m/s
 _G = 9.80665
 
 
+def r_mid_of(band):
+    lo, hi = next((lo, hi) for b, lo, hi in ENV_BANDS if b == band)
+    return (lo + hi) / 2.0
+
+
 def _pct(sorted_vals, q):
     """Percentile by nearest-rank over an already-sorted list."""
     if not sorted_vals:
@@ -160,9 +165,13 @@ def build_envelope(cx, verbose=False):
         if band is None:
             continue
         d = bins.setdefault(("class", cls, surf, band),
-                            {"ag": [], "imp": [], "laps": set(), "builds": set(),
+                            {"ag": [], "imp": [], "vmid": [], "laps": set(), "builds": set(),
                              "sat": 0, "g3": 0})
         d["ag"].append(ag)
+        # Speed projected to the band midpoint. v ~ sqrt(r) at constant lateral g, so this
+        # removes the within-band radius spread before the percentile is taken -- without it
+        # a sample at 79 m and one at 51 m are pooled as though they were the same corner.
+        d["vmid"].append(mph * (r_mid_of(band) / r_m) ** 0.5)
         # implied lateral g from the driven radius: a = v^2 / r
         v = mph * _MPS
         d["imp"].append((v * v / r_m) / _G)
@@ -201,7 +210,15 @@ def build_envelope(cx, verbose=False):
         a_p50 = _median(ag)
         # gate 5: a saturated bin's p90 is unknowable, so it publishes none.
         a_p90 = _pct(ag, 0.90) if pct_sat <= ENV_MAX_SATURATED else None
-        v_env = (((a_p90 * _G * r_mid) ** 0.5) / _MPS) if a_p90 else None
+        # THE SPEED BOUND IS MEASURED, NOT DERIVED (2026-09-19). It was
+        # sqrt(a_p90 * r_mid), which is NOT the p90 of speed: within a band a sample can be
+        # fast at low g or slow at high g, so the two distributions do not map and the derived
+        # bound under-covered -- 76.2 % of held-out samples against a nominal 90 %. Taking the
+        # percentile over observed speed directly gives 88.5 %. It also works where the derived
+        # form could not: mph has no ceiling (max seen 273.3) while lat_g censors at 3.00 g, so
+        # the saturated A and S1 bins get a bound too -- 2,022 held-out samples scored against
+        # 252. Quoted AT r_mid_m; project to a specific radius with v * sqrt(r / r_mid).
+        v_env = _pct(sorted(d["vmid"]), 0.90) if len(d["vmid"]) >= ENV_MIN_SAMPLES else None
         # Saturation nulls the P90 -- and therefore the envelope speed -- but it does NOT
         # unpublish the row. The median sits far below the 3.00 g censoring point and stays
         # sound; only the upper tail is clipped. Discarding a valid a_p50 with it would have

@@ -157,14 +157,34 @@ def runs(fr):
         out.append(cur)
     keep = []
     for run in out:
-        if len(run) < 30 or (run[-1]["t"] - run[0]["t"]) < RUN_MIN_S:
-            continue
-        rs = [x["r"] for x in run]
-        m = st.median(rs)
-        if m <= 0 or (st.pstdev(rs) / m) > RADIUS_COV:   # not a steady radius -- a corner, not a circle
-            continue
-        keep.append(run)
+        w = steadiest(run)
+        if w:
+            keep.append(w)
     return keep
+
+
+def steadiest(run):
+    """The longest stretch INSIDE this one whose radius holds steady -- not all-or-nothing.
+
+    A thirty-second circle with one wobble in it used to be discarded whole, because the coefficient of
+    variation was computed over the entire stretch. That threw away the twenty good seconds either side of
+    the wobble. The thresholds here are unchanged; only the extraction is smarter. Searched coarsely from
+    the longest candidate window down, so the first hit is the longest one.
+    """
+    n = len(run)
+    if n < 30 or (run[-1]["t"] - run[0]["t"]) < RUN_MIN_S:
+        return None
+    ok = lambda a, b: (lambda rs: len(rs) >= 30 and st.median(rs) > 0
+                       and (st.pstdev(rs) / st.median(rs)) <= RADIUS_COV
+                       and (run[b - 1]["t"] - run[a]["t"]) >= RUN_MIN_S)([x["r"] for x in run[a:b]])
+    if ok(0, n):
+        return run                                  # the common case: the whole thing is steady
+    step = max(1, n // 60)
+    for length in range(n - step, 29, -step):       # longest first
+        for a in range(0, n - length + 1, step):
+            if ok(a, a + length):
+                return run[a:a + length]
+    return None
 
 
 def curve(samples, slip_key):

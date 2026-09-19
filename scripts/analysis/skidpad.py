@@ -73,6 +73,7 @@ import json
 import math
 import os
 import statistics as st
+import time
 
 MPS = 0.44704
 # what counts as skidpad conditions, frame by frame
@@ -103,7 +104,12 @@ def _f(r, k):
 
 def frames(path):
     """every frame that is in skidpad condition, with its radius and per-axle slip"""
-    for r in _rows(path):
+    yield from frames_of(_rows(path))
+
+
+def frames_of(rowiter):
+    """the same filter over an arbitrary row iterator, so --watch can feed it only the new rows"""
+    for r in rowiter:
         if (_f(r, "IsRaceOn") or 0) < 1:
             continue
         lat, lg, spd, yaw = _f(r, "lat_g"), _f(r, "long_g"), _f(r, "speed_mph"), _f(r, "yaw_rate_dps")
@@ -211,56 +217,39 @@ def plateau(run):
             "limiting": "front" if sf >= sr else "rear", "slip": round(slip, 2), "status": status}
 
 
-def main():
-    ap = argparse.ArgumentParser(description="skidpad grip-ceiling reader (read-only)")
-    ap.add_argument("captures", nargs="+", help="capture CSV or CSV.GZ paths, or globs")
-    ap.add_argument("--out", help="write the runs as JSON here")
-    ap.add_argument("--pooled", action="store_true",
-                    help="pool every run of the same car+PI instead of listing them separately")
-    args = ap.parse_args()
+def record(path, run):
+    """one run, summarised -- the same shape whether it came from a finished file or a live tail"""
+    f0 = run[0]
+    return {"capture": os.path.basename(path), "car": f0["car"], "pi": f0["pi"], "cls": f0["cls"],
+            "dir": f0["dir"], "s": round(run[-1]["t"] - run[0]["t"], 1),
+            "radius_m": round(st.median([x["r"] for x in run]), 1),
+            "mph": round(st.median([x["spd"] for x in run]), 1),
+            "front": curve(run, "sf"), "rear": curve(run, "sr"), "plateau": plateau(run)}
 
-    paths = []
-    for p in args.captures:
-        paths.extend(sorted(glob.glob(p)) or [p])
 
-    found = []
-    for p in paths:
-        fr = list(frames(p))
-        for run in runs(fr):
-            f0 = run[0]
-            rec = {"capture": os.path.basename(p), "car": f0["car"], "pi": f0["pi"], "cls": f0["cls"],
-                   "dir": f0["dir"], "s": round(run[-1]["t"] - run[0]["t"], 1),
-                   "radius_m": round(st.median([x["r"] for x in run]), 1),
-                   "mph": round(st.median([x["spd"] for x in run]), 1),
-                   "front": curve(run, "sf"), "rear": curve(run, "sr"), "plateau": plateau(run)}
-            found.append((rec, run))
-
+def render(found, pooled):
+    """the whole report as a string, so --watch can reprint only when something actually changed"""
     if not found:
-        print("no skidpad runs found. The detector wants a steady radius held for 4 s or more, one "
-              "direction, no braking and |long g| under 0.20 -- see the protocol at the top of this file.")
-        return
-
-    print(f"{'capture':<28} {'car':>5} {'PI':>4} {'dir':>3} {'s':>5} {'radius':>7} {'mph':>5} "
-          f"{'a_max':>7} {'slip F/R':>9}  limited by")
+        return ("  nothing yet. The detector wants a steady radius held for 4 s or more, one direction,\n"
+                "  no braking and |long g| under 0.20 -- see docs/skidpad-protocol.md.")
+    out = [f"{'car':>5} {'PI':>4} {'dir':>3} {'s':>5} {'radius':>7} {'mph':>5} "
+           f"{'a_max':>7} {'slip F/R':>9}  limited by"]
     for rec, _ in found:
         pl = rec["plateau"]
-        print(f"{rec['capture']:<28} {str(rec['car']):>5} {str(rec['pi']):>4} {rec['dir']:>3} "
-              f"{rec['s']:5.1f} {rec['radius_m']:7.1f} {rec['mph']:5.1f} "
-              f"{pl['a']:6.2f}{'!' if pl['status'] else ' '} "
-              f"{pl['slip_front']:4.2f}/{pl['slip_rear']:<4.2f}  "
-              f"{pl['limiting']} ({'understeer' if pl['limiting'] == 'front' else 'oversteer'})")
-
-    # every warning, spelled out, so a bad run is self-diagnosing rather than needing a second pair of eyes
+        out.append(f"{str(rec['car']):>5} {str(rec['pi']):>4} {rec['dir']:>3} "
+                   f"{rec['s']:5.1f} {rec['radius_m']:7.1f} {rec['mph']:5.1f} "
+                   f"{pl['a']:6.2f}{'!' if pl['status'] else ' '} "
+                   f"{pl['slip_front']:4.2f}/{pl['slip_rear']:<4.2f}  "
+                   f"{pl['limiting']} ({'understeer' if pl['limiting'] == 'front' else 'oversteer'})")
     warns = [(rec, rec["plateau"]["status"]) for rec, _ in found if rec["plateau"]["status"]]
     if warns:
-        print()
+        out.append("")
         for rec, w in warns:
-            print(f"  ! {rec['capture']} {rec['dir']} run: {w}")
-        print("  The limiting axle should sit at slip ~0.9-1.2. Above that the tyre is sliding rather than")
-        print("  gripping; below it the limit was never found. See docs/skidpad-protocol.md.")
-
-    if args.pooled:
-        print()
+            out.append(f"  ! {rec['dir']} run: {w}")
+        out.append("  The limiting axle should sit at slip ~0.9-1.2. Above that the tyre is sliding rather")
+        out.append("  than gripping; below it the limit was never found. See docs/skidpad-protocol.md.")
+    if pooled:
+        out.append("")
         byc = collections.defaultdict(list)
         for rec, run in found:
             byc[(rec["car"], rec["pi"])].append((rec, run))
@@ -271,10 +260,115 @@ def main():
             body = (f"a_max {st.median(good):.2f} g over {len(good)} clean run(s)" if good
                     else f"no clean run; best-effort {max(allv):.2f} g")
             spread = (f", L/R spread {max(good) - min(good):.3f} g" if len(good) >= 2 else "")
-            print(f"car {car} PI {pi}: {len(g)} runs, {''.join(sorted(dirs))} -- {body}{spread}")
+            out.append(f"car {car} PI {pi}: {len(g)} runs, {''.join(sorted(dirs))} -- {body}{spread}")
             if len(dirs) < 2:
-                print("    only one direction driven -- run the circle the other way too, so a camber or a "
-                      "left/right asymmetry shows up instead of being read as grip")
+                out.append("    only one direction driven -- run the circle the other way too, so a camber "
+                           "or a left/right asymmetry shows up instead of being read as grip")
+    return "\n".join(out)
+
+
+class Tail:
+    """Follow a growing capture, handing back only the rows appended since the last look.
+
+    A live capture is hundreds of megabytes and grows while you drive, so re-reading it every few seconds
+    to answer "did that last circle count?" would be absurd. This keeps a byte offset and a header, parses
+    only the new tail, and carries a partial final line over to the next read. If a NEWER capture appears
+    (a fresh session), it switches to it and starts again.
+    """
+
+    def __init__(self, path):
+        self.path = path
+        self.pos = 0
+        self.header = None
+        self.buf = ""
+
+    def new_rows(self):
+        try:
+            size = os.path.getsize(self.path)
+        except OSError:
+            return []
+        if size < self.pos:            # truncated or replaced -- start over
+            self.pos, self.header, self.buf = 0, None, ""
+        if size == self.pos:
+            return []
+        with open(self.path, "r", encoding="utf-8", errors="replace", newline="") as f:
+            f.seek(self.pos)
+            chunk = f.read()
+            self.pos = f.tell()
+        text = self.buf + chunk
+        lines = text.split("\n")
+        self.buf = lines.pop()         # the last piece may be half a line; keep it for next time
+        if self.header is None:
+            if not lines:
+                return []
+            self.header = next(csv.reader([lines.pop(0)]))
+        if not lines:
+            return []
+        return list(csv.DictReader(lines, fieldnames=self.header))
+
+
+def newest_capture(folder):
+    c = sorted(glob.glob(os.path.join(folder, "*.csv")), key=os.path.getmtime)
+    return c[-1] if c else None
+
+
+def watch(folder, every, pooled):
+    """re-score as you drive: print the table only when it actually changes"""
+    path = newest_capture(folder)
+    if not path:
+        print(f"no captures in {folder} yet -- start the daemon and drive")
+        return
+    tail, acc, last = Tail(path), [], None
+    print(f"watching {os.path.basename(path)}  (Ctrl-C to stop)\n"
+          f"  slip F/R: the higher one is the limiting axle and wants to read 0.9-1.2\n", flush=True)
+    while True:
+        n = newest_capture(folder)
+        if n != path:                  # a new session started -- follow it
+            path, tail, acc, last = n, Tail(n), [], None
+            print(f"\n--- new capture: {os.path.basename(path)}", flush=True)
+        acc.extend(frames_of(tail.new_rows()))
+        found = [(record(path, run), run) for run in runs(acc)]
+        text = render(found, pooled)
+        if text != last:
+            last = text
+            print(f"\n[{time.strftime('%H:%M:%S')}]  {len(acc)} qualifying frames", flush=True)
+            print(text, flush=True)
+        time.sleep(every)
+
+
+def main():
+    ap = argparse.ArgumentParser(description="skidpad grip-ceiling reader (read-only)")
+    ap.add_argument("captures", nargs="+", help="capture CSV or CSV.GZ paths, or globs")
+    ap.add_argument("--out", help="write the runs as JSON here")
+    ap.add_argument("--pooled", action="store_true",
+                    help="pool every run of the same car+PI instead of listing them separately")
+    ap.add_argument("--watch", nargs="?", type=float, const=5.0, default=None, metavar="SECONDS",
+                    help="stay running and re-score the newest capture as you drive (default every 5 s)")
+    args = ap.parse_args()
+
+    paths = []
+    for p in args.captures:
+        paths.extend(sorted(glob.glob(p)) or [p])
+
+    if args.watch is not None:
+        folder = paths[0] if os.path.isdir(paths[0]) else os.path.dirname(os.path.abspath(paths[0]))
+        try:
+            watch(folder, args.watch, args.pooled)
+        except KeyboardInterrupt:
+            print("\nstopped")
+        return
+
+    found = []
+    for p in paths:
+        for run in runs(list(frames(p))):
+            found.append((record(p, run), run))
+
+    if not found:
+        print("no skidpad runs found. The detector wants a steady radius held for 4 s or more, one "
+              "direction, no braking and |long g| under 0.20 -- see the protocol at the top of this file.")
+        return
+
+    print(render(found, args.pooled))
 
     if args.out:
         with open(args.out, "w", encoding="utf-8") as f:

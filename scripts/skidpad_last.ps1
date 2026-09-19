@@ -6,7 +6,8 @@
 
     Run it from anywhere:
         .\scripts\skidpad_last.ps1
-        .\scripts\skidpad_last.ps1 -All        # every capture from today, not just the newest
+        .\scripts\skidpad_last.ps1 -Watch      # STAY RUNNING and re-score while you drive
+        .\scripts\skidpad_last.ps1 -All        # every capture in the folder, not just the newest
         .\scripts\skidpad_last.ps1 -Captures "C:\...\captures"
 
     What to look for is `slip F/R`: the higher of the two is the limiting axle and it wants to read 0.9-1.2.
@@ -15,7 +16,11 @@
 [CmdletBinding()]
 param(
     [string]$Captures,
-    [switch]$All
+    [switch]$All,
+    # Stay running and re-score as you drive, so you can glance at the terminal between circles instead of
+    # re-running this after every attempt. Ctrl-C to stop.
+    [switch]$Watch,
+    [double]$Every = 5
 )
 
 $ErrorActionPreference = "Stop"
@@ -36,6 +41,13 @@ if (-not $Captures) {
 }
 if (-not $Captures -or -not (Test-Path $Captures)) {
     Write-Error "no captures directory found -- pass one with -Captures"
+}
+
+if ($Watch) {
+    Write-Host "watching $Captures - Ctrl-C to stop" -ForegroundColor DarkGray
+    # -u so the loop prints as it goes even when piped or redirected
+    python -u (Join-Path $PSScriptRoot "analysis\skidpad.py") $Captures --watch $Every --pooled
+    return
 }
 
 $files = Get-ChildItem (Join-Path $Captures "*.csv") | Sort-Object LastWriteTime -Descending

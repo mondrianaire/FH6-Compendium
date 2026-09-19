@@ -125,13 +125,15 @@ it starts sliding.
 
 ## When you're done
 
-From this checkout, in PowerShell:
+Leave this running in a terminal **while you drive** — it re-scores as the capture grows, so each circle
+shows up a few seconds after you finish it and you never have to re-run anything:
 
 ```bash
-.\scripts\skidpad_last.ps1
+.\scripts\skidpad_last.ps1 -Watch
 ```
 
-That finds the newest capture on its own — including in a sibling worktree, since the daemon may not be
+Ctrl-C to stop. For a one-shot read of the newest capture instead, drop `-Watch`. Either way it finds the
+capture on its own — including in a sibling worktree, since the daemon may not be
 running from the checkout you are standing in — and prints straight to the terminal. There is no dashboard
 page for this yet. Add `-All` to score every capture in that folder rather than only the newest.
 

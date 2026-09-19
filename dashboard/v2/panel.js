@@ -3591,18 +3591,31 @@ function locateRouteInEvent(haveCourse) {
   const hits = [];                                              // named routes only — all 88 Rivals routes are named
   for (const [id, r] of Object.entries(WORLD.routes)) {
     if (!r.name || !(r.pts || []).length) continue;
-    const d = segNear(r._lo || r.pts);   // strided ~16 m copy: full-density r.pts is for DRAWING the focus route, not per-frame matching
-    if (d < 45) hits.push({ id, name: r.name, len: r.len || 0, loop: r.loop, dist: d });
+    const pts = r._lo || r.pts;
+    const d = segNear(pts);   // strided ~16 m copy: full-density r.pts is for DRAWING the focus route, not per-frame matching
+    if (d < 45) hits.push({ id, name: r.name, len: r.len || 0, loop: r.loop, dist: d, race: !!r.is_race,
+      startD: pts.length ? Math.hypot(LIVEPOS[0] - pts[0][0], LIVEPOS[1] - pts[0][1]) : Infinity });   // distance to this route's START
   }
   hits.sort((a, b) => a.dist - b.dist);
-  let best = null;
+  let best = null, startAnchored = false;
   if (hits.length) {
     const nearD = hits[0].dist;
-    // routes share roads, so several can be equally near. A Rivals run is the route you LOADED, which
-    // on a shared stretch is the through-route, not a sub-segment of it — break the near-tie toward the
-    // LONGER route (the Goliath over a sprint that reuses its start), then name the runner-up as shared.
     const tied = hits.filter((h) => h.dist <= nearD + 15);
-    best = tied.reduce((m, h) => (h.len > m.len ? h : m), tied[0]);
+    // START-ANCHORED FIRST (Jett 2026-09-19): several catalogued routes share one tarmac — the Irokawa Space
+    // Center Drag Strip (is_race, 825 m) sits on the Irokawa Circuit loop (free-roam, 1869 m) AND under Launch
+    // Control (is_race, 8.4 km) and Nangan (2.9 km). You spawn at the START of the route you LOADED, and only the
+    // drag strip STARTS here (its first point is 0 m away; the others start 200-1400 m off). So when the car is at
+    // a route's start line, pick the route whose START it is — that's the event you loaded. The EVENT_ROUTE_LOCK
+    // below then holds it through the whole run (all these routes stay within its 90 m radius on the shared tarmac).
+    const atStart = tied.filter((h) => h.race && h.startD < 80);   // race routes only: a free-roam loop's start that happens to sit ON the strip must not steal it
+    if (atStart.length) {
+      best = atStart.reduce((m, h) => (h.startD < m.startD ? h : m), atStart[0]);
+      startAnchored = true;   // a fresh event start -> this pick is authoritative and overrides a stale lock below
+    } else {
+      // not near any start (mid shared road): a RACE route wins over a co-located free-roam one, then LENGTH
+      // separates two of the same kind (the Goliath over a sprint that reuses its start).
+      best = tied.reduce((m, h) => (h.race !== m.race ? (h.race ? h : m) : (h.len > m.len ? h : m)), tied[0]);
+    }
     // "shares road with X" only when X is a COMPARABLE-length route (>= half the through-route). A tiny
     // course the through-route merely spawns beside -- Sekibe Scramble (~2 km) next to a 25-min route --
     // is a plaza coincidence at the start line, not a shared road, and must not be named (Jett 2026-09-07).
@@ -3616,7 +3629,7 @@ function locateRouteInEvent(haveCourse) {
   // generous radius that covers the decimated centre-line and a parked/menu position); only release when the locked
   // route has clearly fallen away, i.e. a different event was loaded. The daemon's named S/F loop still wins — it
   // returns before we reach here (locateCourse: if (LOOP) return) and adoptLoop sets the lock authoritatively.
-  if (EVENT_ROUTE_LOCK && (!best || best.id !== EVENT_ROUTE_LOCK.id)) {
+  if (!startAnchored && EVENT_ROUTE_LOCK && (!best || best.id !== EVENT_ROUTE_LOCK.id)) {
     const lr = WORLD.routes[EVENT_ROUTE_LOCK.id], lpts = lr && (lr._lo || lr.pts);
     const ld = lpts && lpts.length > 1 ? segNear(lpts) : Infinity;
     if (lr && ld <= 90) best = { id: EVENT_ROUTE_LOCK.id, name: lr.name, len: lr.len || 0, loop: lr.loop, dist: ld, alsoName: best ? best.name : null };

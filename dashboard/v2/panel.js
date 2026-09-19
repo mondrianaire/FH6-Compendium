@@ -1480,33 +1480,53 @@ function paintDock() {
 // so an axle reading 1.0 is exactly at its peak. The frame has carried it all along and the dock never showed
 // it; without it a skidpad is driven blind and only scored afterwards. Colour is the grip palette so the
 // meaning matches every other surface: grey inside the limit, the axle's own colour once past it.
+// A RUN HAS TO END (Jett 2026-09-18: "it never tells you to stop? just keep holding?"). The cue said HOLD IT
+// and never said when enough was enough, so a circle could be held indefinitely with no idea whether it had
+// banked. This mirrors skidpad.py's own gates frame by frame and counts the qualifying seconds, so the dock
+// can say GOT IT the moment the run would score -- and say WHY it is not counting when it is not.
+let SKID = { t0: null, tLast: null, dir: null, rs: [] };
+function skidHold(f, r_m, slip) {
+  const t = +f.t;
+  const brake = (f.brk | 0) > 12, lat = Math.abs(+f.lat || 0), lon = Math.abs(+f.lon || 0);
+  const dir = (+f.yaw || 0) > 0 ? "L" : "R";
+  const cond = r_m && !brake && (+f.mph || 0) >= 18 && Math.abs(+f.yaw || 0) >= 8
+               && lon <= Math.max(0.20, 0.25 * lat) && slip >= 0.85 && slip <= 1.6;
+  const broke = !cond || dir !== SKID.dir || SKID.tLast == null || !(t - SKID.tLast < 0.5);
+  if (broke) { SKID = { t0: cond ? t : null, tLast: cond ? t : null, dir, rs: cond ? [r_m] : [] }; }
+  else { SKID.tLast = t; SKID.rs.push(r_m); if (SKID.rs.length > 1200) SKID.rs.shift(); }
+  if (!cond || SKID.t0 == null) return { held: 0, steady: false };
+  const m = SKID.rs.reduce((a, b) => a + b, 0) / SKID.rs.length;
+  const sd = Math.sqrt(SKID.rs.reduce((a, b) => a + (b - m) ** 2, 0) / SKID.rs.length);
+  return { held: t - SKID.t0, steady: m > 0 && sd / m <= 0.25 };
+}
 function slipTile(f) {
   const sl = f.slip || {};
   const ax = (a, b) => Math.max(Math.abs((sl[a] || [0, 0, 0])[2]), Math.abs((sl[b] || [0, 0, 0])[2]));
   const fr = ax("FL", "FR"), rr = ax("RL", "RR");
-  // at the peak (0.85-1.20) is what a skidpad wants; under it there is speed left, over it the tyre slides
   const paint = (v, ink) => v >= 0.85 && v <= 1.2 ? "var(--acc)" : v > 1.2 ? ink : "var(--mut)";
   const bar = (v, ink) => `<i style="width:${Math.max(0, Math.min(100, v / 1.6 * 100)).toFixed(0)}%;background:${paint(v, ink)}"></i>`;
-  // THE SPEED TO AIM FOR. Lateral g goes as v^2 at a fixed radius, and up near the peak the tyre's force is
-  // close enough to linear in slip, so the speed that would put this axle AT 1.00 is v * sqrt(1/slip).
-  // Only shown while slip is already within 0.7-1.4, where that is a +-20% correction rather than a guess:
-  // extrapolating from slip 0.46 would have claimed 80 mph on a car that turned out to hold about 1.9 g.
   const yaw = Math.abs(+f.yaw || 0), mph = +f.mph || 0, slip = Math.max(fr, rr);
   const r_m = yaw > 3 && mph > 5 ? (mph * 0.44704) / (yaw * Math.PI / 180) : null;
   // 0.7-1.6 matches the band skidpad.py scores as usable, and is at most a -21% / +20% correction. Past the
   // limit is exactly when the number is wanted, so the upper end must not blank out.
   const tgt = (slip >= 0.7 && slip <= 1.6 && mph > 10) ? mph * Math.sqrt(1 / slip) : null;
-  const cue = slip < 0.85 ? ["FASTER", "var(--acc2)"] : slip <= 1.2 ? ["HOLD IT", "var(--acc)"] : ["EASE OFF", "var(--bad)"];
-  const foot = r_m
-    ? `${Math.round(r_m)} m circle · ${tgt ? `aim <b style="color:${cue[1]}">${Math.round(tgt)}</b> mph` : "—"}`
-    : "not cornering";
+  const h = skidHold(f, r_m, slip);
+  let cue, col;
+  if (!r_m) { cue = "NOT CORNERING"; col = "var(--dim)"; }
+  else if (slip < 0.85) { cue = "FASTER"; col = "var(--acc2)"; }
+  else if (slip > 1.6) { cue = "TOO FAST"; col = "var(--bad)"; }
+  else if (!h.steady) { cue = "STEADY THE CIRCLE"; col = "var(--w, #e3b341)"; }
+  else if (h.held >= 8) { cue = `✓ GOT IT · ${h.held.toFixed(0)} s`; col = "var(--acc)"; }
+  else if (h.held >= 4) { cue = `✓ BANKED · ${h.held.toFixed(1)} s`; col = "var(--acc)"; }
+  else { cue = `HOLD · ${h.held.toFixed(1)} s`; col = "var(--acc)"; }
+  const foot = r_m ? `${Math.round(r_m)} m${tgt ? ` · aim ${Math.round(tgt)} mph` : ""}${slip > 1.25 && slip <= 1.6 ? " · ease a touch" : ""}` : "";
   return `<div class="dt slip" title="axle slip: the higher axle is the limiting one, and 1.00 is the tyre's own ` +
-    `limit. Hold it at 0.85-1.20 and the run scores clean -- under that there is speed left, over it the tyre ` +
-    `is sliding and the reading comes out low. The aim speed is what would put that axle at 1.00 on the circle ` +
-    `you are currently driving.">` +
+    `limit. The counter runs only while this frame would COUNT for skidpad.py -- steady radius, one direction, ` +
+    `no brake, slip 0.85-1.6. Four seconds banks the run; eight is comfortably better. Then turn round and ` +
+    `do it the other way.">` +
     `<div><span>F</span>${bar(fr, DGRIP.front.ink)}<b style="color:${paint(fr, DGRIP.front.ink)}">${fr.toFixed(2)}</b></div>` +
     `<div><span>R</span>${bar(rr, DGRIP.rear.ink)}<b style="color:${paint(rr, DGRIP.rear.ink)}">${rr.toFixed(2)}</b></div>` +
-    `<em class="slipcue" style="color:${cue[1]}">${r_m ? cue[0] : "axle slip"} · <span>${foot}</span></em></div>`;
+    `<em class="slipcue" style="color:${col}">${cue}${foot ? ` · <span>${foot}</span>` : ""}</em></div>`;
 }
 function dockTiles(f) {
   if (!f) return `<span class="why">waiting for telemetry…</span>`;

@@ -112,6 +112,7 @@ Row counts measured 2026-09-18. `primary key` is the real key; composite keys ar
 | `session` | 645 | session_id | `session_id`, `started_utc`, `duration_s`, `frames`, `rate_pps`, `source`, `file_path`, `imported_at`, `summary` |
 | `session_car` | 1,488 | session_id, cid | `session_id`, `cid`, `ordinal`, `build_id`, `hw_hash`, `name`, `class`, `pi`, `drivetrain`, `cyl`, `live_s` |
 | `session_event` | 1,048 | session_id, i | `session_id`, `i`, `t0`, `t1`, `cid`, `mode`, `solo`, `laps`, `distance_m`, `duration_s`, `start_x`, `start_z`, `end_x`, `end_z`, `route_key`, `start_is_line` |
+| `session_hit` | 26,422 | session_id, kind, x, z | `session_id`, `kind`, `x`, `z`, `mph`, `hard`, `wheel`, `drop_mph` |
 | `course` | 127 | route_key | `route_key`, `name`, `is_rivals`, `event_id`, `length_m`, `turn_count`, `n_laps`, `n_sessions`, `confidence`, `updated_utc`, `geometry`, `profile`, `declared_name`, `declared_source`, `name_source`, `name_confidence` |
 | `course_turn` | 2,405 | route_key, turn_id | `route_key`, `turn_id`, `seq`, `arc_m`, `apex_x`, `apex_z`, `radius_m`, `angle_deg`, `kind`, `n_obs` |
 | `course_route` | 125 | route_key | `route_key`, `route_id`, `match_kind`, `mean_dev_m`, `p95_dev_m`, `covered`, `len_ratio`, `runner_up`, `computed_utc`, `anchor_route_id`, `anchor_events`, `anchor_agree` |
@@ -228,6 +229,24 @@ Four tiers, in precedence order `declared > game > map > length`.
 | `stitched` | `0` (1,527) / `1` (17) | assembled across a capture gap |
 | `is_race` | `NULL` (578) / `0` (639) / `1` (327) | race vs free roam; NULL = undetermined |
 | `solo` | `0` (811) / `1` (733) | solo run vs traffic or AI present |
+
+### Surface and barrier hits — `session_hit.kind`
+
+Added 2026-09-18 (`82c6ed6`) to place bottoming and impacts on the course map. One row per detected
+hit, keyed to the session rather than to a lap, so a hit outside a timed lap is still recorded.
+
+| Value | Meaning | rows |
+| --- | --- | ---: |
+| `bottoming` | the floor grounded out; `wheel` names the corner, `drop_mph` the speed lost | 24,417 |
+| `wall` | a wall or barrier strike | 2,005 |
+
+`hard` is a 0/1 severity flag — `1` on 19,345 rows, `0` on 7,077.
+
+**`wheel` is NULL on exactly the 2,005 `wall` rows** and set on every `bottoming` row (RR 6,152,
+RL 6,122, FR 6,105, FL 6,038). A wall strike has no single wheel, so NULL there is meaningful, not
+missing data — do not "fix" it with a default.
+
+`x`/`z` are in the telemetry metre frame, so a hit plots directly on the course map with no transform.
 
 ### Lap markers — `lap_marker.kind`
 

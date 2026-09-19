@@ -1726,3 +1726,12 @@ body.fixed #pRight > .body:has(.tstat){overflow-y:auto}
 .svcdot[data-up="1"]{background:var(--ok)}
 .svcbtns{margin-left:auto;display:flex;gap:4px}
 .mini.svcb{min-width:62px}
+
+/* AXLE SLIP in the dock -- 1.00 is the tyre's limit, so this is the instrument a skidpad is driven by */
+.dt.slip{display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:104px}
+.dt.slip>div{display:flex;align-items:center;gap:5px}
+.dt.slip span{font:700 9px var(--mono);color:var(--dim);width:8px}
+.dt.slip i{display:block;height:7px;border-radius:3px;transition:width .08s linear}
+.dt.slip>div>i{flex:1 1 auto;background:var(--mut)}
+.dt.slip b{font:700 12px var(--mono);min-width:34px;text-align:right}
+.dt.slip em{font-style:normal;font:8.5px var(--mono);letter-spacing:.04em;color:var(--dim)}

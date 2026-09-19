@@ -1475,6 +1475,24 @@ function paintDock() {
   paintDockTiles(true); paintDockTrace();
 }
 
+// AXLE SLIP, THE LIMIT INSTRUMENT (Jett 2026-09-18: "im unsure of what you're actually looking for ... what
+// should I be attempting to do"). CombinedSlip is Forza's own normalised slip and 1.00 IS the tyre's limit,
+// so an axle reading 1.0 is exactly at its peak. The frame has carried it all along and the dock never showed
+// it; without it a skidpad is driven blind and only scored afterwards. Colour is the grip palette so the
+// meaning matches every other surface: grey inside the limit, the axle's own colour once past it.
+function slipTile(f) {
+  const sl = f.slip || {};
+  const ax = (a, b) => Math.max(Math.abs((sl[a] || [0, 0, 0])[2]), Math.abs((sl[b] || [0, 0, 0])[2]));
+  const fr = ax("FL", "FR"), rr = ax("RL", "RR");
+  // at the peak (0.85-1.20) is what a skidpad wants; under it there is speed left, over it the tyre slides
+  const paint = (v, ink) => v >= 0.85 && v <= 1.2 ? "var(--acc)" : v > 1.2 ? ink : "var(--mut)";
+  const bar = (v, ink) => `<i style="width:${Math.max(0, Math.min(100, v / 1.6 * 100)).toFixed(0)}%;background:${paint(v, ink)}"></i>`;
+  return `<div class="dt slip" title="axle slip: the higher axle is the limiting one. 1.00 is the tyre's own limit -- ` +
+    `hold it at 0.85-1.20 for a grip measurement. Under that there is speed left; over it the tyre is sliding.">` +
+    `<div><span>F</span>${bar(fr, DGRIP.front.ink)}<b style="color:${paint(fr, DGRIP.front.ink)}">${fr.toFixed(2)}</b></div>` +
+    `<div><span>R</span>${bar(rr, DGRIP.rear.ink)}<b style="color:${paint(rr, DGRIP.rear.ink)}">${rr.toFixed(2)}</b></div>` +
+    `<em>axle slip · 1.00 = limit</em></div>`;
+}
 function dockTiles(f) {
   if (!f) return `<span class="why">waiting for telemetry…</span>`;
   const g = f.gear === 0 ? "R/N" : f.gear === 11 ? "⇅" : f.gear;
@@ -1488,6 +1506,7 @@ function dockTiles(f) {
   return t.map(([v, l]) => `<div class="dt"><b>${v}</b><span>${l}</span></div>`).join("")
     + `<div class="dt bars">${bars.map(([l, p, c]) => `<div><span>${l}</span><i style="width:${Math.max(0, Math.min(100, p * 100)).toFixed(0)}%;background:${c}"></i></div>`).join("")}</div>`
     + `<div class="dt susp">${susp}</div>`
+    + slipTile(f)
     + `<div class="dt wide"><b>${esc(mode)}</b><span>${esc(sub)}</span></div>`;
 }
 function paintDockTiles(force) {

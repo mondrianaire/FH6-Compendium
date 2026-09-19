@@ -645,19 +645,19 @@ def main(argv=None):
             _raw = cx.execute("SELECT session_id, kind, x, z, hard FROM session_hit WHERE session_id IN (%s)" % _qm,
                               tuple(_sess_ids)).fetchall()
             _CL = 25.0
-            _cl = {}
+            _clus = {}
             for _r in _raw:
                 _hx, _hz = _r["x"], _r["z"]
                 if _hx is None or _hz is None or not _on_course(_hx, _hz):
                     continue
                 _ck = (_r["kind"], int(round(_hx / _CL)), int(round(_hz / _CL)))
-                _cc = _cl.get(_ck)
+                _cc = _clus.get(_ck)
                 if _cc is None:
-                    _cl[_ck] = _cc = {"kind": _r["kind"], "sx": 0.0, "sz": 0.0, "n": 0, "hard": 0, "sess": set()}
+                    _clus[_ck] = _cc = {"kind": _r["kind"], "sx": 0.0, "sz": 0.0, "n": 0, "hard": 0, "sess": set()}
                 _cc["sx"] += _hx; _cc["sz"] += _hz; _cc["n"] += 1
                 _cc["hard"] += 1 if _r["hard"] else 0; _cc["sess"].add(_r["session_id"])
             hits = sorted(({"kind": _c2["kind"], "x": round(_c2["sx"] / _c2["n"], 1), "z": round(_c2["sz"] / _c2["n"], 1),
-                            "n": _c2["n"], "hard": _c2["hard"], "sess": len(_c2["sess"])} for _c2 in _cl.values()),
+                            "n": _c2["n"], "hard": _c2["hard"], "sess": len(_c2["sess"])} for _c2 in _clus.values()),
                           key=lambda h: -h["n"])[:80]
         total += write(os.path.join(out, "course", re.sub(r"[^A-Za-z0-9_-]", "_", key) + ".json"),
                        {"key": key, "name": c["name"], "len": _disp_len, "rivals": c["rivals"],

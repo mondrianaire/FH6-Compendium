@@ -125,12 +125,19 @@ it starts sliding.
 
 ## When you're done
 
+From this checkout, in PowerShell:
+
 ```bash
-python scripts/analysis/skidpad.py captures/fh6_*.csv --pooled
+.\scripts\skidpad_last.ps1
 ```
 
-It prints one line per run: the radius and speed you held, the **front** and **rear** ceiling, and which axle
-gave up first. Send me the output, or just tell me you've run them.
+That finds the newest capture on its own — including in a sibling worktree, since the daemon may not be
+running from the checkout you are standing in — and prints straight to the terminal. There is no dashboard
+page for this yet. Add `-All` to score every capture in that folder rather than only the newest.
+
+One line per run: the radius and speed you held, the sustained **a_max**, the **slip F/R** of each axle, and
+which axle gave up first. A `!` on the a_max means the run is outside the usable slip band and the reason is
+printed underneath.
 
 ---
 

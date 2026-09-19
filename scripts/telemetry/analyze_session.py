@@ -2957,6 +2957,20 @@ def main():
             # becomes the stored trace -- the backfill surfaced five courses whose trace covered under half the
             # longest. Require near-full coverage, and rank on the GAME clock, not the pause-inflated wall span.
             _full = [w for w in valid if _win_arc[id(w)][0] >= 0.9 * _ref_arc]
+            # ...and drop any window whose time is not physically possible over its own path. A rewind-collapsed
+            # window (a whole Colossus lap left as ~13 s of surviving rows over ~10.9 km) would otherwise win the
+            # "fastest trace" slot on _bw_key and poison the course model's best_lap for good -- and the model
+            # keeps the fastest trace across sessions, so one bad analysis outlives the session that made it.
+            # Checked on BOTH the game clock and the wall span, since _bw_key ranks on the span when the clock is
+            # null, and a collapsed window is short on both.
+            def _win_plausible(w):
+                a = _win_arc[id(w)][0]; g = _game_lap_s(w)[0]; dur = w["t1"] - w["t0"]
+                if a and g and a / g > SHORT_LAP_VMAX:
+                    return False
+                if a and dur > 0 and a / dur > SHORT_LAP_VMAX:
+                    return False
+                return True
+            _full = [w for w in _full if _win_plausible(w)]
             if not _full:
                 continue   # no window covered the course: the lap store keeps the partials, the model saves no best trace
             def _bw_key(w):
@@ -3114,6 +3128,15 @@ def main():
         for cid_, tr_ in speed_traces_new.items():
             prev_ = trm.get(cid_)
             if prev_ is None or (tr_.get("lap_s") or 9e9) < (prev_.get("lap_s") or 9e9) or prev_.get("session") == sid: trm[cid_] = tr_   # same-session re-analysis may REPAIR a bad trace (the escape best_laps already has)
+        # RETIRE A CORRUPTED TRACE. A rewind-collapsed lap an earlier analysis crowned "fastest" (its time implies
+        # an impossible average speed over its own path) sits on the min-lap_s slot forever, since a trace only
+        # improves on time and nothing beats a bogus few-second lap. The selection above no longer mints one, but
+        # a model poisoned before the guard existed heals only if the trace is removed. Run it over the whole set
+        # on every analysis of the course, keyed on nothing session-specific, so it self-heals the next time the
+        # course is driven -- not only when the exact session that made it is re-run.
+        for _k in [k for k, t in trm.items()
+                   if t.get("lap_s") and t.get("pts") and ((t["pts"][-1][0] or 0) / t["lap_s"]) > SHORT_LAP_VMAX]:
+            del trm[_k]
         # RETIRE SHORT TRACES. A stored trace only improves on lap TIME, so a partial lap that once won the slot
         # keeps it forever — it is short, therefore quick, therefore never beaten. The backfill surfaced five
         # courses whose trace covered under half the longest. Coverage is judged against the course's own mapped

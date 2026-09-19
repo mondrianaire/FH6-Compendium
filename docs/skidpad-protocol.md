@@ -143,6 +143,30 @@ printed underneath.
 
 ---
 
+## Result of the first validated run (Exocet, 2026-09-18)
+
+It works. Seven circles, both directions, 60–74 m radius at 79–90 mph:
+
+```
+car 2866 PI 700: 7 runs, LR -- a_max 2.31 g over 6 clean runs, L 2.31 vs R 2.31 -- 0.007 g apart
+```
+
+**Left and right agree to 0.007 g** against a 0.05 g bar, and the build is clearly **front-limited** —
+front slip sat at 1.0–1.5 while the rear loafed at 0.62–0.68 through every single run.
+
+Worth noting against the old method: the lap-derived estimate for this build was **2.885 g**. The skidpad
+says **2.31 g**. The old number was reading transient peaks — kerbs, compressions, crests — and overstated
+the real ceiling by 0.58 g, which is the whole reason for doing this.
+
+Practical notes learned from those runs:
+
+- **Slip in the 1.25–1.6 band is fine.** Past its peak this tyre curve is flat, and a run at slip 1.5 reads
+  only a few hundredths below one at 1.0. Those get a `~`, not a `!`.
+- **Long runs are better but not essential** — the 33-second and the 18-second circles agree with the
+  4.5-second one to within 0.07 g.
+
+---
+
 ## What I'm checking
 
 **The bar is the two directions on one build agreeing to within about 0.05 g.**

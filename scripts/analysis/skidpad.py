@@ -77,7 +77,13 @@ import time
 
 MPS = 0.44704
 # what counts as skidpad conditions, frame by frame
-LONG_G_MAX = 0.20       # neither braking nor driving hard: keep the friction circle almost purely lateral
+# Longitudinal g is allowed RELATIVE to the lateral g, not as a flat cap. The point of the limit is to keep
+# the friction circle almost purely lateral, and "almost" scales: 0.23 g of long at 2.3 g of lat is 10% of
+# the vector and adds 0.5% to its magnitude. A flat 0.20 cap threw away 57% of the frames from a genuine
+# 85 mph circle -- the MEDIAN long_g while cornering above 1.5 g is 0.23 -- and chopped 30-second circles
+# into 5-second fragments. At the relative cap the worst admitted frame still has lat at 97% of the total.
+LONG_G_MAX = 0.20       # the floor, for slow circles where a fraction of a small number would be tiny
+LONG_G_FRAC = 0.25      # ... or a quarter of the lateral g, whichever is larger
 BRAKE_MAX = 5           # the brake pedal at all is disqualifying
 YAW_MIN = 8.0           # deg/s -- actually turning, not drifting down a straight
 SPEED_MIN = 18.0        # mph
@@ -115,7 +121,9 @@ def frames_of(rowiter):
         lat, lg, spd, yaw = _f(r, "lat_g"), _f(r, "long_g"), _f(r, "speed_mph"), _f(r, "yaw_rate_dps")
         if None in (lat, lg, spd, yaw):
             continue
-        if spd < SPEED_MIN or abs(lg) > LONG_G_MAX or abs(yaw) < YAW_MIN:
+        if spd < SPEED_MIN or abs(yaw) < YAW_MIN:
+            continue
+        if abs(lg) > max(LONG_G_MAX, LONG_G_FRAC * abs(lat)):
             continue
         if (_f(r, "Brake") or 0) > BRAKE_MAX:
             continue
@@ -207,14 +215,20 @@ def plateau(run):
     sr = st.median([x["sr"] for x in run])
     slip = max(sf, sr)
     a = lat[int(0.75 * (len(lat) - 1))]          # sustained, not peak: robust to the entry and exit
-    if slip > 1.25:
-        status = f"past the peak (limiting slip {slip:.2f}) -- scrubbing, so this reads LOW"
+    # THE USABLE BAND, set from the data rather than from theory. Seven runs of one build, both directions,
+    # at limiting slips from 0.99 to 1.74, read 2.24-2.34 g: past its peak this tyre curve is FLAT, so a run
+    # at slip 1.5 is worth a few hundredths less than one at 1.0, not a wasted lap. The first cut-off at 1.25
+    # flagged six of those seven as failures when their numbers were fine, which only teaches a driver to
+    # ignore the warning. Above ~1.6 the car is genuinely sliding and the reading does fall away.
+    if slip > 1.6:
+        status = f"sliding (limiting slip {slip:.2f}) -- reads LOW, take 3-5 mph out of it"
     elif slip < 0.85:
-        status = f"never reached the limit (limiting slip {slip:.2f}) -- this reads LOW"
+        status = f"never reached the limit (limiting slip {slip:.2f}) -- reads LOW, carry more speed"
     else:
         status = None
     return {"a": round(a, 3), "slip_front": round(sf, 2), "slip_rear": round(sr, 2),
-            "limiting": "front" if sf >= sr else "rear", "slip": round(slip, 2), "status": status}
+            "limiting": "front" if sf >= sr else "rear", "slip": round(slip, 2), "status": status,
+            "soft": 1.25 < slip <= 1.6}
 
 
 def record(path, run):
@@ -238,7 +252,7 @@ def render(found, pooled):
         pl = rec["plateau"]
         out.append(f"{str(rec['car']):>5} {str(rec['pi']):>4} {rec['dir']:>3} "
                    f"{rec['s']:5.1f} {rec['radius_m']:7.1f} {rec['mph']:5.1f} "
-                   f"{pl['a']:6.2f}{'!' if pl['status'] else ' '} "
+                   f"{pl['a']:6.2f}{'!' if pl['status'] else ('~' if pl['soft'] else ' ')} "
                    f"{pl['slip_front']:4.2f}/{pl['slip_rear']:<4.2f}  "
                    f"{pl['limiting']} ({'understeer' if pl['limiting'] == 'front' else 'oversteer'})")
     warns = [(rec, rec["plateau"]["status"]) for rec, _ in found if rec["plateau"]["status"]]
@@ -246,8 +260,8 @@ def render(found, pooled):
         out.append("")
         for rec, w in warns:
             out.append(f"  ! {rec['dir']} run: {w}")
-        out.append("  The limiting axle should sit at slip ~0.9-1.2. Above that the tyre is sliding rather")
-        out.append("  than gripping; below it the limit was never found. See docs/skidpad-protocol.md.")
+        out.append("  The limiting axle wants 0.85-1.6. A `~` is slightly past the peak and costs a few")
+        out.append("  hundredths; a `!` is a real problem. See docs/skidpad-protocol.md.")
     if pooled:
         out.append("")
         byc = collections.defaultdict(list)
@@ -259,7 +273,16 @@ def render(found, pooled):
             allv = [rec["plateau"]["a"] for rec, _ in g]
             body = (f"a_max {st.median(good):.2f} g over {len(good)} clean run(s)" if good
                     else f"no clean run; best-effort {max(allv):.2f} g")
-            spread = (f", L/R spread {max(good) - min(good):.3f} g" if len(good) >= 2 else "")
+            perdir = {}
+            for rec, _ in g:
+                if not rec["plateau"]["status"]:
+                    perdir.setdefault(rec["dir"], []).append(rec["plateau"]["a"])
+            spread = ""
+            if len(perdir) == 2:
+                lm, rm = st.median(perdir["L"]), st.median(perdir["R"])
+                spread = f", L {lm:.2f} vs R {rm:.2f} -- {abs(lm - rm):.3f} g apart"
+            elif len(good) >= 2:
+                spread = f", run-to-run range {max(good) - min(good):.3f} g"
             out.append(f"car {car} PI {pi}: {len(g)} runs, {''.join(sorted(dirs))} -- {body}{spread}")
             if len(dirs) < 2:
                 out.append("    only one direction driven -- run the circle the other way too, so a camber "

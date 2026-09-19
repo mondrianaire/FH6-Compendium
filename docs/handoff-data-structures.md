@@ -112,7 +112,7 @@ Row counts measured 2026-09-18. `primary key` is the real key; composite keys ar
 | `session` | 645 | session_id | `session_id`, `started_utc`, `duration_s`, `frames`, `rate_pps`, `source`, `file_path`, `imported_at`, `summary` |
 | `session_car` | 1,488 | session_id, cid | `session_id`, `cid`, `ordinal`, `build_id`, `hw_hash`, `name`, `class`, `pi`, `drivetrain`, `cyl`, `live_s` |
 | `session_event` | 1,048 | session_id, i | `session_id`, `i`, `t0`, `t1`, `cid`, `mode`, `solo`, `laps`, `distance_m`, `duration_s`, `start_x`, `start_z`, `end_x`, `end_z`, `route_key`, `start_is_line` |
-| `session_hit` | 26,422 | session_id, kind, x, z | `session_id`, `kind`, `x`, `z`, `mph`, `hard`, `wheel`, `drop_mph` |
+| `session_hit` | 26,871 | hit_id | `hit_id`, `session_id`, `kind`, `x`, `z`, `mph`, `hard`, `wheel`, `drop_mph` |
 | `course` | 127 | route_key | `route_key`, `name`, `is_rivals`, `event_id`, `length_m`, `turn_count`, `n_laps`, `n_sessions`, `confidence`, `updated_utc`, `geometry`, `profile`, `declared_name`, `declared_source`, `name_source`, `name_confidence` |
 | `course_turn` | 2,409 | route_key, turn_id | `route_key`, `turn_id`, `seq`, `arc_m`, `apex_x`, `apex_z`, `radius_m`, `angle_deg`, `kind`, `n_obs` |
 | `course_route` | 125 | route_key | `route_key`, `route_id`, `match_kind`, `mean_dev_m`, `p95_dev_m`, `covered`, `len_ratio`, `runner_up`, `computed_utc`, `anchor_route_id`, `anchor_events`, `anchor_agree` |
@@ -241,6 +241,13 @@ hit, keyed to the session rather than to a lap, so a hit outside a timed lap is 
 | `wall` | a wall or barrier strike | 2,005 |
 
 `hard` is a 0/1 severity flag — `1` on 19,345 rows, `0` on 7,077.
+
+**`hit_id` (2026-09-19) is a SURROGATE key and had to be.** 6,754 of 26,871 rows were exact
+**full-row** duplicates of another row: the same car bottoms at the same spot at the same speed on a
+later lap, and the table records no lap or timestamp to separate them. A natural key over any column
+set would delete real observations and thin the map overlay, so `hit_id` makes a row addressable
+without claiming the data is unique — nothing here can. `import_telemetry.py` wipes the table and
+re-inserts, so there is no double-import a unique constraint would have caught anyway.
 
 **`wheel` is NULL on exactly the 2,005 `wall` rows** and set on every `bottoming` row (RR 6,152,
 RL 6,122, FR 6,105, FL 6,038). A wall strike has no single wheel, so NULL there is meaningful, not

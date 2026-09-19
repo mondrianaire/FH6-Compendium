@@ -593,6 +593,12 @@ CREATE TABLE IF NOT EXISTS session_event (
 -- its driven line and clusters them into a few located map markers (🔧 bottoming / 💥 barrier). NOT a lap
 -- validity signal — a barrier scrape slows the car but never voids the lap. Added 2026-09-18.
 CREATE TABLE IF NOT EXISTS session_hit (
+  -- SURROGATE key, and it has to be: the same car bottoms at the same spot at the same speed on
+  -- different laps, so 6,754 of 26,871 rows were exact FULL-ROW duplicates of another row (measured
+  -- 2026-09-19). Those are distinct physical events the table records no lap or time for, so any
+  -- natural key would delete real observations and thin the map overlay. This makes a row addressable;
+  -- it does NOT enforce uniqueness, and nothing here can.
+  hit_id      INTEGER PRIMARY KEY,
   session_id  TEXT NOT NULL REFERENCES session(session_id) ON DELETE CASCADE,
   kind        TEXT NOT NULL,            -- 'bottoming' (suspension at full compression) | 'wall' (barrier/terrain one-frame speed loss)
   x           REAL, z REAL,             -- world position of the hit

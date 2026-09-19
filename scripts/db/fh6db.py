@@ -550,6 +550,49 @@ def ensure_indexes(cx, schema_path=None):
     return n
 
 
+def rebuild_session_hit(cx):
+    """One-time: give session_hit its surrogate hit_id. Returns 1 if it rebuilt, else 0.
+
+    SQLite cannot ALTER a PRIMARY KEY in, so the table has to be recreated and copied. hit_id is an
+    INTEGER PRIMARY KEY, which is an alias for the implicit rowid -- no extra B-tree, no extra storage.
+    Row COUNT is asserted identical before the swap; this must never lose a hit.
+    """
+    if not has_table(cx, "session_hit"):
+        return 0
+    cols = [r[1] for r in cx.execute("PRAGMA table_info(session_hit)")]
+    if "hit_id" in cols:
+        return 0
+    before = cx.execute("SELECT COUNT(*) FROM session_hit").fetchone()[0]
+    cx.execute("PRAGMA foreign_keys=OFF")
+    try:
+        cx.execute("""CREATE TABLE session_hit__new (
+  hit_id      INTEGER PRIMARY KEY,
+  session_id  TEXT NOT NULL REFERENCES session(session_id) ON DELETE CASCADE,
+  kind        TEXT NOT NULL,
+  x           REAL, z REAL,
+  mph         INTEGER,
+  hard        INTEGER,
+  wheel       TEXT,
+  drop_mph    REAL
+)""")
+        cx.execute("INSERT INTO session_hit__new(session_id, kind, x, z, mph, hard, wheel, drop_mph) "
+                   "SELECT session_id, kind, x, z, mph, hard, wheel, drop_mph FROM session_hit")
+        after = cx.execute("SELECT COUNT(*) FROM session_hit__new").fetchone()[0]
+        if after != before:
+            cx.execute("DROP TABLE session_hit__new")
+            raise RuntimeError("session_hit copy lost rows: %d -> %d" % (before, after))
+        cx.execute("DROP TABLE session_hit")
+        cx.execute("ALTER TABLE session_hit__new RENAME TO session_hit")
+        ensure_indexes(cx)                      # the rename drops the old index with the old table
+        bad = cx.execute("PRAGMA foreign_key_check(session_hit)").fetchall()
+        if bad:
+            raise RuntimeError("session_hit foreign keys broken after rebuild: %r" % bad[:3])
+        cx.commit()
+    finally:
+        cx.execute("PRAGMA foreign_keys=ON")
+    return 1
+
+
 def migrate(cx):
     """Bring a live database up to SCHEMA_VERSION. Idempotent; commits.
 
@@ -568,6 +611,7 @@ def migrate(cx):
         if not cx.execute("SELECT 1 FROM sqlite_master WHERE type='view' AND name=?", (name,)).fetchone():
             cx.execute(ddl)
             n_tabs += 1
+    n_tabs += rebuild_session_hit(cx)
     n_tabs += ensure_indexes(cx)
     if meta_get(cx, "schema_version") != SCHEMA_VERSION:
         meta_set(cx, "schema_version", SCHEMA_VERSION)

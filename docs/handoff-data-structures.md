@@ -293,8 +293,17 @@ reversal, and the lap is cut at the landing lap clock.
 
 ### Session events — `session_event.mode`
 
-`race` (372), `timed solo (Rivals / time trial)` (325), and the `— lapped` variants of both (229 / 67).
-`solo` is `1` (554) or `0` (439).
+Four values. The `lapped` variants were described in prose here but never written as literal values,
+so nothing could check them:
+
+| Value | Events |
+| --- | ---: |
+| `timed solo (Rivals / time trial)` | 488 |
+| `race` | 380 |
+| `timed solo (Rivals / time trial) · lapped` | 240 |
+| `race · lapped` | 68 |
+
+`solo` is `1` (728) or `0` (448).
 
 ### Road and turn vocabulary
 
@@ -324,10 +333,37 @@ reversal, and the lap is cut at the landing lap clock.
 
 ### Reliability tiers — `ref_field_reliability.tier_name`
 
-The slider-value reliability hierarchy stored as data: `database` > `2-point solve` >
-`global band (field-proven)` > `mass-derived formula` > `single anchor` > `position-only` / `unknown`
-(37 rows over the profiled fields). It matches the standing rule — DB row beats a 2-point solve, beats a
-band, beats a formula, beats an anchor — and anything below a DB row is marked derived.
+The slider-value reliability hierarchy stored as data — `database` > `2-point solve` > `global band
+(field-proven)` > `mass-derived formula` > `single anchor` > `position-only` / `unknown`. It matches the
+standing rule: a DB row beats a 2-point solve, beats a band, beats a formula, beats an anchor, and
+anything below a DB row is marked derived.
+
+**`tier` is the ladder; `tier_name` is per-domain, and there are TWO vocabularies on it** — which the
+prose above hid. 37 rows:
+
+| tier | `tier_name` | fields |
+| ---: | --- | ---: |
+| 0 | `database` | 7 |
+| 0 | `proven` | 2 |
+| 1 | `2-point solve` | 6 |
+| 1 | `derived` | 2 |
+| 2 | `unknown` | 2 |
+| 2 | `global band (field-proven)` | 1 |
+| 3 | `mass-derived formula` | 2 |
+| 4 | `single anchor` | 6 |
+| 4 | `single anchor (unscoped)` | 2 |
+| 5 | `position-only` | 7 |
+
+- **Slider values** use the named hierarchy (`database`, `2-point solve`, `global band (field-proven)`,
+  `mass-derived formula`, `single anchor`, `position-only`).
+- **Part-name confidence** (`ref_part.confidence`, `tune_part.confidence`) reuses the same ladder with the
+  confidence vocabulary: `proven` at 0, `derived` at 1, `unknown` at 2.
+- **`single anchor (unscoped)`** is a WEAKER tier 4, for stores keyed by car ordinal alone with no parts
+  fingerprint — `data/car-mass.json` masses and `data/car-tune-ranges.json` points. One historical
+  screenshot of one build's mass gets reused for every build of that car. That build-scoping gap is the
+  reason the variant exists; do not collapse it into plain `single anchor`.
+
+Compare on `tier` when you need an ordering, never on `tier_name`.
 
 ### Event catalogue vocabulary
 

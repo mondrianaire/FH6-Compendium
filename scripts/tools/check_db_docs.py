@@ -24,7 +24,10 @@ What it checks:
      disk location, read instructions and reader -- and the location resolves.
      The binary ones do the same inside docs/formats/*.bt, checked by
      scripts/tools/check_bt_template.py paths.
-  7. Two-way store reconciliation: every store tracked under data/ is
+  7. Every value that EXISTS in a catalogued enum column is documented in the
+     §3 value catalogue -- the only place that says what a coded value MEANS.
+     The value SET is failed on; the counts beside it are only reported.
+  8. Two-way store reconciliation: every store tracked under data/ is
      documented here, which is the rule this inventory exists to enforce
      ("when a store is added, add it here in the same commit") and which
      nothing checked until now. It found three on its first run.
@@ -361,8 +364,70 @@ def check_stores():
     return fails
 
 
+def check_values():
+    """Every value that EXISTS in a catalogued enum column is documented.
+
+    The §3 value catalogue is the only place that says what a coded value MEANS,
+    and nothing checked it. Unlike row counts, an enum's value SET is stable and
+    a new member is a real event: the docs become silently wrong about a column
+    someone reads to interpret data. So the set is FAILED on, while the counts
+    beside it are only reported -- same split as `counts`.
+
+    Self-maintaining, like parsing CREATE INDEX out of schema.sql: the columns
+    checked are whatever the §3 headings name as `table.column`. Document a new
+    enum with a heading and it is covered; no second list to drift.
+
+    Found on its first run: session_event.mode's two `lapped` variants (described
+    in prose but never written as literal values, so unverifiable) and three
+    ref_field_reliability.tier_name values missing entirely, which had hidden the
+    fact that TWO vocabularies share that tier ladder.
+    """
+    fails = []
+    text = io.open(HANDOFF, encoding="utf-8").read()
+    try:
+        sec = text[text.index("## 3. The value catalogue"):text.index("## 4.")]
+    except ValueError:
+        return ["handoff-data-structures.md has no '## 3. The value catalogue' section"]
+
+    lv = live()
+    tables = names(lv, "table")
+    checked = drifted = 0
+    for block in re.split(r"\n(?=### )", sec):
+        head = block.split("\n", 1)[0]
+        for t, c in re.findall(r"`([a-z_0-9]+)\.([a-z_0-9]+)`", head):
+            if t not in tables:
+                fails.append("value catalogue names `%s.%s` but there is no table %s" % (t, c, t))
+                continue
+            if c not in cols(lv, t):
+                fails.append("value catalogue names `%s.%s` but %s has no column %s" % (t, c, t, c))
+                continue
+            rows = list(lv.execute('select "%s", count(*) from "%s" group by 1 order by 2 desc' % (c, t)))
+            checked += 1
+            missing = []
+            for v, n in rows:
+                tok = "NULL" if v is None else str(v)
+                if ("`%s`" % tok) not in block:
+                    missing.append((tok, n))
+            if missing:
+                fails.append("%s.%s has undocumented value(s): %s"
+                             % (t, c, ", ".join("%r (%s rows)" % (m, format(n, ",")) for m, n in missing)))
+            else:
+                # counts beside the values drift like every other count -- report only
+                for v, n in rows:
+                    tok = "NULL" if v is None else str(v)
+                    if re.search(r"`%s`[^|\n]*?\(\s*([\d,]+)\s*\)" % re.escape(tok), block):
+                        m = re.search(r"`%s`[^|\n]*?\(\s*([\d,]+)\s*\)" % re.escape(tok), block)
+                        if int(m.group(1).replace(",", "")) != n:
+                            drifted += 1
+            print("  %-38s %d distinct, all documented" % ("%s.%s" % (t, c), len(rows)))
+    print("  %d enum columns checked" % checked)
+    if drifted:
+        print("  %d inline counts have drifted (reported, not failed -- the DB is written live)" % drifted)
+    return fails
+
+
 CHECKS = {"schema": check_schema, "handoff": check_handoff, "counts": check_counts,
-          "sources": check_sources, "stores": check_stores}
+          "values": check_values, "sources": check_sources, "stores": check_stores}
 
 if __name__ == "__main__":
     argv = sys.argv[1:]

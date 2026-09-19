@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "car_ordinal": 2866,
+  "car": "2018 Exomotive Exocet Sport V8 XP-5",
+  "cid": null,
+  "build_id": null,
+  "label": "S1 800 AWD build — My Cars stats capture (donor clone)",
+  "tune_share_code": null,
+  "captured": "2026-08-23",
+  "source": "My Cars stats pane screenshots (2 pages: Power/Torque/Weight/Front/Displacement + Speed/Handling/Accel/Launch/Braking/Offroad + tire type)",
+  "pane": {
+    "pi": 800,
+    "class": "S1",
+    "power_hp": 332,
+    "torque_lbft": 212,
+    "weight_lb": 1498,
+    "front_pct": 0.52,
+    "compound": "Slick",
+    "suspension": null,
+    "displacement_l": 1.60
+  },
+  "ratings": { "speed": 5.5, "handling": 8.2, "acceleration": 10, "launch": 10, "braking": 10, "offroad": 5.3 },
+  "drivetrain": "AWD",
+  "notes": "Natively-RWD Exocet shown as AWD -> drivetrain swapped (confirms decode). Pane label 'Slick Tires' -> VERIFY whether FH6's grippy road compound (our tier-5 'Race') is actually named 'Slick'; resolvable with the one tire-compound-menu capture. Cylinders not captured (name says V8 but displacement 1.6 L)."
+}

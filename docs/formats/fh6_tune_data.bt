@@ -1,0 +1,219 @@
+//------------------------------------------------
+//--- 010 Editor Binary Template
+//
+//      File: fh6_tune_data.bt
+//   Authors: FH6 Tuning Lab
+//   Version: 1.0 (2026-09-18)
+//   Purpose: Forza Horizon 6 saved tune -- the 598-byte plaintext `Data` blob
+//  Category: Game
+// File Mask: Data
+//
+// SOURCE-CATEGORY: player save -- PLAINTEXT (no key, no container)
+// SOURCE-LOCATION: C:\XboxGames\GameSave\pgs\*\*\ContainersRoot\Tuning_*\Data -- 1,526 on this machine
+// SOURCE-READ: read the 598 bytes directly. C:\XboxGames IS READ-ONLY -- never write to a save.
+// SOURCE-READ: siblings in the same folder: `header` (title/creator/XUID/created), `Thumb.png`.
+// SOURCE-READER: scripts/telemetry/fh6_tune_decode.py
+//
+// NOT ENCRYPTED. Unlike the profile save (C_ProfileData) and the game DB
+// (gamedbRC.slt), the tune blob is plaintext on disk -- no key, no container.
+//
+// UNITS: every slider is stored as a NORMALISED 0..1 slider POSITION, not the
+// number the game shows you. De-normalise with lo + norm*(hi-lo). Seven
+// sliders have chassis-specific ranges and cannot be de-normalised from this
+// file alone -- see PER-CAR below.
+//
+// PROVENANCE: offsets validated byte-for-byte against this machine's saves
+// (2014 Golf R, ordinal 2142) vs footage-verified values in
+// data/tuning-variables.json -- caster 6.5/5.0, brake balance 52, camber
+// baseline -1.3, ride-height endpoints 6.9/8.1, all four damping channels on a
+// fixed [1,20] scale. Parts slots 27/28 were corrected 2026-08-23 against the
+// in-game menu (the two supercharger labels had been reversed).
+// Canonical implementation: scripts/telemetry/fh6_tune_decode.py
+// Narrative: docs/research/savefile-decode-2026-08-22.md
+//
+// EVERY BYTE IS ACCOUNTED FOR: 4 + 10 + 200 + 200 + 144 + 40 = 598.
+// Writing this template is what found the 10-byte block at 0x04 (see Unknown10):
+// fh6_tune_decode.py jumps straight from the 4-byte header to the parts array at
+// 0x000E and never names those bytes. They are documented here.
+//
+// CORPUS: the constants below were measured over all 1,526 tune blobs on this
+// machine (2026-09-18). 1,526/1,526 are exactly 598 bytes and version 0x03;
+// 1,526/1,526 have every one of the 50 reserved words == 0xFFFFFFFF.
+//------------------------------------------------
+
+LittleEndian();
+
+// 0xFFFFFFFF in a part slot means "nothing installed".
+#define PART_EMPTY 0xFFFFFFFF
+
+// -1.0f in a gear slot means "this car does not have this gear".
+#define GEAR_UNUSED -1.0
+
+//------------------------------------------------ 0x0000  header
+typedef struct {
+    ubyte   version  <comment="format version; only 0x03 observed">;
+    ubyte   locked   <comment="0 = self-made, 1 = downloaded (locked in-UI, sliders not readable in game)">;
+    ushort  ordinal  <comment="car ordinal; joins ref_car.ordinal">;
+} TuneHeader <comment="4 bytes">;
+
+//------------------------------------------------ 0x0004  unknown, constant
+// 10 bytes the canonical decoder skips silently. NOT padding, and not zero:
+// every one of the 1,526 tune blobs on this machine carries the identical
+// sequence 00 00 01 00 00 00 01 00 00 00, across many cars, many builds and
+// dates from 2026-07 to 2026-09.
+//
+// As u16 that reads (0, 1, 0, 1, 0); as u32,u32,u16 it reads (65536, 65536, 0).
+// Because it never varies, this corpus cannot tell us what it means -- a
+// constant field and an unused one look identical when nothing moves. Recorded
+// as a known unknown rather than left as a hole. If a value here is ever seen
+// to differ, that is a real finding: it would be the first evidence of what
+// these bytes are for.
+typedef struct {
+    ubyte unknown_const[10] <comment="always 00 00 01 00 00 00 01 00 00 00 (1526/1526 files)">;
+} Unknown10 <comment="10 bytes at 0x0004..0x000D; meaning UNKNOWN, value CONSTANT">;
+
+//------------------------------------------------ 0x000E  installed parts
+// 50 x U32 catalog part IDs, in a fixed slot order. Each joins ref_part.part_id
+// within the slot's ref_slot.slot. Order is the game's, not ours -- do not sort.
+typedef struct {
+    uint engine;
+    uint drivetrain;
+    uint car_body;
+    uint motor;
+    uint brakes;
+    uint springs_dampers;
+    uint front_arb;
+    uint rear_arb;
+    uint tire_compound;
+    uint rear_wing;
+    uint front_rim_size;
+    uint rear_rim_size;
+    uint camshaft;
+    uint valves;
+    uint displacement;
+    uint pistons;
+    uint fuel_system;
+    uint ignition;
+    uint exhaust;
+    uint intake;
+    uint flywheel;
+    uint manifold;
+    uint restrictor_plate;
+    uint oil_cooling;
+    uint single_turbo;
+    uint twin_turbo;
+    uint quad_turbo;
+    uint centrifugal_supercharger <comment="slot 27 -- verified 2026-08-23 (Exocet 2866)">;
+    uint pos_supercharger         <comment="slot 28 -- Jeep Trailcat / Hellcat roots blower">;
+    uint intercooler;
+    uint clutch;
+    uint transmission;
+    uint driveline;
+    uint differential;
+    uint front_bumper;
+    uint rear_bumper;
+    uint hood;
+    uint side_skirts;
+    uint front_tire_width;
+    uint rear_tire_width;
+    uint weight_reduction;
+    uint roll_cage;
+    uint motor_parts;
+    uint rim_style;
+    uint aspiration;
+    uint front_track_width;
+    uint rear_track_width;
+    uint front_tire_profile;
+    uint rear_tire_profile;
+    uint rear_rim_style;
+} PartSlots <comment="50 x U32 at 0x000E..0x00D5; 0xFFFFFFFF = empty">;
+
+//------------------------------------------------ 0x00D6  reserved
+// Exactly 50 more U32s, every one observed as 0xFFFFFFFF on every save read so
+// far. INFERENCE, not established fact: the same width and the same sentinel as
+// PartSlots suggests 50 spare part slots rather than inert padding. Nothing has
+// been seen to occupy them, so treat any non-sentinel value here as a finding,
+// not as a parse error.
+typedef struct {
+    uint reserved[50] <comment="always 0xFFFFFFFF so far; see note above">;
+} ReservedSlots <comment="200 bytes at 0x00D6..0x019D">;
+
+//------------------------------------------------ 0x019E  tune sliders
+// All F32, all normalised 0..1.
+//
+// PER-CAR: front_downforce, rear_downforce, final_drive, front_spring,
+// rear_spring, front_ride_height, rear_ride_height have chassis-specific
+// endpoints. This file gives you the POSITION only; the absolute value needs
+// the car's registered range (data/car-tune-ranges.json) or a 2-point solve.
+//
+// NOT ADJUSTABLE in-game (present, but the player cannot move them):
+// handbrake (static ~1.0), tcs_slip (internal threshold), rear_caster,
+// and the seven _unk_ fields, whose meaning is still unknown. An _unk_ field
+// that ever moves is a lead worth chasing.
+typedef struct {
+    float front_downforce     <comment="PER-CAR; downforce units">;
+    float rear_downforce      <comment="PER-CAR; downforce units">;
+    float final_drive         <comment="PER-CAR; ratio">;
+    float brake_pressure      <comment="0..200 %">;
+    float brake_balance       <comment="0..100 % front">;
+    float handbrake           <comment="0..5.5; NOT adjustable, observed ~1.0">;
+    float center_diff         <comment="0..100 % rear">;
+    float _unk_01BA           <comment="UNKNOWN">;
+    float _unk_01BE           <comment="UNKNOWN">;
+    float tcs_slip            <comment="internal TCS threshold; NOT adjustable">;
+    float _unk_01C6           <comment="UNKNOWN">;
+    float _unk_01CA           <comment="UNKNOWN">;
+    float front_tire_pressure <comment="14..55 psi">;
+    float front_camber        <comment="-5..5 deg">;
+    float front_toe           <comment="-1..1 deg">;
+    float front_caster        <comment="1..7 deg">;
+    float front_spring        <comment="PER-CAR; lb/in">;
+    float front_arb           <comment="1..65 scale">;
+    float front_ride_height   <comment="PER-CAR; inches">;
+    float front_bump          <comment="1..20 scale">;
+    float front_rebound       <comment="1..20 scale">;
+    float front_diff_accel    <comment="0..100 %">;
+    float front_diff_decel    <comment="0..100 %">;
+    float rear_tire_pressure  <comment="14..55 psi">;
+    float rear_camber         <comment="-5..5 deg">;
+    float rear_toe            <comment="-1..1 deg">;
+    float rear_caster         <comment="1..7 deg; NOT adjustable in-game">;
+    float rear_spring         <comment="PER-CAR; lb/in">;
+    float rear_arb            <comment="1..65 scale">;
+    float rear_ride_height    <comment="PER-CAR; inches">;
+    float rear_bump           <comment="1..20 scale">;
+    float rear_rebound        <comment="1..20 scale">;
+    float rear_diff_accel     <comment="0..100 %">;
+    float rear_diff_decel     <comment="0..100 %">;
+    float _unk_0226           <comment="UNKNOWN">;
+    float _unk_022A           <comment="UNKNOWN">;
+} TuneSliders <comment="36 x F32 at 0x019E..0x022D, all normalised 0..1">;
+
+//------------------------------------------------ 0x022E  gear ratios
+// 10 x F32 REAL ratios (not normalised). -1.0 = the car does not have this gear.
+// The count of non -1.0 entries is the gear ladder, which is an identity signal
+// for a build -- but see the standing rule: the ladder is read from disk, never
+// driven for.
+typedef struct {
+    float gear[10] <comment="real ratios; -1.0 = unused">;
+} GearRatios <comment="40 bytes at 0x022E..0x0255">;
+
+//------------------------------------------------ file
+struct FH6_TUNE_DATA {
+    TuneHeader    header;
+    Unknown10     unknown;
+    PartSlots     parts;
+    ReservedSlots reserved;
+    TuneSliders   sliders;
+    GearRatios    gears;
+} file;
+
+// ---- assertions the reader should honour -----------------------------------
+// FileSize() == 598          a short or long file is not this format
+// header.version == 0x03     any other version invalidates every offset below
+//
+// The 010 template language has no assert; check them explicitly.
+if ( FileSize() != 598 )
+    Warning( "Not a 598-byte FH6 tune blob: %Lu bytes", FileSize() );
+if ( file.header.version != 0x03 )
+    Warning( "Unexpected tune format version 0x%02X -- offsets may not hold", file.header.version );

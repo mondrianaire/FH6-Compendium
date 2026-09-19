@@ -1,0 +1,246 @@
+#!/usr/bin/env python3
+"""import_events.py -- the Rivals catalogue as displayed: names, lengths, guids -> ref_event.
+
+Source: data/rivals-routes-<discipline>.json, one file per discipline, each the Rivals > Routes
+screen transcribed end to end -- verbatim event name, the screen's one-decimal "Route Length" in
+miles, and the seven IDS_Name guids the name sits under (RivalsEventData is one-to-many: a route
+name repeats under one guid per event variant, and its description likewise under seven disjoint
+IDS_Description guids -- see the file's own "note").
+
+Every guid is a checked join, re-proven on every run, not a copy: a guid absent from ref_string,
+or present with content that disagrees with the name we read off the screen, fails the whole
+stage rather than importing a name nobody can trust. Two routes sharing a name in one file fails
+the same way -- event_id is derived FROM the name, so a collision there is silent data loss
+waiting to happen.
+
+Length is the only topology the screen gives: is_loop follows the name's own suffix (' Circuit'
+/ ' Sprint' / the two lap-around specials) -- until the game's own catalogue says otherwise.
+
+THE GAME'S CATALOGUE (2026-09-05): stage objectmodel (media/ObjectModelGame.zip) holds the chain
+Rivals event -> race collection -> career race -> track -> route id (v_rivals_route). When it has
+run, every Rivals row here gets route_id, track_id, is_loop (Circuit/P2P ribbon) and a discipline
+from the game, and every career race becomes a kind='career' row (event_id 'career:<key>', no
+length -- the map/length tiers never see those; they exist so a typed name is a checked join to
+the whole event list). The screen files remain the source of the DISPLAYED length.
+
+Run:  python scripts/db/import_events.py [--db PATH] [-v]
+"""
+import argparse
+import glob
+import json
+import os
+import re
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+sys.path.insert(0, HERE)
+
+import fh6db                                            # noqa: E402
+
+DATA = os.path.join(ROOT, "data")
+MI = 1609.344                          # miles -> metres
+FILE_RE = re.compile(r"^rivals-routes-(.+)\.json$")
+
+
+def slug(s):
+    """lowercase, runs of non-alphanumerics -> '-', stripped -- the one slug rule for both
+    event_id and the file-derived discipline tag."""
+    return re.sub(r"[^0-9a-z]+", "-", s.lower()).strip("-")
+
+
+def is_loop_of(name):
+    """The only topology the Routes screen gives: its own name suffix."""
+    if name.endswith(" Circuit") or name in ("The Colossus", "The Goliath"):
+        return 1
+    if name.endswith(" Sprint"):
+        return 0
+    return None
+
+
+def jload(path):
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def gather(cx, path, disciplines, verbose=False):
+    basename = os.path.basename(path)
+    m = FILE_RE.match(basename)
+    disc = slug(m.group(1) if m else os.path.splitext(basename)[0])
+    doc = jload(path)
+    routes = doc.get("routes") or []
+
+    erows, esrows = [], []
+    seen_names = {}
+    for r in routes:
+        name = r["name"]
+        order = r["order"]
+        if name in seen_names:
+            raise ValueError("%s: '%s' names both route #%d and #%d" %
+                              (basename, name, seen_names[name], order))
+        seen_names[name] = order
+
+        event_id = "rivals:" + slug(name)
+        length_mi = r["length_mi"]
+        description = r.get("description")
+        data = json.dumps({"order": order, "length_mi": length_mi,
+                            "description": description, "frames": r.get("frames")})
+        erows.append((event_id, "rivals", name, None, None, None, None, None, data,
+                      disc, length_mi * MI, is_loop_of(name), "data/%s#%d" % (basename, order)))
+
+        for g in r["ids_name_guids"]:
+            key_name = "IDS_Name_" + g
+            row = cx.execute(
+                "SELECT key_hash, content FROM ref_string WHERE table_name='RivalsEventData' AND key_name=?",
+                (key_name,)).fetchone()
+            if row is None:
+                raise ValueError("%s #%d '%s': guid %s is not in ref_string(RivalsEventData)" %
+                                  (basename, order, name, g))
+            if row["content"] != name:
+                raise ValueError("%s #%d: guid %s says '%s', screen says '%s'" %
+                                  (basename, order, g, row["content"], name))
+            esrows.append((event_id, "RivalsEventData", row["key_hash"], key_name, "name"))
+
+        if description:
+            for kh, kn in cx.execute(
+                    "SELECT key_hash, key_name FROM ref_string"
+                    " WHERE table_name='RivalsEventData' AND content=?", (description,)):
+                esrows.append((event_id, "RivalsEventData", kh, kn, "description"))
+
+    disciplines[disc] = disciplines.get(disc, 0) + len(routes)
+    if verbose:
+        print("  %s: %d routes, discipline=%s" % (basename, len(routes), disc))
+    return erows, esrows
+
+
+def run(cx, verbose=False):
+    erows, esrows = [], []
+    disciplines = {}
+    for path in sorted(glob.glob(os.path.join(DATA, "rivals-routes-*.json"))):
+        er, es = gather(cx, path, disciplines, verbose)
+        erows += er
+        esrows += es
+
+    # THE WHOLE LIST, NOT JUST THE MEASURED PART. RivalsEventData names 88 routes; the Routes-screen
+    # files give lengths for the 23 Road ones. The other 65 are imported name-only (length NULL, so
+    # the map/length tiers never see them) so that a typed name is a checked join to the game's own
+    # list instead of an unknown string -- 'Hakone Nanamagari' read as "not a game event name" until
+    # this (2026-09-05). A later rivals-routes-<discipline>.json file simply takes over its rows.
+    have = {r[2] for r in erows}
+    have_ids = {r[0] for r in erows}
+    by_name = {}
+    for kh, kn, content in cx.execute(
+            "SELECT key_hash, key_name, content FROM ref_string"
+            " WHERE table_name='RivalsEventData' AND key_name LIKE 'IDS_Name_%' ORDER BY key_name"):
+        by_name.setdefault(content, []).append((kh, kn))
+    n_name_only = 0
+    for name in sorted(by_name):
+        if name in have:
+            continue
+        event_id = "rivals:" + slug(name)
+        if event_id in have_ids:
+            raise ValueError("name-only event '%s' collides with %s on slug" % (name, event_id))
+        have_ids.add(event_id)
+        erows.append((event_id, "rivals", name, None, None, None, None, None,
+                      json.dumps({"guids": len(by_name[name])}), None, None, is_loop_of(name),
+                      "ref_string:RivalsEventData"))
+        for kh, kn in by_name[name]:
+            esrows.append((event_id, "RivalsEventData", kh, kn, "name"))
+        n_name_only += 1
+    disciplines["name-only"] = n_name_only
+
+    # ---- the game's own catalogue, when stage objectmodel has run ---------------------------
+    n_bound = 0
+    if fh6db.has_table(cx, "ref_track_info") and cx.execute("SELECT COUNT(*) FROM ref_track_info").fetchone()[0]:
+        game = {}                               # rivals name -> {route_id, track_key, ribbon, discipline}
+        for r in cx.execute("SELECT name, route_id, track_key, ribbon, discipline FROM v_rivals_route"):
+            g = game.setdefault(r["name"], {"route_id": set(), "track_key": set(), "ribbon": set(), "discipline": set()})
+            for k in g:
+                if r[k] is not None:
+                    g[k].add(r[k])
+        bound = []
+        for row in erows:
+            g = game.get(row[2])
+            if not g or len(g["route_id"]) != 1:
+                bound.append(row)
+                continue
+            row = list(row)
+            row[4] = next(iter(g["route_id"]))                              # route_id
+            # track_id stays NULL: it references ref_track (the Tracks table, 58 world/test rows),
+            # not the TrackInfo key space. The track key rides in `data`; join ref_track_info by route_id.
+            d = json.loads(row[8]) if row[8] else {}
+            d["track_key"] = next(iter(g["track_key"])) if len(g["track_key"]) == 1 else sorted(g["track_key"])
+            row[8] = json.dumps(d)
+            if len(g["ribbon"]) == 1:
+                rb = next(iter(g["ribbon"]))
+                row[11] = 1 if rb == "Circuit" else (0 if rb == "P2P" else row[11])
+            if row[9] is None and len(g["discipline"]) == 1:
+                row[9] = next(iter(g["discipline"]))
+            bound.append(tuple(row))
+            n_bound += 1
+        erows = bound
+        for r in cx.execute("""SELECT cr.race_key, cr.name, cr.discipline, cr.race_mode, cr.num_laps, cr.event_type,
+                                      ti.route_id, ti.track_key, ti.ribbon
+                                 FROM ref_career_race cr JOIN ref_track_info ti USING(track_key)"""):
+            erows.append(("career:%d" % r["race_key"], "career", r["name"], None, r["route_id"],
+                          None, None, None,
+                          json.dumps({"race_mode": r["race_mode"], "num_laps": r["num_laps"], "event_type": r["event_type"],
+                                      "track_key": r["track_key"]}),
+                          r["discipline"], None,
+                          1 if r["ribbon"] == "Circuit" else (0 if r["ribbon"] == "P2P" else None),
+                          "objectmodel:CareerRaceDataSet"))
+    disciplines["game-bound"] = n_bound
+
+    with cx:
+        cx.execute("BEGIN")                  # a PRAGMA outside a transaction autocommits and resets itself
+        cx.execute("PRAGMA defer_foreign_keys=ON")
+        # ref_event is a foreign-key PARENT (course_event and ref_event_string cascade off it), so it
+        # is MERGED, not wiped: a wipe-and-reinsert -- and INSERT OR REPLACE, which deletes first --
+        # would empty course_event on every rerun. Only events that vanished from the catalogue are
+        # deleted, after their non-cascading links (course.event_id, ref_route.*) are nulled.
+        new_ids = {r[0] for r in erows}
+        cx.execute("CREATE TEMP TABLE IF NOT EXISTS _keep_ev(event_id TEXT PRIMARY KEY)")
+        cx.execute("DELETE FROM _keep_ev")
+        cx.executemany("INSERT INTO _keep_ev(event_id) VALUES(?)", [(e,) for e in new_ids])
+        retired = "SELECT event_id FROM ref_event WHERE kind IN ('rivals', 'career') AND event_id NOT IN (SELECT event_id FROM _keep_ev)"
+        cx.execute("UPDATE course SET event_id=NULL WHERE event_id IN (%s)" % retired)
+        cx.execute("UPDATE ref_route SET name=NULL, event_id=NULL, name_source=NULL, name_confidence=NULL"
+                   " WHERE event_id IN (%s)" % retired)
+        cx.execute("DELETE FROM ref_event WHERE event_id IN (%s)" % retired)   # course_event/ref_event_string cascade
+        n_ev = fh6db.merge_many(cx, "ref_event", [
+            "event_id", "kind", "name", "track_id", "route_id", "class_limit", "pi_limit",
+            "region", "data", "discipline", "length_m", "is_loop", "source"], erows, key=("event_id",))
+        # ref_event_string is a leaf: refresh it per event
+        cx.execute("DELETE FROM ref_event_string WHERE event_id IN (SELECT event_id FROM _keep_ev)")
+        n_es = fh6db.upsert_many(cx, "ref_event_string", [
+            "event_id", "table_name", "key_hash", "key_name", "role"], esrows)
+
+    return {"ref_event": n_ev, "ref_event_string": n_es}, disciplines
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("--db", default=None)
+    ap.add_argument("-v", "--verbose", action="store_true")
+    a = ap.parse_args(argv)
+    cx = fh6db.connect(a.db)
+    fh6db.migrate(cx)                  # so a standalone run works on an un-migrated DB
+    rid = fh6db.run_begin(cx, "events", DATA)
+    try:
+        counts, disciplines = run(cx, a.verbose)
+    except Exception as e:                               # noqa: BLE001
+        cx.rollback()
+        fh6db.run_end(cx, rid, 0, 0, "%s: %s" % (type(e).__name__, e))
+        raise
+    notes = {"events": counts["ref_event"], "strings": counts["ref_event_string"],
+             "disciplines": disciplines}
+    fh6db.run_end(cx, rid, sum(counts.values()), 1, json.dumps(notes))
+    for k in sorted(counts):
+        print("  %-18s %8d" % (k, counts[k]))
+    for d in sorted(disciplines):
+        print("  discipline %-12s %8d" % (d, disciplines[d]))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,88 @@
+//------------------------------------------------
+//--- 010 Editor Binary Template
+//
+//      File: fh6_bxml.bt
+//   Authors: FH6 Tuning Lab
+//   Version: 1.0 (2026-09-18)
+//   Purpose: Forza binary XML -- BXML (the .om.xml files)
+//  Category: Game
+// File Mask: *.om.xml
+//
+// SOURCE-CATEGORY: game install -- PLAIN DEFLATE ZIP, no decryption
+// SOURCE-LOCATION: C:\XboxGames\Forza Horizon 6\Content\media\ObjectModelGame.zip -- 7,121 entries under source/ScribbleData/
+// SOURCE-READ: plain zip. Every entry is BXML DESPITE the .om.xml extension -- it is not text XML.
+// SOURCE-READ: the index width inside each file is DERIVED from its string count; see below.
+// SOURCE-READER: scripts/telemetry/fh6_bxml.py (parses to ElementTree)
+//
+// WHY IT MATTERS: this is where a name GUID meets a route id. The string tables
+// never carried that join -- they name things but cannot tell you WHICH route a
+// name belongs to. Every dataset the string tables reference
+// (RivalsEventDataMap, RouteDataMap, CareerRaceDataSet, CareerTrackInfo ...) is
+// one of these files. Found 2026-09-05; it is the reason course naming works at
+// all, and it feeds ref_track_info -- the authority for course identity.
+//
+// Canonical reader: scripts/telemetry/fh6_bxml.py (parses to ElementTree)
+// Format from the MIT-licensed reference reader:
+//   Nenkai/ForzaTools, ForzaTools.BinaryXML/BXML.cs
+//
+// VARIABLE-LENGTH AND RECURSIVE. This template models the header and the string
+// table exactly; the node tree is recursive with a width-dependent index type,
+// which .bt can express but which cannot be checked by our offset-based
+// verifier. For the tree, trust fh6_bxml.py -- it round-trips to XML, which is
+// a far stronger check than a layout assertion.
+//
+// CORPUS: measured 2026-09-18 over all 7,121 entries.
+//   magic 'BXML'      7,121/7,121
+//   version == 2      7,121/7,121
+//   index width: 1 byte on 7,061 files, 2 bytes on 60. None needed 4.
+//------------------------------------------------
+
+LittleEndian();
+
+//------------------------------------------------ header
+typedef struct {
+    char Magic[4]        <comment="'BXML'">;
+    ubyte Version        <comment="<= 2; always 2 in FH6">;
+    int  StringCount;
+    int  StringTableBytes;
+} BxmlHeader <comment="13 bytes">;
+
+// THE INDEX WIDTH IS DERIVED, NOT STORED. This is the single thing that makes
+// BXML easy to mis-parse: the size of every name/key/value reference in the
+// tree depends on StringCount --
+//     StringCount <=   255  ->  u8
+//     StringCount <= 65535  ->  u16
+//     otherwise             ->  u32
+// A reader that assumes one width silently mis-reads the other 60 files.
+
+typedef struct {
+    ushort Length;
+    char   Text[ Length ] <comment="UTF-8">;
+} BxmlString <optimize=false>;
+
+//------------------------------------------------ node
+// node := u8 flags (1 IsNode | 2 HasAttributes | 4 HasChildNodes)
+//         idx  name
+//         [u8 n_attr, n_attr x (idx key, idx value)]   when HasAttributes
+//         [i16 n_children, n_children x node]          when HasChildNodes
+//
+// Strings are referred to BY INDEX into the table above; the tree stores no
+// text of its own. The table is sorted, so an index is stable across a rebuild
+// of the same asset but NOT across game versions -- never persist a raw index.
+//
+// The recursion is left described rather than coded: 010 can express it with a
+// forward-declared struct, but a partially-correct recursive template that
+// silently mis-walks is worse than a clear description plus a working parser.
+
+//------------------------------------------------ file
+BxmlHeader header;
+BxmlString strings[ header.StringCount ] <optimize=false>;
+// -> u8 root flag, then the recursive node tree, to EOF.
+
+// ---- assertions -------------------------------------------------------------
+if ( header.Magic != "BXML" )
+    Warning( "Not BXML: magic is '%s'", header.Magic );
+if ( header.Version > 2 )
+    Warning( "BXML version %u is newer than the reference reader supports", header.Version );
+if ( header.StringCount < 0 || header.StringTableBytes < 0 )
+    Warning( "Negative string table geometry -- file is corrupt or not BXML" );

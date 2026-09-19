@@ -11,10 +11,10 @@
     0.163,
     0.987
    ],
-   "length_m": 3382,
-   "events": 3,
+   "length_m": 82488,
+   "events": 159,
    "first_seen": "fh6_20260821_122523",
-   "last_seen": "fh6_20260821_173737"
+   "last_seen": "fh6_20260906_061412"
   },
   "4250_-5250": {
    "start": [
@@ -26,9 +26,9 @@
     0.989
    ],
    "length_m": 10594,
-   "events": 2,
+   "events": 461,
    "first_seen": "fh6_20260821_162805",
-   "last_seen": "fh6_20260821_162805"
+   "last_seen": "fh6_20260906_083124"
   },
   "1900_6100": {
    "start": [
@@ -39,38 +39,26 @@
     0.821,
     0.57
    ],
-   "length_m": 1722,
-   "events": 5,
+   "length_m": 20731,
+   "events": 64,
    "first_seen": "fh6_20260821_162805",
-   "last_seen": "fh6_20260821_162805"
-  },
-  "2550_7900": {
-   "start": [
-    2542,
-    7922
-   ],
-   "heading": [
-    -0.506,
-    -0.862
-   ],
-   "length_m": 1464,
-   "events": 1,
-   "first_seen": "fh6_20260821_171239",
-   "last_seen": "fh6_20260821_171239"
+   "last_seen": "fh6_20260823_025408.csv"
   },
   "-7350_-2100": {
+   "name": "Edamame Circuit",
+   "source": "dashboard 2026-08-28",
+   "mode": "event",
    "start": [
-    -7349,
-    -2108
+    -7439,
+    -1931
    ],
+   "length_m": 109159,
+   "events": 1176,
+   "last_seen": "fh6_20260906_035542",
    "heading": [
-    0.226,
-    0.974
-   ],
-   "length_m": 72737,
-   "events": 31,
-   "first_seen": "fh6_20260821_173737",
-   "last_seen": "fh6_20260821_214057"
+    0.196,
+    0.981
+   ]
   },
   "-1850_1550": {
    "start": [
@@ -81,10 +69,2058 @@
     0.769,
     -0.64
    ],
-   "length_m": 23914,
-   "events": 2,
+   "length_m": 30766,
+   "events": 108,
    "first_seen": "fh6_20260821_202122",
-   "last_seen": "fh6_20260821_202122"
+   "last_seen": "fh6_20260828_120421.csv"
+  },
+  "2850_-200": {
+   "start": [
+    2860,
+    -218
+   ],
+   "heading": [
+    -0.939,
+    0.344
+   ],
+   "length_m": 5952,
+   "events": 37,
+   "first_seen": "fh6_20260823_023501",
+   "last_seen": "fh6_20260823_023501.csv"
+  },
+  "5900_1800": {
+   "start": [
+    5909,
+    1825
+   ],
+   "heading": [
+    0.806,
+    0.592
+   ],
+   "length_m": 6952,
+   "events": 171,
+   "first_seen": "fh6_20260823_025408",
+   "last_seen": "fh6_20260823_025408.csv"
+  },
+  "-4550_-6050": {
+   "start": [
+    -4536,
+    -6051
+   ],
+   "heading": [
+    -0.985,
+    0.175
+   ],
+   "length_m": 1125,
+   "events": 108,
+   "first_seen": "fh6_20260823_032213",
+   "last_seen": "fh6_20260903_011214"
+  },
+  "-3250_-7850": {
+   "start": [
+    -3263,
+    -7846
+   ],
+   "heading": [
+    0.119,
+    -0.993
+   ],
+   "length_m": 8170,
+   "events": 146,
+   "first_seen": "fh6_20260823_032213",
+   "last_seen": "fh6_20260823_032213.csv"
+  },
+  "-50_7150": {
+   "start": [
+    -49,
+    7144
+   ],
+   "heading": [
+    -0.776,
+    -0.631
+   ],
+   "length_m": 6276,
+   "events": 572,
+   "first_seen": "fh6_20260827_213049",
+   "last_seen": "fh6_20260905_210813"
+  },
+  "-400_-1150": {
+   "start": [
+    -378,
+    -1150
+   ],
+   "heading": [
+    -0.122,
+    0.993
+   ],
+   "length_m": 5953,
+   "events": 202,
+   "first_seen": "fh6_20260827_213049",
+   "last_seen": "fh6_20260828_001105"
+  },
+  "-4750_-1550": {
+   "start": [
+    -4756,
+    -1531
+   ],
+   "heading": [
+    0.776,
+    -0.63
+   ],
+   "length_m": 5954,
+   "events": 192,
+   "first_seen": "fh6_20260827_213049",
+   "last_seen": "fh6_20260906_125949"
+  },
+  "-2350_-7550": {
+   "name": "Hakone Nanamagari",
+   "source": "dashboard 2026-08-28",
+   "mode": "event",
+   "start": [
+    -2360,
+    -7552
+   ],
+   "heading": [
+    0.022,
+    -1.0
+   ],
+   "length_m": 5950,
+   "events": 259,
+   "first_seen": "fh6_20260828_081447",
+   "last_seen": "fh6_20260906_083124"
+  },
+  "-1850_0": {
+   "start": [
+    -1868,
+    20
+   ],
+   "heading": [
+    -0.822,
+    -0.57
+   ],
+   "length_m": 6674,
+   "events": 23,
+   "first_seen": "fh6_20260827_224507",
+   "last_seen": "fh6_20260827_224507.csv"
+  },
+  "150_-850": {
+   "start": [
+    170,
+    -842
+   ],
+   "heading": [
+    -1.0,
+    -0.021
+   ],
+   "length_m": 7075,
+   "events": 701,
+   "first_seen": "fh6_20260827_224507",
+   "last_seen": "fh6_20260831_142941.csv"
+  },
+  "-100_-6050": {
+   "start": [
+    -112,
+    -6059
+   ],
+   "heading": [
+    -0.973,
+    -0.23
+   ],
+   "length_m": 5948,
+   "events": 47,
+   "first_seen": "fh6_20260828_122408",
+   "last_seen": "fh6_20260828_122408.csv"
+  },
+  "200_-6000": {
+   "start": [
+    208,
+    -6011
+   ],
+   "heading": [
+    -0.82,
+    0.572
+   ],
+   "length_m": 745,
+   "events": 28,
+   "first_seen": "fh6_20260828_122408",
+   "last_seen": "fh6_20260828_122408.csv"
+  },
+  "loop:test loop": {
+   "start": [
+    -1885,
+    1525
+   ],
+   "length_m": 740
+  },
+  "-3750_300": {
+   "start": [
+    -3761,
+    314
+   ],
+   "heading": [
+    -0.93,
+    -0.368
+   ],
+   "length_m": 52526,
+   "events": 533,
+   "first_seen": "fh6_20260829_023235",
+   "last_seen": "fh6_20260831_172011"
+  },
+  "-4100_-4850": {
+   "start": [
+    -4114,
+    -4826
+   ],
+   "heading": [
+    0.281,
+    0.96
+   ],
+   "length_m": 3683,
+   "events": 128,
+   "first_seen": "fh6_20260831_142941",
+   "last_seen": "fh6_20260906_051145"
+  },
+  "-4950_-5500": {
+   "start": [
+    -4967,
+    -5476
+   ],
+   "heading": [
+    0.108,
+    -0.994
+   ],
+   "length_m": 4226,
+   "events": 116,
+   "first_seen": "fh6_20260831_142941",
+   "last_seen": "fh6_20260906_051145"
+  },
+  "-2800_-3750": {
+   "start": [
+    -2823,
+    -3733
+   ],
+   "heading": [
+    -0.159,
+    0.987
+   ],
+   "length_m": 5571,
+   "events": 51,
+   "first_seen": "fh6_20260831_142941",
+   "last_seen": "fh6_20260906_051145"
+  },
+  "-3250_-2300": {
+   "start": [
+    -3271,
+    -2310
+   ],
+   "heading": [
+    0.849,
+    0.529
+   ],
+   "length_m": 3791,
+   "events": 45,
+   "first_seen": "fh6_20260831_142941",
+   "last_seen": "fh6_20260831_142941"
+  },
+  "-6800_-1400": {
+   "start": [
+    -6812,
+    -1423
+   ],
+   "heading": [
+    0.851,
+    0.525
+   ],
+   "length_m": 7899,
+   "events": 28,
+   "first_seen": "fh6_20260829_023235",
+   "last_seen": "fh6_20260831_172011"
+  },
+  "-6800_-1300": {
+   "start": [
+    -6805,
+    -1283
+   ],
+   "heading": [
+    -0.931,
+    -0.365
+   ],
+   "length_m": 2289,
+   "events": 5,
+   "first_seen": "fh6_20260829_023235",
+   "last_seen": "fh6_20260829_023235"
+  },
+  "-1700_-4450": {
+   "start": [
+    -1703,
+    -4435
+   ],
+   "heading": [
+    0.993,
+    -0.116
+   ],
+   "length_m": 6997,
+   "events": 2045,
+   "first_seen": "fh6_20260831_172011",
+   "last_seen": "fh6_20260903_214216",
+   "name": "Highway Circuit",
+   "source": "dashboard 2026-09-02",
+   "mode": null,
+   "rivals": true
+  },
+  "-2300_-4850": {
+   "start": [
+    -2322,
+    -4862
+   ],
+   "heading": [
+    -0.537,
+    0.844
+   ],
+   "length_m": 338,
+   "events": 40,
+   "first_seen": "fh6_20260831_172011",
+   "last_seen": "fh6_20260831_172011"
+  },
+  "-3300_-200": {
+   "start": [
+    -3300,
+    -221
+   ],
+   "heading": [
+    0.994,
+    -0.113
+   ],
+   "length_m": 308,
+   "events": 38,
+   "first_seen": "fh6_20260831_172011",
+   "last_seen": "fh6_20260831_172011"
+  },
+  "-2650_-1050": {
+   "start": [
+    -2639,
+    -1034
+   ],
+   "heading": [
+    1.0,
+    0.032
+   ],
+   "length_m": 2814,
+   "events": 40,
+   "first_seen": "fh6_20260831_172011",
+   "last_seen": "fh6_20260831_172011"
+  },
+  "-2200_-1100": {
+   "start": [
+    -2204,
+    -1101
+   ],
+   "heading": [
+    -0.898,
+    0.439
+   ],
+   "length_m": 173,
+   "events": 34,
+   "first_seen": "fh6_20260831_172011",
+   "last_seen": "fh6_20260831_172011"
+  },
+  "-2250_-900": {
+   "start": [
+    -2257,
+    -918
+   ],
+   "heading": [
+    -0.917,
+    -0.4
+   ],
+   "length_m": 2724,
+   "events": 29,
+   "first_seen": "fh6_20260831_172011",
+   "last_seen": "fh6_20260831_172011"
+  },
+  "-2150_-2400": {
+   "start": [
+    -2134,
+    -2404
+   ],
+   "heading": [
+    0.864,
+    0.504
+   ],
+   "length_m": 7855,
+   "events": 135,
+   "first_seen": "fh6_20260831_172011",
+   "last_seen": "fh6_20260901_042403"
+  },
+  "-1750_-1250": {
+   "start": [
+    -1753,
+    -1237
+   ],
+   "heading": [
+    -0.902,
+    0.431
+   ],
+   "length_m": 476,
+   "events": 19,
+   "first_seen": "fh6_20260831_172011",
+   "last_seen": "fh6_20260831_172011"
+  },
+  "-1900_-1150": {
+   "start": [
+    -1921,
+    -1156
+   ],
+   "heading": [
+    -0.894,
+    0.449
+   ],
+   "length_m": 1717,
+   "events": 21,
+   "first_seen": "fh6_20260831_172011",
+   "last_seen": "fh6_20260906_051145"
+  },
+  "-2000_-1100": {
+   "start": [
+    -1999,
+    -1112
+   ],
+   "length_m": 8098,
+   "events": 34,
+   "last_seen": "fh6_20260906_051145",
+   "heading": [
+    -0.848,
+    0.529
+   ]
+  },
+  "-2200_-950": {
+   "start": [
+    -2195,
+    -958
+   ],
+   "length_m": 1423,
+   "events": 1,
+   "last_seen": "fh6_20260822_134343",
+   "heading": [
+    -0.961,
+    0.275
+   ]
+  },
+  "-2400_-1000": {
+   "start": [
+    -2389,
+    -1023
+   ],
+   "length_m": 4418,
+   "events": 2,
+   "last_seen": "fh6_20260906_051145",
+   "heading": [
+    0.945,
+    -0.326
+   ]
+  },
+  "-2700_-1050": {
+   "start": [
+    -2347,
+    -1212
+   ],
+   "length_m": 4683,
+   "events": 7,
+   "last_seen": "fh6_20260823_012735",
+   "heading": [
+    0.482,
+    -0.876
+   ]
+  },
+  "-5000_-850": {
+   "start": [
+    -5020,
+    -849
+   ],
+   "length_m": 5211,
+   "events": 1,
+   "last_seen": "fh6_20260822_035921",
+   "heading": [
+    0.988,
+    0.154
+   ]
+  },
+  "-850_7550": {
+   "start": [
+    -839,
+    7545
+   ],
+   "length_m": 3639,
+   "events": 3,
+   "last_seen": "fh6_20260822_212747",
+   "heading": [
+    0.635,
+    0.772
+   ]
+  },
+  "1000_2350": {
+   "start": [
+    985,
+    2343
+   ],
+   "length_m": 3439,
+   "events": 9,
+   "last_seen": "fh6_20260823_012735",
+   "heading": [
+    -0.964,
+    -0.265
+   ]
+  },
+  "1050_8550": {
+   "start": [
+    1089,
+    8538
+   ],
+   "length_m": 3330,
+   "events": 1,
+   "last_seen": "fh6_20260822_035921",
+   "heading": [
+    -0.938,
+    -0.345
+   ]
+  },
+  "1700_-4500": {
+   "start": [
+    1686,
+    -4537
+   ],
+   "length_m": 7098,
+   "events": 2,
+   "last_seen": "fh6_20260822_134343",
+   "heading": [
+    0.33,
+    0.944
+   ]
+  },
+  "2700_6400": {
+   "start": [
+    2707,
+    6395
+   ],
+   "length_m": 2708,
+   "events": 1,
+   "last_seen": "fh6_20260823_012735",
+   "heading": [
+    -0.116,
+    -0.993
+   ]
+  },
+  "2850_2700": {
+   "start": [
+    2845,
+    2671
+   ],
+   "length_m": 2759,
+   "events": 84,
+   "last_seen": "fh6_20260906_061412",
+   "heading": [
+    -0.645,
+    0.764
+   ]
+  },
+  "3100_6350": {
+   "start": [
+    3109,
+    6354
+   ],
+   "heading": [
+    0.219,
+    0.976
+   ],
+   "length_m": 7896,
+   "events": 221,
+   "first_seen": "fh6_20260901_042403",
+   "last_seen": "fh6_20260906_061412"
+  },
+  "-1350_-8500": {
+   "start": [
+    -1370,
+    -8514
+   ],
+   "heading": [
+    0.66,
+    0.751
+   ],
+   "length_m": 1875,
+   "events": 110,
+   "first_seen": "fh6_20260901_042403",
+   "last_seen": "fh6_20260906_073009"
+  },
+  "4350_-2350": {
+   "start": [
+    4353,
+    -2330
+   ],
+   "heading": [
+    -0.132,
+    -0.991
+   ],
+   "length_m": 9238,
+   "events": 63,
+   "first_seen": "fh6_20260901_042403",
+   "last_seen": "fh6_20260901_042403.csv"
+  },
+  "3600_6850": {
+   "start": [
+    3581,
+    6868
+   ],
+   "heading": [
+    -0.85,
+    -0.526
+   ],
+   "length_m": 7953,
+   "events": 56,
+   "first_seen": "fh6_20260901_042403",
+   "last_seen": "fh6_20260901_042403.csv"
+  },
+  "-5150_250": {
+   "start": [
+    -5139,
+    234
+   ],
+   "heading": [
+    0.924,
+    0.381
+   ],
+   "length_m": 4080,
+   "events": 343,
+   "first_seen": "fh6_20260901_042403",
+   "last_seen": "fh6_20260905_160823"
+  },
+  "1700_2100": {
+   "start": [
+    1700,
+    2103
+   ],
+   "heading": [
+    0.977,
+    -0.215
+   ],
+   "length_m": 5331,
+   "events": 43,
+   "first_seen": "fh6_20260901_042403",
+   "last_seen": "fh6_20260901_042403.csv"
+  },
+  "-7100_-1850": {
+   "start": [
+    -7106,
+    -1863
+   ],
+   "heading": [
+    0.047,
+    0.999
+   ],
+   "length_m": 3932,
+   "events": 34,
+   "first_seen": "fh6_20260901_042403",
+   "last_seen": "fh6_20260901_042403"
+  },
+  "3250_7300": {
+   "start": [
+    3263,
+    7290
+   ],
+   "heading": [
+    -0.586,
+    0.81
+   ],
+   "length_m": 2830,
+   "events": 23,
+   "first_seen": "fh6_20260901_042403",
+   "last_seen": "fh6_20260901_042403.csv"
+  },
+  "3550_6100": {
+   "start": [
+    3554,
+    6075
+   ],
+   "heading": [
+    0.274,
+    -0.962
+   ],
+   "length_m": 6955,
+   "events": 124,
+   "first_seen": "fh6_20260901_042403",
+   "last_seen": "fh6_20260828_001105"
+  },
+  "-600_-5350": {
+   "start": [
+    -594,
+    -5333
+   ],
+   "heading": [
+    0.551,
+    -0.835
+   ],
+   "length_m": 4422,
+   "events": 388,
+   "first_seen": "fh6_20260901_042403",
+   "last_seen": "fh6_20260901_140726"
+  },
+  "-1150_-5100": {
+   "start": [
+    -1131,
+    -5076
+   ],
+   "heading": [
+    -0.685,
+    0.728
+   ],
+   "length_m": 1462,
+   "events": 6,
+   "first_seen": "fh6_20260901_042403",
+   "last_seen": "fh6_20260901_042403"
+  },
+  "-600_-5350_58": {
+   "start": [
+    -593,
+    -5330
+   ],
+   "heading": [
+    0.58,
+    0.814
+   ],
+   "length_m": 4354,
+   "events": 7,
+   "first_seen": "fh6_20260901_042403",
+   "last_seen": "fh6_20260901_140726"
+  },
+  "-700_-4600": {
+   "start": [
+    -721,
+    -4592
+   ],
+   "heading": [
+    0.801,
+    -0.598
+   ],
+   "length_m": 1034,
+   "events": 46,
+   "first_seen": "fh6_20260901_133906",
+   "last_seen": "fh6_20260901_133906"
+  },
+  "-4800_550": {
+   "start": [
+    -4803,
+    532
+   ],
+   "heading": [
+    0.016,
+    1.0
+   ],
+   "length_m": 278,
+   "events": 7,
+   "first_seen": "fh6_20260901_184528",
+   "last_seen": "fh6_20260901_184528"
+  },
+  "-2050_-5550": {
+   "start": [
+    -2074,
+    -5526
+   ],
+   "heading": [
+    -0.662,
+    0.749
+   ],
+   "length_m": 1804,
+   "events": 2,
+   "first_seen": "fh6_20260902_005318",
+   "last_seen": "fh6_20260902_005318"
+  },
+  "4350_-4650": {
+   "start": [
+    4367,
+    -4659
+   ],
+   "heading": [
+    -0.245,
+    -0.97
+   ],
+   "length_m": 948,
+   "events": 17,
+   "first_seen": "fh6_20260903_022117",
+   "last_seen": "fh6_20260903_022117"
+  },
+  "4200_-5500": {
+   "start": [
+    4190,
+    -5481
+   ],
+   "heading": [
+    0.561,
+    -0.828
+   ],
+   "length_m": 1155,
+   "events": 19,
+   "first_seen": "fh6_20260903_022117",
+   "last_seen": "fh6_20260906_061412"
+  },
+  "4200_-5450_62": {
+   "start": [
+    4181,
+    -5462
+   ],
+   "heading": [
+    -0.173,
+    0.985
+   ],
+   "length_m": 5388,
+   "events": 21,
+   "first_seen": "fh6_20260903_103914",
+   "last_seen": "fh6_20260906_061412"
+  },
+  "900_-1150": {
+   "start": [
+    911,
+    -1137
+   ],
+   "heading": [
+    0.419,
+    0.908
+   ],
+   "length_m": 6813,
+   "events": 76,
+   "first_seen": "fh6_20260903_103914",
+   "last_seen": "fh6_20260906_083124"
+  },
+  "-4500_-3500": {
+   "start": [
+    -4507,
+    -3504
+   ],
+   "heading": [
+    0.087,
+    -0.996
+   ],
+   "length_m": 7462,
+   "events": 25,
+   "first_seen": "fh6_20260903_162743",
+   "last_seen": "fh6_20260903_162743"
+  },
+  "-4100_-4750": {
+   "start": [
+    -4082,
+    -4728
+   ],
+   "heading": [
+    -0.252,
+    -0.968
+   ],
+   "length_m": 5289,
+   "events": 20,
+   "first_seen": "fh6_20260903_162743",
+   "last_seen": "fh6_20260903_162743"
+  },
+  "-2300_-5700": {
+   "start": [
+    -2288,
+    -5695
+   ],
+   "heading": [
+    0.173,
+    0.985
+   ],
+   "length_m": 723,
+   "events": 15,
+   "first_seen": "fh6_20260903_162743",
+   "last_seen": "fh6_20260903_162743"
+  },
+  "1150_-5350": {
+   "start": [
+    1175,
+    -5365
+   ],
+   "heading": [
+    -0.741,
+    -0.672
+   ],
+   "length_m": 6534,
+   "events": 3,
+   "first_seen": "fh6_20260903_162743",
+   "last_seen": "fh6_20260903_171358"
+  },
+  "900_-5900": {
+   "start": [
+    883,
+    -5908
+   ],
+   "heading": [
+    -0.761,
+    0.649
+   ],
+   "length_m": 5385,
+   "events": 62,
+   "first_seen": "fh6_20260903_171358",
+   "last_seen": "fh6_20260903_171358"
+  },
+  "-500_-6400": {
+   "start": [
+    -484,
+    -6423
+   ],
+   "heading": [
+    0.87,
+    0.493
+   ],
+   "length_m": 6811,
+   "events": 42,
+   "first_seen": "fh6_20260903_171358",
+   "last_seen": "fh6_20260903_171358"
+  },
+  "-1900_-200": {
+   "start": [
+    -1898,
+    -217
+   ],
+   "heading": [
+    0.161,
+    -0.987
+   ],
+   "length_m": 62,
+   "events": 1,
+   "first_seen": "fh6_20260822_035921",
+   "last_seen": "fh6_20260822_035921"
+  },
+  "-1900_-500": {
+   "start": [
+    -1889,
+    -514
+   ],
+   "heading": [
+    0.097,
+    -0.995
+   ],
+   "length_m": 40,
+   "events": 2,
+   "first_seen": "fh6_20260822_035921",
+   "last_seen": "fh6_20260822_035921"
+  },
+  "-2400_-4700": {
+   "start": [
+    -2381,
+    -4720
+   ],
+   "heading": [
+    -0.997,
+    0.074
+   ],
+   "length_m": 235,
+   "events": 1,
+   "first_seen": "fh6_20260822_035921",
+   "last_seen": "fh6_20260822_035921"
+  },
+  "-2050_-3050": {
+   "start": [
+    -2058,
+    -3026
+   ],
+   "heading": [
+    -0.995,
+    -0.105
+   ],
+   "length_m": 161,
+   "events": 1,
+   "first_seen": "fh6_20260822_035921",
+   "last_seen": "fh6_20260822_035921"
+  },
+  "-2350_-900": {
+   "start": [
+    -2351,
+    -884
+   ],
+   "heading": [
+    0.036,
+    -0.999
+   ],
+   "length_m": 2724,
+   "events": 2,
+   "first_seen": "fh6_20260822_035921",
+   "last_seen": "fh6_20260831_172011.csv"
+  },
+  "-1050_400": {
+   "start": [
+    -1028,
+    400
+   ],
+   "heading": [
+    0.914,
+    0.407
+   ],
+   "length_m": 281,
+   "events": 1,
+   "first_seen": "fh6_20260822_035921",
+   "last_seen": "fh6_20260822_035921"
+  },
+  "-750_6700": {
+   "start": [
+    -770,
+    6704
+   ],
+   "heading": [
+    0.987,
+    -0.16
+   ],
+   "length_m": 46740,
+   "events": 46,
+   "first_seen": "fh6_20260905_220248",
+   "last_seen": "fh6_20260905_220248"
+  },
+  "5900_1850": {
+   "start": [
+    5910,
+    1825
+   ],
+   "heading": [
+    0.826,
+    0.564
+   ],
+   "length_m": 3064,
+   "events": 118,
+   "first_seen": "fh6_20260905_220248",
+   "last_seen": "fh6_20260905_220248"
+  },
+  "5750_1550": {
+   "start": [
+    5773,
+    1557
+   ],
+   "heading": [
+    -0.255,
+    0.967
+   ],
+   "length_m": 277,
+   "events": 1,
+   "first_seen": "fh6_20260905_222810",
+   "last_seen": "fh6_20260905_222810"
+  },
+  "4000_-6000": {
+   "start": [
+    4004,
+    -6010
+   ],
+   "heading": [
+    0.854,
+    -0.521
+   ],
+   "length_m": 3015,
+   "events": 8,
+   "first_seen": "fh6_20260905_232556",
+   "last_seen": "fh6_20260905_232556"
+  },
+  "4300_-4650": {
+   "start": [
+    4318,
+    -4663
+   ],
+   "heading": [
+    0.985,
+    0.171
+   ],
+   "length_m": 11225,
+   "events": 5,
+   "first_seen": "fh6_20260903_022117",
+   "last_seen": "fh6_20260906_024029"
+  },
+  "4200_-5450_81": {
+   "start": [
+    4184,
+    -5462
+   ],
+   "heading": [
+    0.471,
+    0.882
+   ],
+   "length_m": 7020,
+   "events": 6,
+   "first_seen": "fh6_20260903_030433",
+   "last_seen": "fh6_20260906_061412"
+  },
+  "4200_-5450_82": {
+   "start": [
+    4183,
+    -5462
+   ],
+   "heading": [
+    0.51,
+    0.86
+   ],
+   "length_m": 82488,
+   "events": 2,
+   "first_seen": "fh6_20260905_210813",
+   "last_seen": "fh6_20260905_220248"
+  },
+  "4350_-5800": {
+   "start": [
+    4335,
+    -5799
+   ],
+   "heading": [
+    -0.157,
+    0.988
+   ],
+   "length_m": 2977,
+   "events": 12,
+   "first_seen": "fh6_20260906_024029",
+   "last_seen": "fh6_20260906_024029"
+  },
+  "4500_-4750": {
+   "start": [
+    4487,
+    -4738
+   ],
+   "heading": [
+    0.874,
+    0.486
+   ],
+   "length_m": 3857,
+   "events": 25,
+   "first_seen": "fh6_20260906_024029",
+   "last_seen": "fh6_20260906_024029"
+  },
+  "4200_-5450_85": {
+   "start": [
+    4183,
+    -5461
+   ],
+   "heading": [
+    0.514,
+    0.858
+   ],
+   "length_m": 25055,
+   "events": 257,
+   "first_seen": "fh6_20260906_035542",
+   "last_seen": "fh6_20260906_083124"
+  },
+  "4950_1150": {
+   "start": [
+    4941,
+    1171
+   ],
+   "heading": [
+    -0.031,
+    -1.0
+   ],
+   "length_m": 12540,
+   "events": 101,
+   "first_seen": "fh6_20260906_035542",
+   "last_seen": "fh6_20260906_061412"
+  },
+  "4700_-5300": {
+   "start": [
+    4708,
+    -5291
+   ],
+   "heading": [
+    0.997,
+    0.077
+   ],
+   "length_m": 3727,
+   "events": 16,
+   "first_seen": "fh6_20260906_051145",
+   "last_seen": "fh6_20260906_051145"
+  },
+  "4200_-5500_88": {
+   "start": [
+    4190,
+    -5481
+   ],
+   "heading": [
+    -0.895,
+    -0.445
+   ],
+   "length_m": 1195,
+   "events": 1,
+   "first_seen": "fh6_20260906_061412",
+   "last_seen": "fh6_20260906_061412"
+  },
+  "2500_-5050": {
+   "start": [
+    2491,
+    -5065
+   ],
+   "heading": [
+    -0.118,
+    -0.993
+   ],
+   "length_m": 2124,
+   "events": 122,
+   "first_seen": "fh6_20260906_061412",
+   "last_seen": "fh6_20260906_061412"
+  },
+  "-550_4950": {
+   "start": [
+    -574,
+    4963
+   ],
+   "heading": [
+    -0.892,
+    0.452
+   ],
+   "length_m": 5764,
+   "events": 108,
+   "first_seen": "fh6_20260906_061412",
+   "last_seen": "fh6_20260906_061412"
+  },
+  "4050_-2850": {
+   "start": [
+    4041,
+    -2866
+   ],
+   "heading": [
+    0.074,
+    -0.997
+   ],
+   "length_m": 19609,
+   "events": 9,
+   "first_seen": "fh6_20260906_061412",
+   "last_seen": "fh6_20260906_061412"
+  },
+  "-4450_400": {
+   "start": [
+    -4469,
+    399
+   ],
+   "heading": [
+    0.38,
+    0.925
+   ],
+   "length_m": 87,
+   "events": 8,
+   "first_seen": "fh6_20260906_073009",
+   "last_seen": "fh6_20260906_073009"
+  },
+  "50_1800": {
+   "start": [
+    68,
+    1799
+   ],
+   "heading": [
+    0.176,
+    0.984
+   ],
+   "length_m": 2534,
+   "events": 3,
+   "first_seen": "fh6_20260906_073009",
+   "last_seen": "fh6_20260906_073009"
+  },
+  "2350_1350": {
+   "start": [
+    2365,
+    1325
+   ],
+   "heading": [
+    -0.946,
+    -0.324
+   ],
+   "length_m": 469,
+   "events": 77,
+   "first_seen": "fh6_20260906_083124",
+   "last_seen": "fh6_20260906_083124"
+  },
+  "route:162": {
+   "start": [
+    2879,
+    -225
+   ],
+   "heading": [
+    -0.938,
+    0.345
+   ],
+   "length_m": 5633,
+   "catalogue": true,
+   "is_race": false,
+   "events": 1,
+   "last_seen": "fh6_20260823_023501",
+   "first_seen": "fh6_20260823_023501",
+   "name": "Bamboo Forest Scramble"
+  },
+  "route:2121": {
+   "start": [
+    5909,
+    1825
+   ],
+   "heading": [
+    0.815,
+    0.579
+   ],
+   "length_m": 8090,
+   "catalogue": true,
+   "is_race": false,
+   "events": 3,
+   "last_seen": "fh6_20260823_025408",
+   "first_seen": "fh6_20260823_025408",
+   "name": "Ito Trail"
+  },
+  "route:2052": {
+   "start": [
+    1882,
+    6077
+   ],
+   "heading": [
+    0.849,
+    0.528
+   ],
+   "length_m": 30692,
+   "catalogue": true,
+   "is_race": false,
+   "events": 2,
+   "last_seen": "fh6_20260823_025408",
+   "first_seen": "fh6_20260823_025408",
+   "name": "The Gauntlet"
+  },
+  "route:1341": {
+   "start": [
+    -4536,
+    -6051
+   ],
+   "heading": [
+    -0.988,
+    0.152
+   ],
+   "length_m": 8104,
+   "catalogue": true,
+   "is_race": false,
+   "events": 2,
+   "last_seen": "fh6_20260903_011214",
+   "first_seen": "fh6_20260823_032213",
+   "name": "Izu Cross Country"
+  },
+  "route:2411": {
+   "start": [
+    -3263,
+    -7846
+   ],
+   "heading": [
+    0.081,
+    -0.997
+   ],
+   "length_m": 9102,
+   "catalogue": true,
+   "is_race": false,
+   "events": 2,
+   "last_seen": "fh6_20260823_032213",
+   "first_seen": "fh6_20260823_032213",
+   "name": "Coastline Sprint"
+  },
+  "route:6001": {
+   "start": [
+    -7354,
+    -2127
+   ],
+   "heading": [
+    0.214,
+    0.977
+   ],
+   "length_m": 2092,
+   "catalogue": true,
+   "is_race": true,
+   "events": 60,
+   "last_seen": "fh6_20260906_115521",
+   "first_seen": "fh6_20260823_032213",
+   "name": "Edamame Circuit"
+  },
+  "route:141": {
+   "start": [
+    -1846,
+    1569
+   ],
+   "heading": [
+    0.677,
+    -0.736
+   ],
+   "length_m": 1453,
+   "catalogue": true,
+   "is_race": true,
+   "events": 6,
+   "last_seen": "fh6_20260828_120421",
+   "first_seen": "fh6_20260823_101233",
+   "name": "Shimanoyama Circuit"
+  },
+  "route:5041": {
+   "start": [
+    -49,
+    7144
+   ],
+   "heading": [
+    -0.782,
+    -0.623
+   ],
+   "length_m": 7814,
+   "catalogue": true,
+   "is_race": true,
+   "events": 7,
+   "last_seen": "fh6_20260906_073009",
+   "first_seen": "fh6_20260827_213049",
+   "name": "Norikura Skyline"
+  },
+  "route:5201": {
+   "start": [
+    -378,
+    -1150
+   ],
+   "heading": [
+    -0.129,
+    0.992
+   ],
+   "length_m": 6919,
+   "catalogue": true,
+   "is_race": true,
+   "events": 5,
+   "last_seen": "fh6_20260905_201758",
+   "first_seen": "fh6_20260827_213049",
+   "name": "Arashiyama Takao"
+  },
+  "route:5031": {
+   "start": [
+    3554,
+    6075
+   ],
+   "heading": [
+    0.303,
+    -0.953
+   ],
+   "length_m": 8741,
+   "catalogue": true,
+   "is_race": true,
+   "events": 11,
+   "last_seen": "fh6_20260906_125949",
+   "first_seen": "fh6_20260827_213049",
+   "name": "Mt. Haruna"
+  },
+  "route:5191": {
+   "start": [
+    -4756,
+    -1531
+   ],
+   "heading": [
+    0.78,
+    -0.626
+   ],
+   "length_m": 5947,
+   "catalogue": true,
+   "is_race": true,
+   "events": 8,
+   "last_seen": "fh6_20260906_134846",
+   "first_seen": "fh6_20260827_213049",
+   "name": "Bandai Azuma"
+  },
+  "route:5411": {
+   "start": [
+    -2360,
+    -7552
+   ],
+   "heading": [
+    0.04,
+    -0.999
+   ],
+   "length_m": 3084,
+   "catalogue": true,
+   "is_race": false,
+   "events": 25,
+   "last_seen": "fh6_20260906_083124",
+   "first_seen": "fh6_20260827_213049",
+   "name": "Hakone Nanamagari"
+  },
+  "route:4141": {
+   "start": [
+    -1868,
+    20
+   ],
+   "heading": [
+    -0.835,
+    -0.55
+   ],
+   "length_m": 7379,
+   "catalogue": true,
+   "is_race": false,
+   "events": 1,
+   "last_seen": "fh6_20260827_224507",
+   "first_seen": "fh6_20260827_224507",
+   "name": "Festival Chase"
+  },
+  "route:4211": {
+   "start": [
+    170,
+    -842
+   ],
+   "heading": [
+    -0.999,
+    -0.046
+   ],
+   "length_m": 7326,
+   "catalogue": true,
+   "is_race": false,
+   "events": 35,
+   "last_seen": "fh6_20260831_142941",
+   "first_seen": "fh6_20260827_224507",
+   "name": "Cedar Run"
+  },
+  "route:30000": {
+   "start": [
+    -2047,
+    1596
+   ],
+   "heading": [
+    -0.105,
+    0.995
+   ],
+   "length_m": 1107,
+   "catalogue": true,
+   "is_race": false,
+   "events": 2,
+   "last_seen": "fh6_20260828_120421",
+   "first_seen": "fh6_20260828_120421",
+   "name": "Shimanoyama Circuit"
+  },
+  "route:352": {
+   "start": [
+    -112,
+    -6059
+   ],
+   "heading": [
+    -0.973,
+    -0.23
+   ],
+   "length_m": 2724,
+   "catalogue": true,
+   "is_race": true,
+   "events": 2,
+   "last_seen": "fh6_20260828_122408",
+   "first_seen": "fh6_20260828_122408",
+   "name": "Daikoku Circuit"
+  },
+  "route:311": {
+   "start": [
+    4246,
+    -5179
+   ],
+   "heading": [
+    -0.274,
+    0.962
+   ],
+   "length_m": 5038,
+   "catalogue": true,
+   "is_race": true,
+   "events": 21,
+   "last_seen": "fh6_20260906_125949",
+   "first_seen": "fh6_20260828_122408",
+   "name": "Legend Island Circuit"
+  },
+  "route:132": {
+   "start": [
+    -6796,
+    -1260
+   ],
+   "heading": [
+    0.875,
+    0.485
+   ],
+   "length_m": 52526,
+   "catalogue": true,
+   "is_race": false,
+   "events": 6,
+   "last_seen": "fh6_20260831_172011",
+   "first_seen": "fh6_20260828_213928",
+   "name": "The Colossus"
+  },
+  "route:271": {
+   "start": [
+    -4114,
+    -4826
+   ],
+   "heading": [
+    0.281,
+    0.96
+   ],
+   "length_m": 3683,
+   "catalogue": true,
+   "is_race": false,
+   "events": 2,
+   "last_seen": "fh6_20260906_051145",
+   "first_seen": "fh6_20260831_142941",
+   "name": "Taiyaki Scramble"
+  },
+  "route:341": {
+   "start": [
+    -4967,
+    -5476
+   ],
+   "heading": [
+    0.108,
+    -0.994
+   ],
+   "length_m": 4226,
+   "catalogue": true,
+   "is_race": false,
+   "events": 3,
+   "last_seen": "fh6_20260906_051145",
+   "first_seen": "fh6_20260831_142941",
+   "name": "Kawazu Nanadaru Scramble"
+  },
+  "route:2281": {
+   "start": [
+    -2838,
+    -3643
+   ],
+   "heading": [
+    -0.159,
+    0.987
+   ],
+   "length_m": 6321,
+   "catalogue": true,
+   "is_race": false,
+   "events": 2,
+   "last_seen": "fh6_20260906_051145",
+   "first_seen": "fh6_20260831_142941",
+   "name": "Kinkaku-ji Trail"
+  },
+  "route:281": {
+   "start": [
+    -1703,
+    -4435
+   ],
+   "heading": [
+    0.993,
+    -0.116
+   ],
+   "length_m": 6997,
+   "catalogue": true,
+   "is_race": true,
+   "events": 40,
+   "last_seen": "fh6_20260903_214216",
+   "first_seen": "fh6_20260831_172011",
+   "name": "Highway Circuit"
+  },
+  "route:2051": {
+   "start": [
+    3109,
+    6354
+   ],
+   "heading": [
+    0.219,
+    0.976
+   ],
+   "length_m": 9971,
+   "catalogue": true,
+   "is_race": false,
+   "events": 4,
+   "last_seen": "fh6_20260906_061412",
+   "first_seen": "fh6_20260901_042403",
+   "name": "Nukabira Trail"
+  },
+  "route:421": {
+   "start": [
+    -1397,
+    -8545
+   ],
+   "heading": [
+    0.66,
+    0.751
+   ],
+   "length_m": 1875,
+   "catalogue": true,
+   "is_race": false,
+   "events": 2,
+   "last_seen": "fh6_20260906_073009",
+   "first_seen": "fh6_20260901_042403",
+   "name": "Irokawa Circuit"
+  },
+  "route:2241": {
+   "start": [
+    4353,
+    -2330
+   ],
+   "heading": [
+    -0.132,
+    -0.991
+   ],
+   "length_m": 11109,
+   "catalogue": true,
+   "is_race": false,
+   "events": 1,
+   "last_seen": "fh6_20260901_042403",
+   "first_seen": "fh6_20260901_042403",
+   "name": "Ito Sprint"
+  },
+  "route:2031": {
+   "start": [
+    3581,
+    6868
+   ],
+   "heading": [
+    -0.85,
+    -0.526
+   ],
+   "length_m": 8440,
+   "catalogue": true,
+   "is_race": false,
+   "events": 1,
+   "last_seen": "fh6_20260901_042403",
+   "first_seen": "fh6_20260901_042403",
+   "name": "Venus Sprint"
+  },
+  "route:131": {
+   "start": [
+    -5139,
+    234
+   ],
+   "heading": [
+    0.924,
+    0.381
+   ],
+   "length_m": 4080,
+   "catalogue": true,
+   "is_race": true,
+   "events": 7,
+   "last_seen": "fh6_20260905_160823",
+   "first_seen": "fh6_20260901_042403",
+   "name": "Narai-Juku Circuit"
+  },
+  "route:4102": {
+   "start": [
+    1700,
+    2103
+   ],
+   "heading": [
+    0.977,
+    -0.215
+   ],
+   "length_m": 6913,
+   "catalogue": true,
+   "is_race": false,
+   "events": 1,
+   "last_seen": "fh6_20260901_042403",
+   "first_seen": "fh6_20260901_042403",
+   "name": "Sunflower Charge"
+  },
+  "route:2201": {
+   "start": [
+    -2134,
+    -2404
+   ],
+   "heading": [
+    0.872,
+    0.49
+   ],
+   "length_m": 9321,
+   "catalogue": true,
+   "is_race": false,
+   "events": 1,
+   "last_seen": "fh6_20260901_042403",
+   "first_seen": "fh6_20260901_042403",
+   "name": "Festival Sprint"
+  },
+  "route:4031": {
+   "start": [
+    3263,
+    7290
+   ],
+   "heading": [
+    -0.586,
+    0.81
+   ],
+   "length_m": 6651,
+   "catalogue": true,
+   "is_race": false,
+   "events": 1,
+   "last_seen": "fh6_20260901_042403",
+   "first_seen": "fh6_20260901_042403",
+   "name": "Norikura Descent"
+  },
+  "route:351": {
+   "start": [
+    -605,
+    -5316
+   ],
+   "heading": [
+    0.551,
+    -0.835
+   ],
+   "length_m": 4422,
+   "catalogue": true,
+   "is_race": true,
+   "events": 7,
+   "last_seen": "fh6_20260906_073009",
+   "first_seen": "fh6_20260901_042403",
+   "name": "Electric Town Circuit"
+  },
+  "route:2311": {
+   "start": [
+    4187,
+    -5461
+   ],
+   "heading": [
+    0.21,
+    0.978
+   ],
+   "length_m": 6946,
+   "catalogue": true,
+   "is_race": true,
+   "events": 3,
+   "last_seen": "fh6_20260906_083124",
+   "first_seen": "fh6_20260903_022117",
+   "name": "Legend Island Trail"
+  },
+  "route:5555": {
+   "start": [
+    4185,
+    -5461
+   ],
+   "heading": [
+    0.498,
+    0.867
+   ],
+   "length_m": 85273,
+   "catalogue": true,
+   "is_race": true,
+   "events": 11,
+   "last_seen": "fh6_20260906_061412",
+   "first_seen": "fh6_20260903_022117",
+   "name": "The Goliath"
+  },
+  "route:1211": {
+   "start": [
+    911,
+    -1137
+   ],
+   "heading": [
+    0.419,
+    0.908
+   ],
+   "length_m": 2992,
+   "catalogue": true,
+   "is_race": true,
+   "events": 1,
+   "last_seen": "fh6_20260903_103914",
+   "first_seen": "fh6_20260903_103914",
+   "name": "Naruo Cross Country Circuit"
+  },
+  "route:4271": {
+   "start": [
+    -4507,
+    -3504
+   ],
+   "heading": [
+    0.087,
+    -0.996
+   ],
+   "length_m": 8360,
+   "catalogue": true,
+   "is_race": false,
+   "events": 1,
+   "last_seen": "fh6_20260903_162743",
+   "first_seen": "fh6_20260903_162743",
+   "name": "Minami Chase"
+  },
+  "route:4361": {
+   "start": [
+    1175,
+    -5365
+   ],
+   "heading": [
+    -0.741,
+    -0.672
+   ],
+   "length_m": 7104,
+   "catalogue": true,
+   "is_race": false,
+   "events": 2,
+   "last_seen": "fh6_20260903_171358",
+   "first_seen": "fh6_20260903_162743",
+   "name": "Tokyo City Docks Charge"
+  },
+  "route:4351": {
+   "start": [
+    -484,
+    -6423
+   ],
+   "heading": [
+    0.87,
+    0.493
+   ],
+   "length_m": 7254,
+   "catalogue": true,
+   "is_race": true,
+   "events": 1,
+   "last_seen": "fh6_20260903_171358",
+   "first_seen": "fh6_20260903_171358",
+   "name": "Daikoku Chase"
+  },
+  "route:121": {
+   "start": [
+    5910,
+    1825
+   ],
+   "heading": [
+    0.818,
+    0.575
+   ],
+   "length_m": 3071,
+   "catalogue": true,
+   "is_race": true,
+   "events": 3,
+   "last_seen": "fh6_20260905_222810",
+   "first_seen": "fh6_20260905_220248",
+   "name": "Ine Scramble"
+  },
+  "route:181": {
+   "start": [
+    -7102,
+    -1883
+   ],
+   "heading": [
+    -0.008,
+    1.0
+   ],
+   "length_m": 3932,
+   "catalogue": true,
+   "is_race": false,
+   "events": 1,
+   "last_seen": "fh6_20260906_035542",
+   "first_seen": "fh6_20260906_035542",
+   "name": "Horizon Stadium Scramble"
+  },
+  "route:1311": {
+   "start": [
+    4708,
+    -5291
+   ],
+   "heading": [
+    0.997,
+    0.077
+   ],
+   "length_m": 4925,
+   "catalogue": true,
+   "is_race": false,
+   "events": 1,
+   "last_seen": "fh6_20260906_051145",
+   "first_seen": "fh6_20260906_051145",
+   "name": "Legend Island Cross Country Circuit"
+  },
+  "route:1023": {
+   "start": [
+    -2017,
+    -1104
+   ],
+   "heading": [
+    -0.844,
+    0.536
+   ],
+   "length_m": 23395,
+   "catalogue": true,
+   "is_race": true,
+   "events": 2,
+   "last_seen": "fh6_20260906_051145",
+   "first_seen": "fh6_20260906_051145",
+   "name": "The Titan"
+  },
+  "route:1201": {
+   "start": [
+    -2463,
+    -1032
+   ],
+   "heading": [
+    0.844,
+    0.536
+   ],
+   "length_m": 7874,
+   "catalogue": true,
+   "is_race": false,
+   "events": 2,
+   "last_seen": "fh6_20260906_073009",
+   "first_seen": "fh6_20260906_051145",
+   "name": "Temple Cross Country"
+  },
+  "route:101": {
+   "start": [
+    2858,
+    2655
+   ],
+   "heading": [
+    -0.658,
+    0.753
+   ],
+   "length_m": 2563,
+   "catalogue": true,
+   "is_race": true,
+   "events": 1,
+   "last_seen": "fh6_20260906_061412",
+   "first_seen": "fh6_20260906_061412",
+   "name": "Hokubu Circuit"
+  },
+  "route:30003": {
+   "start": [
+    2493,
+    -5046
+   ],
+   "heading": [
+    -0.118,
+    -0.993
+   ],
+   "length_m": 2134,
+   "catalogue": true,
+   "is_race": false,
+   "events": 2,
+   "last_seen": "fh6_20260906_061412",
+   "first_seen": "fh6_20260906_061412",
+   "name": "Sekibe Scramble"
+  },
+  "route:2061": {
+   "start": [
+    -574,
+    4963
+   ],
+   "heading": [
+    -0.892,
+    0.452
+   ],
+   "length_m": 6082,
+   "catalogue": true,
+   "is_race": false,
+   "events": 3,
+   "last_seen": "fh6_20260906_061412",
+   "first_seen": "fh6_20260906_061412",
+   "name": "Waterfall Trail"
+  },
+  "route:2211": {
+   "start": [
+    910,
+    -1137
+   ],
+   "heading": [
+    0.416,
+    0.91
+   ],
+   "length_m": 8165,
+   "catalogue": true,
+   "is_race": false,
+   "events": 1,
+   "last_seen": "fh6_20260906_083124",
+   "first_seen": "fh6_20260906_083124",
+   "name": "Airfield Trail"
+  },
+  "route:2041": {
+   "start": [
+    -283,
+    6385
+   ],
+   "heading": [
+    0.272,
+    0.962
+   ],
+   "length_m": 9021,
+   "catalogue": true,
+   "is_race": false,
+   "events": 1,
+   "last_seen": "fh6_20260906_125949",
+   "first_seen": "fh6_20260906_125949",
+   "name": "Tateyama Kurobe Sprint"
   }
  }
 }

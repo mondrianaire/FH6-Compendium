@@ -1,0 +1,216 @@
+//------------------------------------------------
+//--- 010 Editor Binary Template
+//
+//      File: fh6_dataout_packet.bt
+//   Authors: FH6 Tuning Lab
+//   Version: 1.0 (2026-09-18)
+//   Purpose: Forza Horizon 6 "Data Out" UDP telemetry packet -- 324 bytes
+//  Category: Game
+//
+// SOURCE-CATEGORY: live wire format -- NO FILE ON DISK
+// SOURCE-LOCATION: (none -- UDP datagram; port set in-game at Settings > HUD and Gameplay > Data Out)
+// SOURCE-LOCATION: captures/*.csv.gz -- 400 recorded sessions, DECODED to one row per frame
+// SOURCE-READ: bind a UDP socket and unpack 324 little-endian bytes. Length identifies the game:
+// SOURCE-READ:   232 = sled only, 311 = FM7, 324 = FH4/FH5/FH6, 331 = FM2023.
+// SOURCE-READ: the capture tool pads a 323-byte datagram with one zero byte before decoding.
+// SOURCE-READER: scripts/telemetry/fh6_dataout_capture.py (and fh6_live_daemon.py, port 8765)
+//
+// THIS IS A WIRE FORMAT, NOT A FILE. One datagram per simulation frame, ~60/s,
+// sent by the game to the address set in
+//   Settings > HUD and Gameplay > (bottom) Data Out
+// The lab listens on UDP 9876 (fh6_live_daemon.py) and records frames to
+// captures/*.csv.gz. To open one of those bytes-on-the-wire in 010 Editor you
+// need a raw dump (e.g. a pcap payload); the CSVs are already decoded.
+//
+// It is also the ONLY developer-supplied live source this project has. Every
+// other source is a decode of a game file. See docs/data-availability.md.
+//
+// LAYOUT AUTHORITY: the official FH Data Out doc (Zendesk 51744149102611),
+// 324 bytes, little-endian, identical across FH4/FH5/FH6. Offsets cross-checked
+// against ClickClickMedia / 0x20F / grimsi / richstokes, and against this lab's
+// own corpus (below). Canonical implementation:
+//   scripts/telemetry/fh6_dataout_capture.py  (FH_FMT / FIELDS)
+//
+// RELATED PACKET SIZES on the same port -- length alone identifies the game:
+//   232 = sled only     311 = FM7      324 = FH4 / FH5 / FH6      331 = FM2023
+// fh6_dataout_capture.py counts every length it sees and ignores anything < 323.
+//
+// CORPUS: measured 2026-09-18 over 4,356,598 frames from a 25-capture sample of
+// the 400 on disk. Findings are marked MEASURED below; anything not so marked
+// is taken from the spec and not independently confirmed here.
+//
+// EVERY BYTE IS ACCOUNTED FOR: 232 (sled) + 12 (horizon) + 79 (dash) + 1 = 324.
+//------------------------------------------------
+
+LittleEndian();
+
+// Wheel order is FRONT-LEFT, FRONT-RIGHT, REAR-LEFT, REAR-RIGHT in every
+// per-wheel array in this packet. Never re-order; several lab bugs have come
+// from assuming FL/RL/FR/RR.
+typedef struct { float FL; float FR; float RL; float RR; } Wheel4f <comment="FL,FR,RL,RR">;
+typedef struct { int   FL; int   FR; int   RL; int   RR; } Wheel4i <comment="FL,FR,RL,RR">;
+
+//================================================ 0x000  SLED BLOCK (232 bytes)
+// Shared with Forza Motorsport. Identical in FM7's 311-byte packet.
+typedef struct {
+
+    int    IsRaceOn <comment="1 = simulation running, 0 = in a menu or paused">;
+    uint   TimestampMS <comment="game clock, ms; wraps; NOT wall time">;
+
+    float  EngineMaxRpm;
+    float  EngineIdleRpm;
+    float  CurrentEngineRpm;
+
+    // Acceleration in the CAR's frame, m/s^2. Divide by 9.80665 for g.
+    // X is lateral (the lab's lat_g), Z is longitudinal (long_g).
+    float  AccelerationX <comment="m/s^2, lateral -> lat_g">;
+    float  AccelerationY <comment="m/s^2, vertical">;
+    float  AccelerationZ <comment="m/s^2, longitudinal -> long_g">;
+
+    // Velocity in the WORLD frame, m/s. |Velocity| == Speed (see assertions);
+    // the angle between this and the car's heading is body slip beta, which is
+    // how the drift work recovers slip angle and how a slip-corrected cornering
+    // radius would be computed. beta is NOT transmitted -- it is derived.
+    float  VelocityX <comment="m/s, world frame">;
+    float  VelocityY <comment="m/s, world frame">;
+    float  VelocityZ <comment="m/s, world frame">;
+
+    float  AngularVelocityX <comment="rad/s, pitch rate">;
+    float  AngularVelocityY <comment="rad/s, YAW RATE -- the lab's yaw_rate_dps and lap_point.r_m = v/omega">;
+    float  AngularVelocityZ <comment="rad/s, roll rate">;
+
+    float  Yaw   <comment="radians">;
+    float  Pitch <comment="radians">;
+    float  Roll  <comment="radians">;
+
+    Wheel4f NormalizedSuspensionTravel <comment="0 = full droop, 1 = full compression">;
+    Wheel4f TireSlipRatio      <comment="longitudinal slip; 0 = gripping, >1 = spinning/locked">;
+    Wheel4f WheelRotationSpeed <comment="rad/s">;
+    Wheel4i WheelOnRumbleStrip <comment="s32 not float -- a real spec quirk, easy to mis-parse">;
+    Wheel4f WheelInPuddleDepth <comment="0..1">;
+    Wheel4f SurfaceRumble;
+    Wheel4f TireSlipAngle      <comment="lateral slip; 0 = gripping">;
+    Wheel4f TireCombinedSlip   <comment="combined lat+long; >1 = sliding. Drives the lab's grip state">;
+    Wheel4f SuspensionTravelMeters;
+
+    // Car identity, live. These are the INSTANT identity signals the project's
+    // identity rule permits; they never require driving the car.
+    int    CarOrdinal <comment="joins ref_car.ordinal">;
+    int    CarClass   <comment="0=D 1=C 2=B 3=A 4=S1 5=S2 6=R 7=X -- see note below">;
+    int    CarPerformanceIndex <comment="PI, 100..999 (raw here, NOT the normalised form the profile save uses)">;
+    int    DrivetrainType <comment="0=FWD 1=RWD 2=AWD">;
+    int    NumCylinders;
+
+} SledBlock <comment="232 bytes, shared with Forza Motorsport">;
+
+// CarClass note: the GAME separates R (class 6, PI 901-998) from X (class 7,
+// PI 999). The lab's own pipeline maps class 6 -> "X", a known mislabel kept
+// for compatibility. Read this field as the game's numbering, not the lab's.
+
+//================================================ 0x0E8  HORIZON BLOCK (12 bytes)
+// The 12 bytes Horizon inserts that Motorsport does not have. The official doc
+// does not name them; these names are the lab's, and the evidence for them is:
+//
+//   CarGroup          MEASURED: 18 distinct values over 4.36M frames (0, 43,
+//                     50, 11, 17 ...). It varies with the car, so it is a real
+//                     per-car enum and not padding. The enum itself is NOT
+//                     decoded -- we have no table mapping these numbers to
+//                     group names. Treat the name as a label, not a finding.
+//
+//   Smashable*        MEASURED: 0.0 / 0.0 in 4,355,441 of 4,356,598 frames
+//                     (99.97%), non-zero in only 1,157 scattered frames with
+//                     small transient values. That is the signature of a
+//                     collision-event channel -- zero except at the instant of
+//                     an impact -- which is consistent with the naming and is
+//                     the best evidence we have for it.
+typedef struct {
+    uint   CarGroup         <comment="LAB NAME. per-car enum, 18 values seen, mapping unknown">;
+    float  SmashableVelDiff <comment="LAB NAME. 0.0 except on impact frames (99.97% zero)">;
+    float  SmashableMass    <comment="LAB NAME. 0.0 except on impact frames (99.97% zero)">;
+} HorizonBlock <comment="12 bytes at 0x0E8 -- present in FH, absent in FM">;
+
+//================================================ 0x0F4  DASH BLOCK (79 bytes)
+typedef struct {
+
+    // World position, metres. THE SAME METRE FRAME as the game's route files
+    // (Route<id>.owt), so a driven line and a game centre-line compare directly
+    // with no transform. PosY is elevation.
+    float  PositionX;
+    float  PositionY <comment="elevation">;
+    float  PositionZ;
+
+    float  Speed  <comment="m/s. x2.23694 for mph">;
+    float  Power  <comment="watts">;
+    float  Torque <comment="Nm">;
+
+    Wheel4f TireTemp <comment="DEGREES FAHRENHEIT, not C. The lab converts on capture">;
+
+    float  Boost;
+    float  Fuel;
+
+    // MEASURED ELSEWHERE / PROJECT FINDING: DistanceTraveled is dead in free
+    // roam -- it does not advance outside an event. Never use it as a free-roam
+    // odometer; the lab derives distance from position instead.
+    float  DistanceTraveled;
+
+    // Lap timing, seconds. THESE ARE CANON. The project's hard rule is that the
+    // game's own lap metadata (CurrentLap / LapNumber / LastLap) decides what a
+    // lap is and what it took -- never our own clock, never the odometer.
+    // LastLap is what lap.official (schema 8) records having received.
+    // A rewind shows up here as the lap clock RUNNING BACKWARDS.
+    float  BestLap    <comment="seconds">;
+    float  LastLap    <comment="seconds -- the game's published time, CANON">;
+    float  CurrentLap <comment="seconds">;
+    float  CurrentRaceTime <comment="seconds">;
+
+    ushort LapNumber <comment="u16">;
+
+    byte   RacePosition <comment="u8. mode(RacePosition>1) is the lab's only load-in signal">;
+
+    // Pedals and inputs. 0..255, NOT 0..100. The lab stores lap_point.thr/brk
+    // rescaled to 0-100 %.
+    byte   Accel     <comment="0..255 throttle">;
+    byte   Brake     <comment="0..255">;
+    byte   Clutch    <comment="0..255">;
+    byte   HandBrake <comment="0..255">;
+    byte   Gear      <comment="0 = reverse">;
+
+    char   Steer <comment="SIGNED -127..127">;
+    char   NormalizedDrivingLine;
+    char   NormalizedAIBrakeDifference;
+
+} DashBlock <comment="79 bytes at 0x0F4..0x142">;
+
+//================================================ 0x143  trailing byte
+// MEASURED: 0 in all 4,356,598 frames sampled.
+//
+// CAVEAT, and it matters: fh6_dataout_capture.py accepts 323-byte datagrams and
+// pads them with a zero byte before decoding. A recorded 0 therefore cannot be
+// distinguished from "the packet was only 323 bytes long". The corpus can tell
+// us this byte is never non-zero; it cannot tell us whether it is really there.
+// Settling that needs a raw datagram-length capture, not the CSVs.
+typedef struct {
+    ubyte Trailing323 <comment="always 0 in the corpus; see the padding caveat">;
+} Trailer;
+
+//================================================ packet
+struct FH6_DATAOUT_PACKET {
+    SledBlock    sled;
+    HorizonBlock horizon;
+    DashBlock    dash;
+    Trailer      trailer;
+} packet;
+
+// ---- assertions -------------------------------------------------------------
+// The layout self-check the capture tool runs on the first moving frame:
+// |Velocity| must equal Speed. If the offsets were wrong this would not hold.
+// MEASURED: true for 1,042,321 of 1,042,334 moving frames (within 0.5 m/s),
+// worst case 1.789 m/s -- the handful of outliers are respawn/teleport frames
+// where position jumps between ticks.
+local float vmag = Sqrt( packet.sled.VelocityX * packet.sled.VelocityX
+                       + packet.sled.VelocityY * packet.sled.VelocityY
+                       + packet.sled.VelocityZ * packet.sled.VelocityZ );
+if ( packet.dash.Speed > 1.0 && Abs( vmag - packet.dash.Speed ) > 0.5 )
+    Warning( "|Velocity|=%f but Speed=%f -- offsets do not hold", vmag, packet.dash.Speed );
+if ( FileSize() != 324 )
+    Warning( "Not a 324-byte Horizon packet: %Lu bytes (232=sled 311=FM7 331=FM2023)", FileSize() );

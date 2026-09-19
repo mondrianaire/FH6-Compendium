@@ -1,0 +1,244 @@
+{
+ "containers": 575,
+ "clone_ready": 426,
+ "by_blocker_kind": {
+  "ready": 426,
+  "derived": 74,
+  "unknown": 53,
+  "derived + unknown": 22
+ },
+ "per_slot": {
+  "engine": {
+   "brand": 562
+  },
+  "drivetrain": {
+   "unknown": 575
+  },
+  "car_body": {
+   "brand": 575
+  },
+  "brakes": {
+   "proven": 566,
+   "verified": 9
+  },
+  "springs_dampers": {
+   "proven": 563,
+   "verified": 12
+  },
+  "front_arb": {
+   "proven": 571,
+   "verified": 4
+  },
+  "rear_arb": {
+   "proven": 570,
+   "verified": 5
+  },
+  "tire_compound": {
+   "proven": 537,
+   "unknown": 38
+  },
+  "rear_wing": {
+   "brand": 575
+  },
+  "front_rim_size": {
+   "derived": 575
+  },
+  "rear_rim_size": {
+   "derived": 575
+  },
+  "camshaft": {
+   "verified": 562
+  },
+  "valves": {
+   "verified": 562
+  },
+  "displacement": {
+   "verified": 562
+  },
+  "pistons": {
+   "verified": 562
+  },
+  "fuel_system": {
+   "verified": 562
+  },
+  "ignition": {
+   "verified": 562
+  },
+  "exhaust": {
+   "verified": 562
+  },
+  "intake": {
+   "verified": 562
+  },
+  "flywheel": {
+   "verified": 562
+  },
+  "manifold": {
+   "derived": 118
+  },
+  "oil_cooling": {
+   "verified": 562
+  },
+  "clutch": {
+   "derived": 575
+  },
+  "transmission": {
+   "proven": 467,
+   "derived": 108
+  },
+  "driveline": {
+   "proven": 547,
+   "verified": 28
+  },
+  "differential": {
+   "proven": 547,
+   "unknown": 26,
+   "verified": 2
+  },
+  "front_bumper": {
+   "brand": 575
+  },
+  "rear_bumper": {
+   "brand": 575
+  },
+  "hood": {
+   "brand": 575
+  },
+  "side_skirts": {
+   "brand": 575
+  },
+  "front_tire_width": {
+   "derived": 575
+  },
+  "rear_tire_width": {
+   "derived": 575
+  },
+  "weight_reduction": {
+   "unknown": 161,
+   "derived": 368,
+   "proven": 46
+  },
+  "roll_cage": {
+   "derived": 343,
+   "unknown": 186,
+   "proven": 46
+  },
+  "front_track_width": {
+   "derived": 575
+  },
+  "rear_track_width": {
+   "derived": 575
+  },
+  "front_tire_profile": {
+   "derived": 575
+  },
+  "rear_tire_profile": {
+   "derived": 575
+  },
+  "twin_turbo": {
+   "derived": 109
+  },
+  "intercooler": {
+   "verified": 315
+  },
+  "rim_style": {
+   "rim": 300,
+   "rim-proven": 6
+  },
+  "rear_rim_style": {
+   "rim": 304
+  },
+  "centrifugal_supercharger": {
+   "verified": 175
+  },
+  "single_turbo": {
+   "derived": 142
+  },
+  "restrictor_plate": {
+   "unknown": 11,
+   "derived": 10
+  },
+  "pos_supercharger": {
+   "derived": 18
+  },
+  "motor": {
+   "unknown": 13
+  },
+  "motor_parts": {
+   "derived": 13
+  }
+ },
+ "gaps": [
+  {
+   "slot": "single_turbo",
+   "key": 4,
+   "builds": 55,
+   "cars": 23,
+   "top": "1989 Nissan S-Cargo (Forza Edition) x9, 2020 Wuling Sunshine S (Forza Edition) x7, 1962 Peel P50 x4"
+  },
+  {
+   "slot": "twin_turbo",
+   "key": 4,
+   "builds": 41,
+   "cars": 22,
+   "top": "1994 Mazda MX-5 Miata (Forza Edition) x11, 1998 Subaru Impreza 22B x3, 2012 Nissan GT-R x3"
+  },
+  {
+   "slot": "tire_compound",
+   "key": 11,
+   "builds": 36,
+   "cars": 11,
+   "top": "1994 Mazda MX-5 Miata (Forza Edition) x10, 2020 Wuling Sunshine S (Forza Edition) x7, 1989 Nissan S-Cargo (Forza Edition) x4"
+  },
+  {
+   "slot": "differential",
+   "key": 7,
+   "builds": 26,
+   "cars": 17,
+   "top": "1986 MG Metro 6R4 x4, 2004 Subaru Impreza WRX STi x3, 2014 Volkswagen Golf R x3"
+  },
+  {
+   "slot": "restrictor_plate",
+   "key": 2,
+   "builds": 11,
+   "cars": 9,
+   "top": "2014 Alfa Romeo 4C x2, 2018 Lotus Scura Motorsports Exige WTAC x2, 2008 Mitsubishi Lancer Evolution X GSR x1"
+  },
+  {
+   "slot": "tire_compound",
+   "key": 12,
+   "builds": 2,
+   "cars": 2,
+   "top": "1962 Peel P50 x1, 1970 Ferrari 512 S x1"
+  },
+  {
+   "slot": "transmission",
+   "key": 9,
+   "builds": 1,
+   "cars": 1,
+   "top": "2024 Lamborghini Revuelto x1"
+  }
+ ],
+ "ready_examples": [
+  "1964 Ferrari 250 GTO",
+  "1964 Ferrari 250 GTO",
+  "1964 Ferrari 250 GTO",
+  "1964 Ferrari 250 GTO",
+  "1967 Chevrolet Corvette Stingray",
+  "2002 Chevrolet Corvette Z06",
+  "1997 Lamborghini Diablo SV",
+  "1969 Ferrari Dino 246",
+  "1997 McLaren F1 GT",
+  "1995 Ferrari F50",
+  "1995 Ferrari F50",
+  "1995 Ferrari F50",
+  "1995 Ferrari F50",
+  "1995 Ferrari F50",
+  "2005 Ford GT",
+  "2005 Ford GT",
+  "2005 Ford GT",
+  "2005 Ford GT",
+  "2005 Ford GT",
+  "2005 Ford GT"
+ ]
+}

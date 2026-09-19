@@ -1,0 +1,94 @@
+{
+ "car": "1992 Honda NSX-R (ordinal 412)",
+ "captured": "2026-09-02",
+ "source": "Upgrade Shop > Drivetrain > Differential / Driveline; Y page 4; setups dif1..dif4, drv1..drv2",
+ "banner": "UNLOCKS FULL DIFFERENTIAL TUNING on every non-stock differential tile.",
+ "side_effect": "Installing a differential rewrites the five differential sliders to that part's defaults (normalised); the Race diff left the Stock values in place. Drivelines change no slider.",
+ "hypothesis": "differential index 7 = Rally Diff: index 4 appears in no stored tune, 7 only on AWD rally-type cars (Golf R, WRX STi, Metro 6R4, Evo X). Prove on the Golf R.",
+ "differential": [
+  {
+   "tile": 1,
+   "name": "Stock Diff",
+   "index": 0,
+   "price_cr": 0,
+   "t0_60_s": 2.85,
+   "t0_100_s": 6.733,
+   "top_mph": 152.0,
+   "setup": "dif1",
+   "defaults": {
+    "center_diff": 0.602,
+    "front_diff_accel": 0.3,
+    "front_diff_decel": 0.1,
+    "rear_diff_accel": 0.55,
+    "rear_diff_decel": 0.125
+   }
+  },
+  {
+   "tile": 2,
+   "name": "Race Diff",
+   "index": 3,
+   "price_cr": 2500,
+   "t0_60_s": 2.9,
+   "t0_100_s": 6.8,
+   "top_mph": 152.0,
+   "setup": "dif2",
+   "defaults": "unchanged from Stock values (no rewrite observed)"
+  },
+  {
+   "tile": 3,
+   "name": "Drift Diff",
+   "index": 5,
+   "price_cr": 0,
+   "t0_60_s": 2.817,
+   "t0_100_s": 6.7,
+   "top_mph": 152.0,
+   "setup": "dif3",
+   "defaults": {
+    "front_diff_accel": 0.1,
+    "front_diff_decel": 0.0,
+    "rear_diff_accel": 0.825,
+    "rear_diff_decel": 0.025
+   }
+  },
+  {
+   "tile": 4,
+   "name": "Offroad Diff",
+   "index": 6,
+   "price_cr": 0,
+   "installed": true,
+   "t0_60_s": 3.0,
+   "t0_100_s": 6.883,
+   "top_mph": 150.8,
+   "setup": "dif4",
+   "defaults": {
+    "center_diff": 0.5,
+    "front_diff_accel": 1.0,
+    "front_diff_decel": 1.0,
+    "rear_diff_accel": 1.0,
+    "rear_diff_decel": 1.0
+   }
+  }
+ ],
+ "driveline": [
+  {
+   "tile": 1,
+   "name": "Stock Driveline",
+   "index": 0,
+   "installed": true,
+   "t0_60_s": 2.85,
+   "t0_100_s": 6.717,
+   "top_mph": 152.0,
+   "setup": "drv1"
+  },
+  {
+   "tile": 2,
+   "name": "Race Driveline",
+   "index": 3,
+   "price_cr": 0,
+   "t0_60_s": 2.833,
+   "t0_100_s": 6.7,
+   "top_mph": 152.0,
+   "setup": "drv2"
+  }
+ ]
+}

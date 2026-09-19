@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FH6 Tuning Decision Dashboard</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=audit159" />
 </head>
 <body>
   <header class="topbar">
@@ -140,7 +140,10 @@
     <span id="footStamp"></span>
   </footer>
 
-  <script src="db.js"></script>
-  <script src="app.js"></script>
+  <!-- db.js MUST carry the cache-buster too. It did not, so while app.js updated on every deploy the DATA it
+       renders came from browser cache indefinitely: the map showed a stale bundle (11 courses instead of 25,
+       superseded turn geometry) no matter how many times the course was re-analysed. -->
+  <script src="db.js?v=audit159"></script>
+  <script src="app.js?v=gearless160"></script>
 </body>
 </html>

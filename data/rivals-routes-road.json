@@ -1,0 +1,444 @@
+{
+ "schema_version": "1.0.0",
+ "created": "2026-09-01",
+ "discipline": "Road Racing",
+ "source": "Horizon Rivals > Routes screen, scrolled end to end; forzahorizon6_iuv0War65N.mp4 at 1 fps (49 frames), two readers + reconciler; names verified verbatim against data/game-strings/RivalsEventData.json",
+ "note": "RivalsEventData carries each route name under SEVEN IDS_Name guids (one per event variant) and the description under seven disjoint IDS_Description guids, so name->guid is one-to-many. Length is the in-game Route Length in miles, imported by stage events into ref_event.length_m; stage route_names matches it against fh6.db's course.length_m to name a course only when the map identity and the catalogue length agree.",
+ "routes": [
+  {
+   "order": 1,
+   "name": "Highway Circuit",
+   "length_mi": 4.3,
+   "description": "A full-throttle lap of the Highway Loop around Tokyo City.",
+   "ids_name_guids": [
+    "367ed32633194085b6c2ed2abb264c71",
+    "b3b34aeba82b4c2fa0ea3b441a288cd1",
+    "bfaca10d925a4c1696ea2c8759c20bef",
+    "cb0804f17ad747de803770658c2e1dc8",
+    "e405ecf783114527a5dd3aed9328e8dd",
+    "f4607ccc886d4268a32c963dab1e44e9",
+    "fd321c3c0f3b49a7b7d96aa477f66916"
+   ],
+   "frames": [
+    "r_006",
+    "r_007"
+   ]
+  },
+  {
+   "order": 2,
+   "name": "Narai-Juku Circuit",
+   "length_mi": 1.5,
+   "description": "A quick circuit that favors an aggressive cornering approach to build momentum lap on lap.",
+   "ids_name_guids": [
+    "285093916ead428ca5a728ab8848793f",
+    "4a4247f6b7ce4d6f83d5fad97bfab570",
+    "5a05d0f1ec174ea2918cdb54e659a172",
+    "843c432f8b7e40a694b00facdf1f7131",
+    "aafc09e252ab4a03b248b579306edaff",
+    "af3cf48d8e58472db7de5956c3dd3b55",
+    "dca8cef6e7c34e5cbfcd4451b49e6f15"
+   ],
+   "frames": [
+    "r_008",
+    "r_009"
+   ]
+  },
+  {
+   "order": 3,
+   "name": "Shirakawa Circuit",
+   "length_mi": 2.0,
+   "description": "A short technical circuit with plenty of long sweeping corners that keep the pace fast.",
+   "ids_name_guids": [
+    "5c744b5869314f49adbd0af2decf660f",
+    "67bb35167e484feca4f80ab968cc9dc5",
+    "6afddb4a573241b6897611f67ff52b74",
+    "b687b49525ae4328b86167cce6f37898",
+    "b6a7ab67a9fd450a871b6fea44f5f2d0",
+    "e8e96c40616e4116aeaade69cad2c393",
+    "fa49aebbcd3a4602bdfec1e02db61ea2"
+   ],
+   "frames": [
+    "r_010",
+    "r_011"
+   ]
+  },
+  {
+   "order": 4,
+   "name": "Shimanoyama Circuit",
+   "length_mi": 0.7,
+   "description": "A purpose built Drift Circuit that always draws a crowd with its free-flowing turns. Send it!",
+   "ids_name_guids": [
+    "0c325c1e62374ef983fa6a91590f799c",
+    "1bcdb4108abb49408e40506d3066e5e5",
+    "22ae71e6bd3b430fb837ef4a3a36c364",
+    "4ca38e696cbe4583a362a52b89b83c6f",
+    "7958ca33f5db400582033874ab07de6e",
+    "8b48531ff3ba4ce686faf2a8622a2e3d",
+    "e0d55b18e55947b6aab2eaf88a207695"
+   ],
+   "frames": [
+    "r_012",
+    "r_013",
+    "r_014"
+   ]
+  },
+  {
+   "order": 5,
+   "name": "Hokubu Circuit",
+   "length_mi": 1.6,
+   "description": "This fast paced Circuit is nestled within a forest and is perfect for setting some serious lap times.",
+   "ids_name_guids": [
+    "3984c3ebfd6d478c9fc21f6cdc0f9a62",
+    "5f3b8ee084494aa89e97db1c61fb99ee",
+    "688f7441daa94331ad59fed83ecd4112",
+    "783482638fab434588f898b9ac91baaa",
+    "958ee1ae0e454c33827888b3e92415b7",
+    "c64ff69e2bd8400387ec2c0e98f9f2b3",
+    "d723377045604605bc7205c2f45d375c"
+   ],
+   "frames": [
+    "r_015",
+    "r_016"
+   ]
+  },
+  {
+   "order": 6,
+   "name": "Soni Circuit",
+   "length_mi": 1.2,
+   "description": "Twist and turn your way around this circuit as the sharp corners and elevation changes keep you on your toes.",
+   "ids_name_guids": [
+    "4523e4fc262347ff967a3244df9d4b91",
+    "4c03d20d5feb46ce96c3f6ecd85af4cb",
+    "6e332f994f754fe590290c2252b6c38b",
+    "6ffeffaede98448abac205f56b53b855",
+    "74e927c3b31047499b3c6a0b9c7f2521",
+    "bb12f2ce16964562aff88bc13ce3177f",
+    "d9c8913e358343bc973b23b218700cfc"
+   ],
+   "frames": [
+    "r_017"
+   ]
+  },
+  {
+   "order": 7,
+   "name": "Daikoku Circuit",
+   "length_mi": 1.7,
+   "description": "The extra wide roads on this fast paced Circuit provide plenty of passing opportunities.",
+   "ids_name_guids": [
+    "02bd84d8d34d46f8b8322d32d4102205",
+    "39d240a8e6e847699cadbcac60ff9cbf",
+    "4a62aa3d6fcf4b49905352617ac3fda3",
+    "71dafa515a7c4265af9503d3199ea18d",
+    "8e0b9d0b78a94a8a8ef04cfcb8d7f301",
+    "9d3679f9d1724f4a84202c77b0707c30",
+    "aac06f3abe7a438c8c9e05b1eff33dd4"
+   ],
+   "frames": [
+    "r_018",
+    "r_019"
+   ]
+  },
+  {
+   "order": 8,
+   "name": "Electric Town Circuit",
+   "length_mi": 2.7,
+   "description": "Expect long straights and square corners in this whistlestop tour around Tokyo City.",
+   "ids_name_guids": [
+    "0b548ebcd7b84f6a954b1e15fdf0176f",
+    "84eb0c94c1a64372a9e42e5bf494ec21",
+    "96352ee8623f4766942f569224bf8b15",
+    "afe4e10b3e0c491cade874e09688792c",
+    "cb5724237e594190b53193e23d4462c7",
+    "da71410b4d324000880e39a2f5af021f",
+    "f4ed3f18d09c43d5abb514080f16a0a0"
+   ],
+   "frames": [
+    "r_020",
+    "r_021"
+   ]
+  },
+  {
+   "order": 9,
+   "name": "Legend Island Circuit",
+   "length_mi": 2.9,
+   "description": "Built for Legends. The Circuit where only the best of the best can take on its challenging turns and blazing fast pace.",
+   "ids_name_guids": [
+    "18c4e958874b4b28a059a4a51bc9fa7c",
+    "34b9dd0cb49141109616ec241966795a",
+    "511cc647db684d7295d2ae4e18306533",
+    "7a0c314dbf9e4a0c9e390c071186ae4d",
+    "91843a1e4cd24a09a06cf6f79dee7f7a",
+    "994e104994524640bfea50b0d6834618",
+    "ce1dedc161e04c7aae6d8eec2a194af6"
+   ],
+   "frames": [
+    "r_022",
+    "r_023"
+   ]
+  },
+  {
+   "order": 10,
+   "name": "Irokawa Circuit",
+   "length_mi": 1.2,
+   "description": "Prepare for take off as you loop around the Irokawa Space Center! Get ready to hit the brakes for the hairpin after the steep downhill section.",
+   "ids_name_guids": [
+    "07d62a2da98e4599b2f3b2a0022aa6f4",
+    "0803ee906f3d4075a071b0d074f8dff5",
+    "2344a33a75c04c738bfbbee2eeef2a19",
+    "3d73b475182348e68feced868e1ec303",
+    "aaa4b327babd49ada25202a1f8877ba5",
+    "d6f62564311a4f10a4ccf555062ef9e3",
+    "de9779135fac4d83a932eb224fcda270"
+   ],
+   "frames": [
+    "r_024",
+    "r_025"
+   ]
+  },
+  {
+   "order": 11,
+   "name": "Edamame Circuit",
+   "length_mi": 0.7,
+   "description": "This short, technical circuit was built in the shape of Edamame Mascot to host the Horizon Mascot Party.",
+   "ids_name_guids": [
+    "06fccd9d004e4f13813ff32c32006482",
+    "1c6965d1a7904190a59a36f63df9ed6b",
+    "4568fcedf7464803a7e998d889ea34cd",
+    "5379407d05a3440790884d9bdea883cf",
+    "9f767906cfd7446a9af28b5cb9b1af66",
+    "ca25407c96a94be6943c114d48b15867",
+    "e94afec3697840e0986e6415159d8caa"
+   ],
+   "frames": [
+    "r_026",
+    "r_027"
+   ]
+  },
+  {
+   "order": 12,
+   "name": "Festival Sprint",
+   "length_mi": 4.9,
+   "description": "A scenic point to point run that speeds right through the Horizon Festival Site and out the other side.",
+   "ids_name_guids": [
+    "1d51cf74169f4c04ac0453ad0443290b",
+    "34f6bbc2e2aa4c46a6897a34d62d464c",
+    "69dd75ffbda646009e052552b1869779",
+    "99a56b7544a34e0c8c5bb2be30ab7c0e",
+    "bddafb6962774eee91a363378660b532",
+    "dde91baf16124d13a6e60a218a624cd1",
+    "f1fc46ec33764154bf504d68ed9b465b"
+   ],
+   "frames": [
+    "r_028",
+    "r_029"
+   ]
+  },
+  {
+   "order": 13,
+   "name": "Venus Sprint",
+   "length_mi": 5.0,
+   "description": "Tame the narrow twisting mountain road from the Takashiro Region up towards the Sotoyama Region.",
+   "ids_name_guids": [
+    "23e6fe128331487eaf1b11fb2e0d04a4",
+    "4737d09d987a44969b692e583f038720",
+    "5cb853946e0140649d2b04034ccee784",
+    "b68ef961acd9499c96e9827494baf51a",
+    "d81221ce336445539e961f9b5eef8ea6",
+    "dd8842b889d24cf7bd40694816530041",
+    "f37a7217074b4c12aecbf26fa0bb7fb0"
+   ],
+   "frames": [
+    "r_030",
+    "r_031"
+   ]
+  },
+  {
+   "order": 14,
+   "name": "Seaside Park Sprint",
+   "length_mi": 4.5,
+   "description": "This point to point route passes through Legend Island, a mix of flat out speed and sudden tight turns demand the drivers full focus.",
+   "ids_name_guids": [
+    "0daaf8ee7d7746d58e819bdea9d35dea",
+    "26994dd28112484a99cdce5bef8173c3",
+    "7206311cc5d9408584f37a4a45b189b1",
+    "8199e828b0274090b0d8c805edcab441",
+    "9ba094794b824028aa14447cadb00711",
+    "b9437a4c87474d65b9c85f13dc6aebed",
+    "ff2a109ea0144215ba52adea21e99f13"
+   ],
+   "frames": [
+    "r_032"
+   ]
+  },
+  {
+   "order": 15,
+   "name": "Ito Sprint",
+   "length_mi": 5.8,
+   "description": "This run twists and turns along the coastal roads of the Ito Region.",
+   "ids_name_guids": [
+    "56ccc13989444acf9a53f78a31d0d302",
+    "65fe2d090a5e47abb7e80a1fde8e5487",
+    "69c7112805634be99f173253342e5b18",
+    "bd27932b743a40679da3822641ca92d7",
+    "c1ad8a012efc495ca219d09dbb18d20b",
+    "d1af2084805f4a36933960e86695192b",
+    "f8eec91221ac480496a83af4dcb84417"
+   ],
+   "frames": [
+    "r_033",
+    "r_034"
+   ]
+  },
+  {
+   "order": 16,
+   "name": "Tateyama Kurobe Sprint",
+   "length_mi": 3.8,
+   "description": "A fast paced point to point run that passes through the Tateyama Kurobe Snow Corridor.",
+   "ids_name_guids": [
+    "164b65caf09f48da9f617e1ddb0c12a3",
+    "2549664165e94d6ea43154add3c155e7",
+    "3e544543fa5b4e118db5d09e72abc37e",
+    "77a6c57e1cb24b6d84594e48542dd874",
+    "809ab64e78e54ede964eb6e2cd95a390",
+    "90a981aef6cc4d89ae20288a7cca73b4",
+    "b840c34781af453188b748cdb50af9bf"
+   ],
+   "frames": [
+    "r_035",
+    "r_036"
+   ]
+  },
+  {
+   "order": 17,
+   "name": "Shimanoyama Sprint",
+   "length_mi": 4.0,
+   "description": "Head along the coastal roads before a very sharp right turn as you race through the Shimanoyama Region.",
+   "ids_name_guids": [
+    "08e81da3d08245599e5220f5cdc1e31d",
+    "4ea752bcfe54471e98856b72b2bf51a2",
+    "62bef02273a342eb9da4f41c24c38083",
+    "64fdb73c9fb04193b6a91e809e489030",
+    "6a9253e473b74e8ab49697c7bca83006",
+    "998089e8f4234017844eca5c1ed7e552",
+    "c5c0d36a0bc84c9a875980787954c225"
+   ],
+   "frames": [
+    "r_037",
+    "r_038"
+   ]
+  },
+  {
+   "order": 18,
+   "name": "Satta Sprint",
+   "length_mi": 5.1,
+   "description": "A flat out charge through the Ito Region to really test your nerve and control at top speeds.",
+   "ids_name_guids": [
+    "1d5b5576c69347a1b03e866f76f9148a",
+    "75d54678186d40a8bb25f99d554676c9",
+    "765bf0cc2bb44b6391b7220ecc46ad76",
+    "77bbabfcdc5c4fff8236575bac1be2ea",
+    "9669da227942483fa488ebbc9e5755b4",
+    "ae39d9940ffd42a5adeed4ac642f9b12",
+    "f51ee713ffba41faa43e8b6c409fb5eb"
+   ],
+   "frames": [
+    "r_039"
+   ]
+  },
+  {
+   "order": 19,
+   "name": "Coastline Sprint",
+   "length_mi": 5.0,
+   "description": "Twist and turn through the Nangan Region before hitting a flat out back half towards Tokyo City.",
+   "ids_name_guids": [
+    "2ebf27f22b294c06aa37c006804c4e54",
+    "58df6007ae19472ab7380c7264c9344c",
+    "826d0f34817f41a6aee43fa299c988ea",
+    "9197db9c875c4207b0286820d7face9d",
+    "a1bbd9386421456088714635309a009a",
+    "cb8e4a0ba25942d3af16f442434661a3",
+    "fd440a30225b479785ec8b8c8e978974"
+   ],
+   "frames": [
+    "r_040",
+    "r_041"
+   ]
+  },
+  {
+   "order": 20,
+   "name": "Tokyo Railway Sprint",
+   "length_mi": 4.2,
+   "description": "This point to point sprint through Tokyo City requires on-rails cornering ability to get ahead of the pack.",
+   "ids_name_guids": [
+    "33c26cd3dfc6496e9802f291a104cf03",
+    "480d633151ee43e19dd1ca321264787a",
+    "574f17dc3a6f4805bc3ec394d6fa197f",
+    "58e8b691eaee4091a977dce598deef44",
+    "815a142596a74e25b058f529449e82fc",
+    "c7bbf0d8eb1841718dd6091b0ee8071e",
+    "e81c5f5e0ea44e52837d37748ea39c0e"
+   ],
+   "frames": [
+    "r_042",
+    "r_043"
+   ]
+  },
+  {
+   "order": 21,
+   "name": "Shikisai Sprint",
+   "length_mi": 4.8,
+   "description": "Cut a winding path through the Hokubu Region and under the highways before looping back.",
+   "ids_name_guids": [
+    "1c6fbae3f44a4566933080198177295d",
+    "61f9d069462443958224e0835801be36",
+    "6b45106a955747a786f978b310559c19",
+    "7f5c58461173406098342490b520195a",
+    "c26e74197a2540afb3bf3d8e0bf75120",
+    "df757498adbf46828170289ae54706f2",
+    "ff3e60e85e594bfe8e43d6e0ee9dd113"
+   ],
+   "frames": [
+    "r_044"
+   ]
+  },
+  {
+   "order": 22,
+   "name": "The Colossus",
+   "length_mi": 23.4,
+   "description": "One colossal lap around the entire highway loop.",
+   "ids_name_guids": [
+    "0411943f68ef4125935adff70e23ec9e",
+    "0da27110ed094f60a25f368689f38c0e",
+    "0eaa95860bc04671b560db979747612d",
+    "29fbe1444cee4b1c9f15ee5ec2405e2e",
+    "b7d370113eba474286a382478711eb96",
+    "ccdf3b5698d045718c122e0fa9556e1e",
+    "db34632c83754aac8b8298d5f37aacd4"
+   ],
+   "frames": [
+    "r_045"
+   ]
+  },
+  {
+   "order": 23,
+   "name": "The Goliath",
+   "length_mi": 53.1,
+   "description": "A lap around the entire perimeter of Japan.",
+   "ids_name_guids": [
+    "046e60bfbb4944ef8631eae67be74bfa",
+    "1a6d4c4fbd0d4de1864335863ce54a77",
+    "3796723e82d1400592aab4dc99ddceac",
+    "5cb9a02161fb48f781f1e438bd5a87dd",
+    "7c2d7dea253146c1aa71daa94f3cec25",
+    "83c1a04e59dc4cd783e13581dff519e9",
+    "ec9ede9698d34d5cb56cd960ca939447"
+   ],
+   "frames": [
+    "r_046",
+    "r_047",
+    "r_048",
+    "r_049"
+   ]
+  }
+ ]
+}

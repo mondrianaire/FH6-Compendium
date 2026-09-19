@@ -1,0 +1,94 @@
+//------------------------------------------------
+//--- 010 Editor Binary Template
+//
+//      File: fh6_stringtable_str.bt
+//   Authors: FH6 Tuning Lab
+//   Version: 1.0 (2026-09-18)
+//   Purpose: Forza Horizon 6 string table -- <name>.str
+//  Category: Game
+// File Mask: *.str
+//
+// SOURCE-CATEGORY: game install -- PLAIN DEFLATE ZIP, no decryption
+// SOURCE-LOCATION: C:\XboxGames\Forza Horizon 6\Content\media\stripped\stringtables\EN.zip -- 291 entries = 290 .str + _list.txt
+// SOURCE-READ: open with any zip reader and read the entries. NOTHING here is encrypted; the "stripped"
+// SOURCE-READ: folder name refers to the build, not to protection. Other languages are sibling <LANG>.zip.
+// SOURCE-READER: scripts/telemetry/fh6_strings.py (also scripts/db/strparse.py)
+//
+// WHAT IT IS: the game's own id -> display-name layer. Every course, part,
+// event and car name the UI shows resolves through here.
+//
+// STRUCTURE -- two tables keyed by the SAME 32-bit hash:
+//     TABLE 1  the localised VALUES  ("Sprint Circuit")
+//     TABLE 2  the symbolic KEYS     ("IDS_Name_43")
+// Zip them on the hash and you get {IDS_key: text}. Neither table alone is
+// useful: table 1 has no names, table 2 has no text.
+//
+// A WARNING THE PROJECT LEARNED THE HARD WAY: a .str will happily give you a
+// plausible-looking name for almost anything. Course identity is
+// route id -> ref_track_info -> name. NEVER name a course from a string table,
+// from a length, or from a decryption. See CLAUDE.md, hard rules.
+//
+// Canonical reader: scripts/telemetry/fh6_strings.py (also scripts/db/strparse.py)
+// Reverse-engineered 2026-09-01 from GameStrings.str.
+//
+// CORPUS: measured 2026-09-18 over all 290 .str tables in EN.zip.
+//   byte 0 == 0, byte 1 == 8                    290/290
+//   u16 version at 0x82 == 2                    290/290
+//   table-2 offset points inside the file       290/290
+//   the embedded table name matches the filename 290/290
+//------------------------------------------------
+
+LittleEndian();
+
+//------------------------------------------------ 0x00  header
+typedef struct {
+    ubyte Zero  <comment="always 0">;
+    ubyte Eight <comment="always 8">;
+    // The table's own name, NUL-terminated and zero-padded out to 0x80.
+    // Matches the zip entry filename on all 290 tables, which makes it a usable
+    // integrity check rather than just a label.
+    char  TableName[126] <comment="NUL-terminated, zero-padded to 0x80">;
+
+    ushort Version      <comment="2">;
+    uint   Table1Size   <comment="size field for table 1">;
+    uint   Table2Offset <comment="absolute offset of table 2">;
+} StrHeader <comment="0x00..0x8B">;
+
+//------------------------------------------------ table
+// Both tables share this shape. The strings live in a blob that begins right
+// after the record array; each record's Offset is relative to THAT blob, not to
+// the file.
+typedef struct {
+    uint Hash   <comment="32-bit key; the SAME hash joins table 1 to table 2">;
+    uint Offset <comment="relative to the start of the string blob for this table">;
+} StrRecord <comment="8 bytes">;
+
+typedef struct {
+    uint X <comment="UNKNOWN">;
+    uint Y <comment="UNKNOWN">;
+    uint Count;
+    StrRecord records[ Count ] <optimize=true>;
+    // Followed by Count NUL-terminated UTF-8 strings, reached by Offset rather
+    // than read in sequence -- they are not guaranteed to be contiguous or in
+    // record order, so this template does not model them as an array.
+} StrTable <comment="12-byte head + Count x 8-byte records + string blob">;
+
+//------------------------------------------------ file
+StrHeader header;
+
+FSeek( 0x8C );
+StrTable table1_values <comment="the localised text">;
+
+FSeek( header.Table2Offset );
+StrTable table2_keys <comment="the IDS_ symbols">;
+
+// ---- assertions -------------------------------------------------------------
+if ( header.Zero != 0 || header.Eight != 8 )
+    Warning( "Header does not start 00 08 -- not a .str" );
+if ( header.Version != 2 )
+    Warning( "String table version %u, expected 2", header.Version );
+if ( header.Table2Offset <= 0x8C || header.Table2Offset >= FileSize() )
+    Warning( "Table 2 offset %u is outside the file", header.Table2Offset );
+if ( table1_values.Count != table2_keys.Count )
+    Warning( "Value/key count mismatch: %u vs %u -- the tables should pair 1:1",
+             table1_values.Count, table2_keys.Count );

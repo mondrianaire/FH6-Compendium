@@ -1,0 +1,190 @@
+{
+ "route_key": "-2400_-4700",
+ "name": null,
+ "turns": [
+  {
+   "id": "T1",
+   "pos": [
+    -2380,
+    -4803
+   ],
+   "dir": "R",
+   "type": "hairpin",
+   "radius_m": 13,
+   "n": 4,
+   "best": {
+    "mph_in": 33,
+    "mph_min": 33,
+    "mph_out": 38,
+    "brake_on_m": 0,
+    "throttle_on_m": 0,
+    "lat_g": 1.24,
+    "apex": [
+     -2395,
+     -4801
+    ],
+    "t0": 13188.9,
+    "stint": 122,
+    "first_red": "front ph1",
+    "session": "fh6_20260822_035921"
+   },
+   "sessions": 1,
+   "best_by_car": {
+    "1350|2|8|601": {
+     "mph_in": 33,
+     "mph_min": 33,
+     "mph_out": 38,
+     "brake_on_m": 0,
+     "throttle_on_m": 0,
+     "lat_g": 1.24,
+     "apex": [
+      -2395,
+      -4801
+     ],
+     "t0": 13188.9,
+     "stint": 122,
+     "first_red": "front ph1",
+     "session": "fh6_20260822_035921"
+    }
+   },
+   "cars": [
+    "1350|2|8|601"
+   ],
+   "status": "turn",
+   "by_session": {
+    "fh6_20260822_035921": {
+     "n": 4,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 4,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 1.0,
+     "mph_min": 33,
+     "usi": 0.66,
+     "cars": [
+      "1350|2|8|601"
+     ]
+    }
+   },
+   "track": {
+    "passes": 4,
+    "laps_seen": 1,
+    "sessions": 1,
+    "fr": {
+     "front": 4,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 1
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "1350|2|8|601"
+    ],
+    "laps_track": 1,
+    "presence": 1.0
+   },
+   "established": true,
+   "est_by": "behaviour"
+  }
+ ],
+ "laps": 1,
+ "sessions": [
+  "fh6_20260822_035921"
+ ],
+ "updated": "fh6_20260822_035921",
+ "best_laps": {},
+ "visits": [
+  {
+   "session": "fh6_20260822_035921",
+   "laps": 1,
+   "attempts": 1,
+   "cars": [
+    "1350|2|8|601"
+   ],
+   "best_lap": null,
+   "best_car": null
+  }
+ ],
+ "cars": {
+  "1350|2|8|601": {
+   "name": "2011 BMW X5 M",
+   "class": "A",
+   "pi": 601,
+   "drivetrain": "AWD"
+  }
+ },
+ "speed_traces": {},
+ "geo_turns": {},
+ "turn_count_delta": null,
+ "turn_count": 1,
+ "profile": {
+  "dims": {
+   "low_corner": {
+    "frac": 0.366,
+    "band": "heavy"
+   },
+   "mid_corner": {
+    "frac": 0.031,
+    "band": "light"
+   },
+   "fast_corner": {
+    "frac": 0.0,
+    "band": "absent"
+   },
+   "braking": {
+    "frac": 0.165,
+    "band": "moderate"
+   },
+   "straight": {
+    "frac": 0.126,
+    "band": "moderate"
+   },
+   "elevation": {
+    "frac": null,
+    "band": "absent",
+    "range_m": 0.5
+   },
+   "launch": {
+    "frac": null,
+    "band": "absent"
+   }
+  },
+  "heavy": [
+   "low-speed corners"
+  ],
+  "absent": [
+   "fast sweepers",
+   "elevation (crests)"
+  ],
+  "gears_used": [
+   1,
+   2,
+   3,
+   11
+  ],
+  "top_gear_used": 11,
+  "max_gear": 6,
+  "top_speed": 86,
+  "elevation_range_m": 0.5,
+  "notes": [
+   "flat (no crests) — spring/damper vertical behaviour isn't tested on this course",
+   "no fast corners — understeer here is mechanical, not aero"
+  ],
+  "priority": [
+   "low-speed corners",
+   "heavy braking",
+   "straights / top-end"
+  ],
+  "rough_frac": 0.0,
+  "rough_n": 4
+ },
+ "profile_laps": 1,
+ "profile_session": "fh6_20260822_035921"
+}

@@ -1,0 +1,230 @@
+# Uncommitted draft from worktree nostalgic-fermi-71f14e (branch claude/nostalgic-fermi-71f14e, base ae7d69d)
+# Saved 2026-09-05 before the worktree was removed. dashboard/db.js (a generated bundle) deliberately excluded.
+# Superseded by the committed acquisition-method work of 2026-08-06..11 in dashboard/app.js; kept for the
+# discipline-header 'focus' line idea (DISC_FOCUS) and the get-row/method-badge styling.
+diff --git a/dashboard/app.js b/dashboard/app.js
+index fcfd1fc..7d91d79 100644
+--- a/dashboard/app.js
++++ b/dashboard/app.js
+@@ -50,6 +50,25 @@
+ 
+   function opt(v, label) { const o = document.createElement("option"); o.value = v; o.textContent = label; return o; }
+ 
++  // ---- acquisition identity ----
++  const METHODS = DB.metaCars.acquisition_methods || {};
++  const DISC_FOCUS = DB.metaCars.discipline_tuning_focus || {};
++
++  function resolveGetIt(c) {
++    if (c.get_it) return c.get_it;
++    const a = (c.acquisition || "").toLowerCase();
++    const method =
++      a.includes("car pass") ? "car_pass" :
++      (a.includes("wheelspin") || a.includes("reward")) ? "wheelspin" :
++      a.includes("aftermarket") ? "aftermarket" : "autoshow";
++    return { method };
++  }
++
++  function methodBadge(m) {
++    const meta = METHODS[m] || { label: m, icon: "" };
++    return `<span class="method-badge m-${m}">${meta.icon} ${meta.label}</span>`;
++  }
++
+   function isFree(c) {
+     const a = (c.acquisition || "").toLowerCase();
+     return c.price_credits === 0 || a.includes("free") || a.includes("reward") || a.includes("collection journal") || a.includes("wheelspin");
+@@ -79,10 +98,28 @@
+     document.getElementById("resultCount").textContent =
+       `${list.length} car${list.length === 1 ? "" : "s"} match — ranked by tier, then value.`;
+ 
+-    const grid = document.getElementById("recoCards");
+-    grid.innerHTML = "";
+-    if (!list.length) { grid.innerHTML = "<p class='empty'>No cars match these filters. Loosen the budget or class.</p>"; return; }
+-    list.forEach((c, i) => grid.appendChild(card(c, i === 0)));
++    const host = document.getElementById("recoCards");
++    host.innerHTML = "";
++    if (!list.length) { host.innerHTML = "<p class='empty'>No cars match these filters. Loosen the budget or class.</p>"; return; }
++
++    // Group under discipline headers; each header states what to tune for in that category.
++    const groups = d ? [d] : disciplines.filter((k) => list.some((c) => c.disciplines.includes(k)));
++    groups.forEach((k) => {
++      const sub = list.filter((c) => c.disciplines.includes(k));
++      if (!sub.length) return;
++      const sec = document.createElement("section");
++      sec.className = "disc-section";
++      sec.innerHTML = `
++        <div class="disc-head">
++          <h2>${DISCIPLINE_LABEL[k] || k}</h2>
++          ${DISC_FOCUS[k] ? `<p class="disc-focus">${DISC_FOCUS[k]}</p>` : ""}
++        </div>`;
++      const g = document.createElement("div");
++      g.className = "card-grid";
++      sub.forEach((c, i) => g.appendChild(card(c, i === 0)));
++      sec.appendChild(g);
++      host.appendChild(sec);
++    });
+   }
+ 
+   function card(c, top) {
+@@ -136,9 +173,19 @@
+         <dt>Drivetrain</dt><dd>${c.drivetrain_stock} stock → ${c.recommended_drivetrain}</dd>
+         <dt>Power split</dt><dd>${c.power_split || "—"}</dd>
+         <dt>Price</dt><dd>${fmtCr(c.price_credits)}${c.price_note ? `<br><span class="why" style="font-size:12px">${c.price_note}</span>` : ""}</dd>
+-        <dt>Acquisition</dt><dd>${c.acquisition || "—"}</dd>
+         <dt>Value rating</dt><dd>${c.value_rating}/10</dd>
+       </dl>
++      ${(() => {
++        const g = resolveGetIt(c);
++        const meta = METHODS[g.method] || {};
++        const alts = (g.alternatives || []).map((a) =>
++          `<li>${methodBadge(a.method)} <span class="why">${a.detail}</span></li>`).join("");
++        return `
++          <h3>Get it</h3>
++          <div class="get-row">${methodBadge(g.method)}<span class="price">${fmtCr(c.price_credits)}</span></div>
++          <p class="why">${meta.blurb || ""}${g.note ? ` <span class="get-note">(${g.note})</span>` : ""}</p>
++          ${alts ? `<h3>Alternative ways to get it</h3><ul class="alt-list">${alts}</ul>` : ""}`;
++      })()}
+       <h3>Why this car</h3>
+       <p class="why">${c.why}</p>
+       <h3>Mod / upgrade priority (buy in this order)</h3>
+diff --git a/dashboard/index.html b/dashboard/index.html
+index 0f4fad3..c4a91eb 100644
+--- a/dashboard/index.html
++++ b/dashboard/index.html
+@@ -43,7 +43,7 @@
+         <button id="resetBtn" class="ghost">Reset</button>
+       </div>
+       <p class="result-count" id="resultCount"></p>
+-      <div id="recoCards" class="card-grid"></div>
++      <div id="recoCards"></div>
+     </section>
+ 
+     <!-- PROGRESS -->
+diff --git a/dashboard/styles.css b/dashboard/styles.css
+index 98034f1..e3a66fd 100644
+--- a/dashboard/styles.css
++++ b/dashboard/styles.css
+@@ -122,6 +122,34 @@ td.price { font-variant-numeric: tabular-nums; }
+ .share code { color: var(--accent); font-weight: 700; }
+ .why { color: var(--muted); font-size: 13px; line-height: 1.6; }
+ 
++/* ---- discipline sections (Recommend tab) ---- */
++.disc-section { margin-bottom: 30px; }
++.disc-head { margin: 22px 2px 12px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
++.disc-head h2 { margin: 0; font-size: 17px; }
++.disc-head .disc-focus { margin: 4px 0 0; color: var(--muted); font-size: 13px; line-height: 1.5; max-width: 880px; }
++
++/* ---- Get it (car modal) ---- */
++.get-row {
++  display: flex; align-items: center; justify-content: space-between; gap: 12px;
++  background: var(--bg3); padding: 10px 12px; border-radius: 8px; margin: 8px 0 4px;
++}
++.get-row .price { font-variant-numeric: tabular-nums; font-weight: 700; }
++.method-badge {
++  font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap;
++  background: var(--bg3); color: var(--muted);
++}
++.method-badge.m-autoshow { background: rgba(0,210,122,.15); color: var(--accent); }
++.method-badge.m-car_pass { background: rgba(227,179,65,.15); color: var(--warn); }
++.method-badge.m-wheelspin { background: rgba(240,136,62,.15); color: #f0883e; }
++.method-badge.m-aftermarket { background: rgba(47,129,247,.15); color: var(--accent2); }
++.method-badge.m-journal, .method-badge.m-loyalty { background: rgba(0,210,122,.15); color: var(--accent); }
++.get-note { color: var(--warn); }
++.alt-list { list-style: none; margin: 6px 0 0; padding: 0; }
++.alt-list li {
++  display: flex; align-items: center; gap: 10px;
++  background: var(--bg3); border-radius: 8px; padding: 8px 12px; margin: 6px 0;
++}
++
+ .foot { display: flex; justify-content: space-between; padding: 16px 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+ .foot code { background: var(--bg2); padding: 2px 6px; border-radius: 4px; }
+ .empty { text-align: center; color: var(--muted); padding: 40px; }
+diff --git a/data/meta-cars.json b/data/meta-cars.json
+index 9ddba7c..223045d 100644
+--- a/data/meta-cars.json
++++ b/data/meta-cars.json
+@@ -8,6 +8,21 @@
+   },
+   "pi_classes_note": "CORRECTED 2026-06-08 from PRIMARY in-game evidence: a 2014 Golf R displays as B-class at PI 589 (player screenshot) AND at stock PI 536 (ForzaLabs/Dexerto). This DISPROVES the FH4/FH5 table (C 501-600 / B 601-700) that SEO guides — and this project's earlier data — parroted. FH6 shifted every class ~100 PI lower. The shifted model below is the best fit (confidence: probable). Ground truth: 536 and 589 are both B, so the B cap is ~600. The C/B floor and the S1/S2/R lines are not yet independently confirmed — verify exact boundaries in-game.",
+   "disciplines": ["road", "touge_street", "dirt_rally", "cross_country", "drag"],
++  "acquisition_methods": {
++    "autoshow": { "label": "Autoshow", "icon": "🏪", "blurb": "Buy anytime with credits." },
++    "car_pass": { "label": "Car Pass (paid DLC)", "icon": "💳", "blurb": "Requires the paid Car Pass — not buyable with credits." },
++    "wheelspin": { "label": "Wheelspin / reward", "icon": "🎰", "blurb": "Drops from wheelspins or reward pools — cannot be bought directly." },
++    "aftermarket": { "label": "Aftermarket dealer", "icon": "🔧", "blurb": "Bought at a physical dealer location on the map." },
++    "journal": { "label": "Collection Journal", "icon": "🏆", "blurb": "Earned free by completing Collection Journal tiers." },
++    "loyalty": { "label": "FH5 loyalty unlock", "icon": "🎁", "blurb": "Unlocked free for returning Forza Horizon 5 players." }
++  },
++  "discipline_tuning_focus": {
++    "road": "Grip before power: race tires + front width, brakes, race suspension. Springs stiff, ride height low, AWD with ~70% rear bias. Add power LAST — the class cap punishes it.",
++    "touge_street": "Rotation and response: sharp turn-in (high caster, stiffer rear ARB), strong brakes, short gearing for hairpins. AWD launch bias wins tight technical roads.",
++    "dirt_rally": "Compliance over stiffness: rally tires, springs and dampers softened ~30% vs road, raised ride height, tire psi down ~3. AWD with more decel diff lock for stability.",
++    "cross_country": "Survivability: off-road tires, maximum ride height, soft long-travel suspension, AWD/4WD. Clearance and a high off-road stat beat fragile top-end speed.",
++    "drag": "Launch is everything: maximum power, drag tires, locked/launch diff, dedicated short gearing, weight reduction. Traction off the line decides the race."
++  },
+   "cars": [
+     {
+       "id": "gtr-nismo-2024",
+@@ -21,6 +36,7 @@
+       "price_credits": 220000,
+       "price_note": "game8 database lists 220,000 cr; the 270,000 figure circulating in SEO tier-lists is unconfirmed. Free path verified: Touge & Street Rivals Collection Journal, Tier 3 reward.",
+       "acquisition": "Autoshow; also a Tier-3 reward of the Touge & Street Rivals Collection Journal (earnable free)",
++      "get_it": { "method": "autoshow", "alternatives": [{ "method": "journal", "detail": "Touge & Street Rivals Collection Journal, Tier 3 reward — earnable free (verified)" }] },
+       "tier": "S",
+       "value_rating": 9,
+       "upgrade_priority": ["front tire width/compound", "brakes", "race suspension", "weight reduction", "modest power"],
+@@ -106,6 +122,7 @@
+       "power_split": "30/70 F/R",
+       "price_credits": null,
+       "acquisition": "Autoshow (price unconfirmed)",
++      "get_it": { "method": "autoshow", "note": "price unconfirmed" },
+       "tier": "A",
+       "value_rating": 7,
+       "upgrade_priority": ["front grip", "brakes", "suspension", "weight reduction"],
+@@ -146,6 +163,7 @@
+       "power_split": "30/70 F/R",
+       "price_credits": null,
+       "acquisition": "Car Pass exclusive (PAID DLC, added ~2026-05-28) — not buyable with credits alone",
++      "get_it": { "method": "car_pass", "note": "added ~2026-05-28" },
+       "tier": "S",
+       "value_rating": 9,
+       "upgrade_priority": ["front grip", "brakes", "suspension", "weight reduction", "minimal power"],
+@@ -169,6 +187,7 @@
+       "power_split": "30/70 F/R",
+       "price_credits": null,
+       "acquisition": "Autoshow / high-end (PI ~900 S2); often unlockable FREE if you have a Forza Horizon 5 save",
++      "get_it": { "method": "autoshow", "note": "high-end price bracket", "alternatives": [{ "method": "loyalty", "detail": "Often unlocked free with a Forza Horizon 5 save" }] },
+       "tier": "S",
+       "value_rating": 8,
+       "upgrade_priority": ["front grip", "brakes", "downforce", "suspension"],
+@@ -230,6 +249,7 @@
+       "power_split": "30/70 F/R",
+       "price_credits": null,
+       "acquisition": "Autoshow (price unconfirmed)",
++      "get_it": { "method": "autoshow", "note": "price unconfirmed" },
+       "tier": "S",
+       "value_rating": 8,
+       "upgrade_priority": ["dirt/rally tires", "soften suspension", "raise ride height", "power"],
+@@ -290,6 +310,7 @@
+       "power_split": "30/70 F/R",
+       "price_credits": 450000,
+       "acquisition": "Aftermarket Car at Sotoyama Ski Resort",
++      "get_it": { "method": "aftermarket", "note": "Sotoyama Ski Resort dealer" },
+       "tier": "A",
+       "value_rating": 7,
+       "upgrade_priority": ["AWD swap", "all-terrain/rally tires", "raise ride height", "suspension"],
+@@ -310,6 +331,7 @@
+       "power_split": "30/70 F/R",
+       "price_credits": null,
+       "acquisition": "Reward/Wheelspin (unconfirmed)",
++      "get_it": { "method": "wheelspin", "note": "drop source unconfirmed" },
+       "tier": "S",
+       "value_rating": 8,
+       "upgrade_priority": ["AWD swap", "off-road tires", "raise ride height", "suspension"],
+@@ -370,6 +392,7 @@
+       "power_split": "drag-specific",
+       "price_credits": null,
+       "acquisition": "Reward/Wheelspin (unconfirmed)",
++      "get_it": { "method": "wheelspin", "note": "drop source unconfirmed" },
+       "tier": "S",
+       "value_rating": 8,
+       "upgrade_priority": ["max power", "drag tires", "drag-specific gearing", "weight reduction"],

@@ -1,0 +1,12 @@
+{
+ "IDS_DisplayName_13272ac27ec34748ac11cb9847fbc221": "Sekibe Time Attack",
+ "IDS_DisplayName_1342f4b74bda4605be9528a8f1d4c674": "Soni Time Attack",
+ "IDS_DisplayName_c04db36897464aa6adc4b8a6cf4f9181": "Hokubu Time Attack",
+ "IDS_DisplayName_c429ceb69dd9411194659e0287d72db4": "Brio Time Attack 01",
+ "IDS_DisplayName_c9416e3fc01647858403d70d330db88a": "Legend Island Time Attack",
+ "IDS_DisplayName_dcf63c56fa3e4270a784826d7535f1ea": "Edamame Time Attack",
+ "IDS_Time_Attack": "Time Attack",
+ "IDS_Time_Attack_Fail_State": "False Start",
+ "IDS_Time_Attack_Start": "TIME ATTACK START",
+ "IDS_Time_Attack_Wrong_Dir": ""
+}

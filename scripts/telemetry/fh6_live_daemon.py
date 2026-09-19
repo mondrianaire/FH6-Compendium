@@ -12,17 +12,33 @@ Endpoints:  GET /events  (SSE: status / frame ~20 Hz / strip per second / corner
             GET /session.json  (latest auto-analysis)   GET /health
 Dashboard: Telemetry Lab -> Live (EventSource on http://localhost:8765/events)
 """
-import argparse, csv, json, math, os, socket, struct, subprocess, sys, threading, time
+import argparse, csv, glob, json, math, os, socket, struct, subprocess, sys, threading, time
+import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from fh6_dataout_capture import FH_FMT, FIELDS, W, decode  # noqa: E402
+import lap_store  # noqa: E402  — the per-lap history store (data/laps.db); the daemon only ever READS it
+try:
+    import fh6_tune_decode as TUNE  # on-disk tune reader (stdlib); optional
+except Exception:
+    TUNE = None
+try:
+    import fh6_profile as PROFILE  # C_ProfileData decode: current-equipped tune + garage corpus; optional
+except Exception:
+    PROFILE = None
 
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 G = 9.80665
 CLASS = {0: "D", 1: "C", 2: "B", 3: "A", 4: "S1", 5: "S2", 6: "X", 7: "X"}
 DRIVE = {0: "FWD", 1: "RWD", 2: "AWD"}
+
+# Feature B — per-part PI scaffolding: pair the active car's on-disk decoded config with its live CarPI.
+PI_OBS_PATH = os.path.join(ROOT, "data", "pi-observations.json")
+_PI_LOCK = threading.Lock()
+_BL_LOCK = threading.Lock()   # data/build-letters.json — the permanent build-letter registry
+_PI_LAST = [None]   # (ordinal, parts_hash, car_pi) of the last write — cheap dedup so the file isn't thrashed
 
 class State:
     def __init__(self):
@@ -37,19 +53,303 @@ class State:
         self.cars = {}              # ordinal -> info
         self.csv_path = None; self.csv_writer = None; self.csv_file = None
         self.last_on_t = None; self.live_since_analysis = 0.0; self.drive_since_periodic = 0.0; self.analyzing = False; self.replay = False
+        self.last_lapnum = None; self._last_lap_analysis = 0.0; self._last_analysis_secs = 0.0   # LAP-completion analysis trigger (the granularity the cross-lap limiter changes at)
         self.session_json = None; self.session_path = None; self.analysis = None
         self.stint = 0; self.stint_start = None; self._zero_since = None; self.prev_cfg = None; self.stint_tags = {}
-        self.last_pos = None; self.loop = None; self.loop_lap = 0; self._loop_state = "start"; self._loop_away = 0.0; self._loop_prev = None; self._loop_t0 = None; self.loop_last_s = None
+        self.last_pos = None; self.loop = None; self.loop_lap = 0; self._loop_state = "start"; self._loop_away = 0.0; self._loop_prev = None; self._loop_t0 = None; self.loop_last_s = None; self._auto_loop = False; self._auto_suspend = None   # _auto_loop: the current loop was auto-started by a timed event (Rivals), not a manual mark; _auto_suspend: odometer/lap-timer snapshot taken at a mid-event pause (J7)
+        self.ev_path = []; self._ev_named = False; self._ev_match_next = 16   # the current event's driven path (25 m samples), and the LIVE catalogue-naming state: has a positive path match renamed the loop yet, and the next path length to retry the match at
+        self._ev_dist = None   # DistanceTraveled last seen in an event; a large DROP = a new race began (PvP Horizon Open runs races back-to-back), so the auto-loop must re-identify the new course rather than stay named from the previous one
         self.last_t = 0.0; self.game = "menu"; self.game_kind = None; self._noev_since = None; self.ev_maxpos = 0; self.mode_suggest = None; self.mode_reason = None   # lab-mode auto-detection
         self.lab_mode = None; self._force_split = False; self._ev_edge = False; self.stint_starts = {}; self.last_drive_game = None   # effective lab mode (pushed by the dashboard), manual split request, event edge pending, run boundaries (t_mono)
         self.events = []            # queued one-shot events (strip/corner/session) for SSE clients: list of (seq, name, payload)
         self.seq = 0
+        self.clone_lock = None      # ordinal the user pinned as a CLONE TARGET — while set, PI/catalog accrual for it is paused (building the replica must not poison the target)
+        self.gears_seen = {}        # ordinal -> set of forward gears USED at speed this session — hard identity evidence (you cannot use gear 8 in a 6-speed box)
+        self.picked_id = {}         # ordinal -> {ts, t}: the save the user PICKED in the 🪪 drawer — seeded from data/identity-evidence.json at startup so a restart does not re-ask
+        self._eng_bootstrapped = {}  # ordinal -> container ts already used to bootstrap that download's engine family cyl from the live frame (learn once per fresh download; see _equipped_fresh_download / _enrich_engine_desc)
+        self.live_fdg = {}          # ordinal -> {gear: [rpm/mph samples]} measured DAEMON-LOCAL at clean WOT — the ladder must not wait for (or die with) the analyzer
     def emit(self, name, payload):
         with self.lock:
             self.seq += 1; self.events.append((self.seq, name, payload))
             if len(self.events) > 2000: self.events = self.events[-2000:]
 
 ST = State()
+
+def _ident_restore():
+    """Resume, do not re-ask. Without this the persisted evidence would be written and never read, which is
+    exactly the orphan pattern the ask audit spent its time removing."""
+    try:
+        d = _ident_load()
+        for o, v in (d.get("picked") or {}).items():
+            # CARRY THE PICK'S AGE -- don't reset it. _ident_remember stamps 'at' when the pick was MADE; seeding 't'
+            # to now() here re-timestamped a stale declaration as "fresh", so a pick made days ago survived every
+            # restart and the 2 h freshness window that gates it everywhere (/disk-tune, PI-recording) never expired
+            # it. Restore 't' from the stored 'at' so an old pick ages out on its own; fall back to now() only for a
+            # legacy record written before 'at' existed.
+            if v.get("ts"): ST.picked_id[str(o)] = {"ts": str(v["ts"]), "t": float(v.get("at") or time.time())}
+        for o, gs in (d.get("gears") or {}).items():
+            g = gs.get("g") if isinstance(gs, dict) else gs
+            if g: ST.gears_seen[str(o)] = set(int(x) for x in g)
+        if d.get("picked") or d.get("gears"):
+            print("[identity] restored %d pick(s) and gear evidence for %d car(s)"
+                  % (len(d.get("picked") or {}), len(d.get("gears") or {})), flush=True)
+    except Exception as e:
+        # NEVER SILENTLY. This except used to be a bare `pass`, and it was swallowing a NameError: the call sat
+        # ABOVE _ident_load's definition, so the restore raised on every single startup and the daemon discarded
+        # every pick and every gear observation it had faithfully written to disk. The docstring above calls that
+        # "exactly the orphan pattern the ask audit spent its time removing" — the function was an instance of it.
+        print("[identity] RESTORE FAILED — evidence on disk was not loaded: %r" % (e,), flush=True)
+
+_IDENT_LOCK = threading.Lock()
+def _ident_path(): return os.path.join(ROOT, "data", "identity-evidence.json")
+
+def _ident_load():
+    """Identity evidence that SURVIVES. Both signals that resolve a multi-build car were in-memory only and
+    expired after 2 h: the user's explicit drawer pick, and the gears actually used (you cannot reach 8th in a
+    6-speed box). A restart, a crash, a reboot or two quiet hours discarded every one, and the car went back to
+    "6 saved builds share this engine" — so the same question got asked again and again while nothing accumulated.
+
+    A gear you have driven is a permanent fact about a build; a pick is a standing declaration until the user
+    moves off that build or a fresh save supersedes it. Neither should evaporate on a process bounce."""
+    try:
+        with open(_ident_path(), encoding="utf-8") as f: return json.load(f)
+    except Exception:
+        return {"schema_version": "1.0.0", "picked": {}, "gears": {}}
+
+def _ident_save(doc):
+    try:
+        p2 = _ident_path(); os.makedirs(os.path.dirname(p2), exist_ok=True)
+        tmp = p2 + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f: json.dump(doc, f, indent=1)
+        os.replace(tmp, p2)
+    except Exception:
+        pass
+
+# CALLED HERE, not beside its definition: _ident_restore needs _ident_load, and being defined earlier in the file
+# than the thing it calls is the whole reason the evidence never came back.
+_ident_restore()
+
+
+def _ident_remember(kind, ordn, value, kwargs_cid=None):
+    with _IDENT_LOCK:
+        d = _ident_load()
+        if kind == "picked":
+            d.setdefault("picked", {})[str(ordn)] = {"ts": str(value), "at": time.time()}
+        else:
+            # SCOPED TO THE BUILD, not to the car. Gears are a property of the GEARBOX, and the gearbox belongs to
+            # the build — so ST.gears_seen is (correctly) cleared on a build change and on a new save, because the
+            # old build's top gear must not veto or fingerprint the new one. The disk copy did NOT mirror that, so
+            # it accumulated across builds forever and the two diverged the moment you changed anything: a car
+            # that ran a 10-speed and then a 6-speed keeps [1..10] on disk, never matches the 6-speed's [1..6],
+            # and _box_exercised — which reads DISK — silently stops working for that car.
+            # Within one build gears still only ACCUMULATE (driving 3rd never unproves 8th); a different build
+            # starts its own set. Old list-shaped entries are read once and then replaced.
+            rec = (d.setdefault("gears", {}) or {}).get(str(ordn))
+            cid = str(kwargs_cid) if kwargs_cid else None
+            if isinstance(rec, dict):
+                g = set(rec.get("g") or []) if (not cid or rec.get("cid") in (None, cid)) else set()
+            else:
+                g = set(rec or [])                      # legacy: a bare list, no build recorded — adopt it once
+            g |= set(int(x) for x in value)
+            d["gears"][str(ordn)] = {"cid": cid, "g": sorted(g)}
+        _ident_save(d)
+
+def _ident_forget_gears(ordn):
+    """Drop a car's PERSISTED gear evidence, to mirror ST.gears_seen being cleared.
+
+    Called from the two places that reset the in-memory set — a build change and a fresh save — because both mean
+    the gearbox may not be the one those gears were measured on. Without this the disk copy kept accumulating
+    across builds while memory reset per build, the two diverged permanently, and _box_exercised (which reads
+    disk) stopped being able to confirm any box on a car whose build had ever changed."""
+    with _IDENT_LOCK:
+        d = _ident_load()
+        if (d.get("gears") or {}).pop(str(ordn), None) is not None:
+            _ident_save(d)
+
+
+def _ident_forget_pick(ordn):
+    with _IDENT_LOCK:
+        d = _ident_load()
+        if d.get("picked", {}).pop(str(ordn), None) is not None: _ident_save(d)
+
+
+def _remember_equipped(ordn, save):
+    """FOLD 1 -- DURABLE LAST-EQUIPPED MEMORY (Jett 2026-09-17). When identity settles via a fresh equip+save,
+    record that build so it stays recognized across a long session AND a daemon restart, not just the 30-min fresh
+    window. Keyed by ORDINAL: the telemetry gives no per-instance UUID (cid is CarOrdinal|Drivetrain|Cyl|PI, i.e.
+    model-level), so two identical cars collide and the last save wins. Stores the save ts + its instant signature
+    (cyl / pi / parts fingerprint) so recall can confirm the live car still matches. Idempotent -- only writes when
+    the remembered save actually changes -- and a real equip+save SUPERSEDES any stale manual pick for the car
+    (the manual pick is what caused the old mis-identification; this replaces it with a self-refreshing record)."""
+    try:
+        ts = str(save.get("ts") or "")
+        if not ts:
+            return
+        with _IDENT_LOCK:
+            d = _ident_load()
+            eq = d.setdefault("equipped", {})
+            cur = eq.get(str(ordn)) or {}
+            picked_had = (d.get("picked") or {}).pop(str(ordn), None) is not None   # a fresh save retires the stale pick
+            if str(cur.get("ts")) == ts and not picked_had:
+                return   # unchanged
+            eq[str(ordn)] = {"ts": ts, "cyl": save.get("cyl"), "pi": save.get("pi"),
+                             "bsig": save.get("_bsig"), "at": time.time()}
+            _ident_save(d)
+    except Exception:
+        pass
+
+
+def _recall_equipped(ordn):
+    """The build last equipped+saved on this car ({ts, cyl, pi, bsig, at}), or None. See _remember_equipped."""
+    try:
+        with _IDENT_LOCK:
+            return (_ident_load().get("equipped") or {}).get(str(ordn))
+    except Exception:
+        return None
+
+
+def _remember_profile_equipped(equipped_by_ord):
+    """Record the CURRENTLY-EQUIPPED tune per ordinal read from the decrypted C_ProfileData (identify-on-equip).
+    Unlike Fold-1 (a save-mtime heuristic), this is the game's own "current car's equipped tune" ground truth —
+    it settles a signature tie even for an EQUIP of an existing tune, which writes no Tuning_* file. Written only
+    by the user-approved /profile-decrypt path. Shape mirrors `equipped`: {<ord>: {ts, at}} under `equipped_profile`."""
+    try:
+        with _IDENT_LOCK:
+            d = _ident_load()
+            ep = d.setdefault("equipped_profile", {})
+            for ordn, ts in (equipped_by_ord or {}).items():
+                if ts:
+                    ep[str(ordn)] = {"ts": str(ts), "at": time.time()}
+            _ident_save(d)
+    except Exception:
+        pass
+
+
+def _recall_profile_equipped(ordn):
+    """The profile-reported currently-equipped tune for this car ({ts, at}), or None. See _remember_profile_equipped."""
+    try:
+        with _IDENT_LOCK:
+            return (_ident_load().get("equipped_profile") or {}).get(str(ordn))
+    except Exception:
+        return None
+
+
+_PROFILE_LOCK = threading.Lock()   # serializes every _profile_decrypt_and_record (auto + manual) — see its docstring
+
+
+_BRIO_SNAPSHOT_TTL = 2 * 3600   # a baseline older than this isn't a trustworthy "previous read" (see below)
+
+
+def _recall_brio_snapshot():
+    """The last-seen brio progression map ({"<type>:<route>": "<hex>"}), or {}. Persisted in identity-evidence
+    so the diff survives a daemon restart -- the whole point is comparing THIS read against the previous one.
+
+    STALENESS GUARD (audit 2026-09-18): identity-evidence.json is a TRACKED file, so a fresh worktree (or one
+    that pulled a committed snapshot) would otherwise diff its first read against an hours/days-old baseline and
+    report every route driven anywhere in between as one spurious burst. The snapshot is stamped with the read's
+    wall-clock time; a baseline older than _BRIO_SNAPSHOT_TTL degrades to "no baseline" (re-establish, no diff)
+    rather than a misleading burst. Sibling keys (picked/equipped/gears) all have such a guard; this now matches."""
+    try:
+        with _IDENT_LOCK:
+            snap = _ident_load().get("brio_snapshot") or {}
+            if isinstance(snap, dict) and "map" in snap and "at" in snap:      # current shape {"at","map"}
+                if (time.time() - float(snap.get("at") or 0)) > _BRIO_SNAPSHOT_TTL:
+                    return {}
+                return snap.get("map") or {}
+            return snap if isinstance(snap, dict) else {}                      # legacy bare-map; rewritten on next persist
+    except Exception:
+        return {}
+
+
+def _remember_brio_snapshot(bm):
+    try:
+        with _IDENT_LOCK:
+            d = _ident_load()
+            d["brio_snapshot"] = {"at": time.time(), "map": bm or {}}
+            _ident_save(d)
+    except Exception:
+        pass
+
+
+def _brio_advisory(dec):
+    """ADVISORY brio-diff (no course-ID authority yet). Diff this profile read's per-route progression blobs
+    against the last snapshot; a route whose blob moved was just driven. For Rivals -- where the menu offers
+    no clean current-route pointer -- this is a self-verifying course signal. We log it and emit `brio_change`
+    so it can be watched firing correctly, then persist the new snapshot. Promotion to an actual locateCourse
+    input happens only after it's confirmed reliable. Never raises; never names a course (route id only)."""
+    if PROFILE is None or not hasattr(PROFILE, "brio_map"):
+        return
+    try:
+        cur = PROFILE.brio_map(dec)
+        if not cur:
+            return
+        prev = _recall_brio_snapshot()
+        # A SHRINKING map is almost always a partial/torn read (a route never disappears from a real profile).
+        # Persisting it would forget a route's baseline and fire a spurious change on the next good read, so
+        # skip persisting and diffing this one -- the next full read re-establishes the comparison.
+        if prev and len(cur) < len(prev):
+            print("[brio] shrunk read (%d < %d) — skipping (likely partial)" % (len(cur), len(prev)), flush=True)
+            return
+        changed = PROFILE.brio_diff(prev, cur) if prev else []
+        _remember_brio_snapshot(cur)
+        if prev and changed:
+            routes = [c["route"] for c in changed]
+            print("[brio] routes moved since last read: %s" % routes, flush=True)
+            ST.emit("brio_change", {"routes": routes, "changed": changed, "at": time.time()})
+    except Exception as e:
+        print("[brio] advisory diff failed: %s" % (str(e)[:120]), flush=True)
+
+
+def _profile_decrypt_and_record(allow_upload=False, auto=False):
+    """Read C_ProfileData and record the current car's equipped tune per ordinal, so _pick_meta settles the
+    signature tie (identify-on-equip), then force a disk re-emit + announce the result.
+
+    Two callers, two policies:
+      * AUTOMATIC (auto=True, allow_upload=False) — fired by the disk watcher when the profile's mtime moves
+        (an equip / a save). Offline only: fh6_profile prefers scripts/tools/fh6_local_decrypt, which keeps
+        the save on this machine, so this needs no click and costs ~0.3 s.
+      * USER-APPROVED (/profile-decrypt {approved:true}, allow_upload=True) — the fallback when the offline
+        decryptor is missing; fh6_profile may then use ForzaCryptoTool, which UPLOADS the save.
+
+    Never uploads unless the caller passed allow_upload — the automatic path cannot, by construction.
+    Runs in a background thread."""
+    import tempfile
+    # SERIALIZE every profile read (audit 2026-09-18). Both callers reach here on their own thread (the auto
+    # disk-watcher and the manual /profile-decrypt endpoint run on a ThreadingHTTPServer worker), and
+    # PROFILE.decrypt() drives an external tool over shared temp files. Two in flight at once could delete or
+    # overwrite each other's plaintext mid-read -> a torn buffer feeds current_equipped()/_brio_advisory and
+    # corrupts the persisted snapshot. A non-blocking acquire means a second read just no-ops instead of racing.
+    if not _PROFILE_LOCK.acquire(blocking=False):
+        ST.emit("profile_read", {"ok": False, "err": "a profile read is already in flight", "auto": bool(auto)})
+        return
+    if PROFILE is None:
+        _PROFILE_LOCK.release()
+        ST.emit("profile_read", {"ok": False, "err": "profile module unavailable"}); return
+    ST._profile_reading = True   # reflect it for both callers (the manual endpoint doesn't pre-set it)
+    # per-process unique plaintext path so a stray concurrent reader (e.g. a manual CLI run) can't collide
+    out = os.path.join(tempfile.gettempdir(), "fh6_C_ProfileData.%d.dec" % os.getpid())
+    try:
+        src = PROFILE.find_profile_path()
+        if not src:
+            ST.emit("profile_read", {"ok": False, "err": "C_ProfileData not found"}); return
+        PROFILE.decrypt(src, out, approved=bool(allow_upload), timeout=120)
+        dec = open(out, "rb").read()
+        eq = PROFILE.current_equipped(dec)
+        by_ord = {}
+        if eq and eq.get("ordinal") and eq.get("tune_ts"):
+            by_ord[str(eq["ordinal"])] = eq["tune_ts"]
+        if by_ord:
+            _remember_profile_equipped(by_ord)
+            ST._disk_dirty = True   # next disk emit re-runs _pick_meta -> settles via the profile fact
+        _brio_advisory(dec)         # ADVISORY: log/emit which route just moved (Rivals course-ID scaffold)
+        ST.emit("profile_read", {"ok": True, "equipped": eq, "at": time.time(), "auto": bool(auto)})
+    except Exception as e:
+        ST.emit("profile_read", {"ok": False, "err": str(e)[:200], "auto": bool(auto)})
+    finally:
+        ST._profile_reading = False
+        try: os.remove(out)
+        except Exception: pass
+        _PROFILE_LOCK.release()
 
 def cid(p): return f'{p["CarOrdinal"]}|{p["DrivetrainType"]}|{p["NumCylinders"]}|{p["CarPI"]}'
 NAMES_PATH = os.path.join(ROOT, "data", "car-ordinals.json")
@@ -66,6 +366,9 @@ def compact(p, t_mono):
         "t": round(t_mono, 2), "on": p["IsRaceOn"], "car": p["CarOrdinal"], "cid": cid(p), "pi": p["CarPI"], "cls": CLASS.get(p["CarClass"], "?"), "drv": DRIVE.get(p["DrivetrainType"], "?"), "cyl": p["NumCylinders"],
         "gear": p["Gear"], "mph": round(p["Speed"] * 2.23694, 1), "rpm": round(p["CurrentEngineRpm"]), "maxrpm": round(p["EngineMaxRpm"]),
         "ev": 1 if p["CurrentLap"] > 0 else 0, "lapn": p["LapNumber"], "rpos": p["RacePosition"], "lapt": round(p["CurrentLap"], 2), "dist": round(p["DistanceTraveled"]), "px": round(p["PosX"], 1), "pz": round(p["PosZ"], 1),   # ev = lap timer running (RacePosition lingers after an event ends)
+        # game-REPORTED completed / best lap times (float seconds), sanitised against the known LastLap-latch garbage
+        # (seen stuck at 43840s / 231307s). Forwarded live so the dashboard can flash a PB / rival-beat without OCR.
+        "last": (round(p["LastLap"], 3) if 3 <= p["LastLap"] <= 1800 else None), "best": (round(p["BestLap"], 3) if 3 <= p["BestLap"] <= 1800 else None),
         "lat": round(p["AccelX"] / G, 2), "lon": round(p["AccelZ"] / G, 2), "yaw": round(math.degrees(p["AngVelY"]), 1),
         "steer": p["Steer"], "thr": p["Accel"], "brk": p["Brake"], "hb": p["HandBrake"], "boost": round(p["Boost"], 1),
         "hp": round(p["Power"] / 745.7), "tq": round(p["Torque"] * 0.7376),
@@ -96,6 +399,181 @@ def _save_tags():
     os.makedirs(os.path.dirname(tp), exist_ok=True)
     with open(tp, "w", encoding="utf-8") as f: json.dump({"session": sid, "stints": ST.stint_tags, "stint_starts": ST.stint_starts}, f, indent=2, ensure_ascii=False)
 
+_ROUTE_STARTS = None    # [(name, start_x, start_z, is_race)] from the CATALOGUE — the S/F-line lookup for the live name
+
+
+def _route_starts():
+    """Every named route's start point, from the game's catalogue in fh6.db (ref_route + its first geometry
+    point, which is the start/finish for a loop and the grid for a P2P). This REPLACES the stale
+    data/routes.json (95 routes, pre-objectmodel — it never held The Goliath or 74 other catalogued routes,
+    so the S/F match returned 'Rivals course' for them). Cached for the daemon's life; a restart re-reads."""
+    global _ROUTE_STARTS
+    if _ROUTE_STARTS is None:
+        _ROUTE_STARTS = []
+        try:
+            import sqlite3
+            cx = sqlite3.connect("file:%s?mode=ro" % os.path.join(ROOT, "data", "fh6.db").replace("\\", "/"), uri=True)
+            firsts = {}
+            for rid, x, z in cx.execute("SELECT route_id, x, z FROM ref_route_point WHERE i = 0"):
+                firsts[rid] = (x, z)
+            for rid, name, is_race in cx.execute("SELECT route_id, name, is_race FROM ref_route WHERE name IS NOT NULL"):
+                p = firsts.get(rid)
+                if p:
+                    _ROUTE_STARTS.append((name, p[0], p[1], bool(is_race)))
+            cx.close()
+        except Exception:
+            _ROUTE_STARTS = []
+    return _ROUTE_STARTS
+
+
+def _match_route_name(sf):
+    """Best-effort LIVE course name: the nearest catalogued route START within ~120 m of the S/F crossing.
+    The analyzer does the rigorous attribution (start + heading + length); this is the live 'auto-tracking X'
+    label. Race routes win a tie with a free-roam ribbon that merely shares the coordinate."""
+    try:
+        best, bd, best_race = None, 120.0, False
+        for name, sx, sz, is_race in _route_starts():
+            d = math.hypot(sf[0] - sx, sf[1] - sz)
+            if d < bd or (d < bd + 15 and is_race and not best_race):
+                bd, best, best_race = d, name, is_race
+        return best
+    except Exception:
+        return None
+
+_AN = None
+def _an():
+    """The analyze_session module, imported once and cached -- the shared home of the route catalogue, path match
+    and activation spheres, so the daemon and the analyzer corroborate identity the same way. None if unavailable."""
+    global _AN
+    if _AN is None:
+        try:
+            import analyze_session as _mod
+            _AN = _mod
+        except Exception:                                # noqa: BLE001
+            _AN = False
+    return _AN or None
+def _catalogue_match(sx, sz, sample):
+    """CONFIDENT live course id from the accumulated event path -- the same two-tier catalogue match the analyzer
+    uses (start-anchored when the drive begins within 500 m of the catalogued start, else path-dominant), gated
+    so we only claim a name when we are POSITIVE: the drive lies almost wholly on the road (ov >= 0.70) and, for
+    an offset start (PvP/Rivals whose S/F is far from the catalogued point, e.g. Mt. Haruna 622 m), covers most
+    of it (cov >= 0.60). Returns (name, 'route:<id>') or None. Reuses analyze_session's cached catalogue; never
+    downgrades -- callers stop once named."""
+    if len(sample) < 8: return None
+    try:
+        _mod = _an()
+        if _mod is None: return None
+        starts = _mod._catalogue_starts()
+    except Exception:
+        return None
+    def near(x, z, cells):
+        cx0, cz0 = int(x // 30), int(z // 30)
+        for dx in (-1, 0, 1):
+            for dz in (-1, 0, 1):
+                for px, pz in cells.get((cx0 + dx, cz0 + dz), ()):
+                    if (px - x) ** 2 + (pz - z) ** 2 <= 900: return True
+        return False
+    best_start = best_path = None
+    for key, name, cx0, cz0, length_m, is_race, conf, bb in starts:
+        if bb and not (bb[0] - 250 <= sx <= bb[2] + 250 and bb[1] - 250 <= sz <= bb[3] + 250): continue
+        cp = _mod._catalogue_path(key)
+        if not cp: continue
+        cells = {}
+        for x, z in cp: cells.setdefault((int(x // 30), int(z // 30)), []).append((x, z))
+        ov = sum(1 for x, z in sample if near(x, z, cells)) / len(sample)
+        if ov < 0.70: continue                       # the drive must LIE ON this road to be it
+        d0 = math.hypot(sx - cx0, sz - cz0)
+        if d0 <= 500:
+            cand = (-round(ov, 2), round(d0), name, "route:%s" % key.split(":", 1)[-1])
+            if best_start is None or cand < best_start: best_start = cand
+        else:                                        # offset start: needs coverage as the guard against a shared-tarmac sliver
+            scells = {}
+            for x, z in sample: scells.setdefault((int(x // 30), int(z // 30)), []).append((x, z))
+            cov = sum(1 for x, z in cp if near(x, z, scells)) / max(1, len(cp))
+            if cov < 0.60: continue
+            cand = (-round(ov, 2), round(d0), name, "route:%s" % key.split(":", 1)[-1])
+            if best_path is None or cand < best_path: best_path = cand
+    best = best_start or best_path
+    return (best[2], best[3]) if best else None
+
+_LEARNED = None
+def _learned_starts():
+    """Per-route S/F CROSSINGS we have actually driven (session_event.start on a route:<id> key) -- the REAL
+    finish-line location, unlike the catalogued i=0 which sits far from it on many courses. Lets an event be named
+    at LOAD-IN from where the game spawns you (the S/F line), with no driving at all. Cached; a restart re-reads."""
+    global _LEARNED
+    if _LEARNED is None:
+        _LEARNED = []
+        try:
+            import sqlite3
+            cx = sqlite3.connect("file:%s?mode=ro" % os.path.join(ROOT, "data", "fh6.db").replace("\\", "/"), uri=True)
+            meta = {str(rid): (nm, bool(isr)) for rid, nm, isr in cx.execute("SELECT route_id, name, is_race FROM ref_route WHERE name IS NOT NULL")}
+            for rk, sx, sz in cx.execute("SELECT route_key, start_x, start_z FROM session_event WHERE route_key LIKE 'route:%' AND start_x IS NOT NULL"):
+                m = meta.get(rk.split(":", 1)[1])
+                if m: _LEARNED.append((m[0], rk, sx, sz, m[1]))
+            cx.close()
+        except Exception:                                # noqa: BLE001
+            _LEARNED = []
+    return _LEARNED
+
+def _match_learned_start(sf, thresh=60.0, rpos=None):
+    """Nearest route whose DRIVEN S/F crossing is within thresh m of sf. Returns (name, key, unambiguous) or None;
+    unambiguous means we can name it at load-in without driving to confirm. Three independent routes to unambiguous
+    for a plaza-shared start (two courses spawn at the same line):
+    (1) no OTHER route's learned S/F is within thresh*2 (a lone start), OR
+    (2) RacePosition > 1 -> a CERTAIN race (the packet has no mode field; RacePosition is the only signal, and >1 is
+        positive proof of a field), so among the plaza-mates keep only the is_race variant -- resolves e.g. Chiheisen
+        (race) vs Temple Cross Country (solo), Naruo Circuit (race) vs Airfield Trail (solo), at spawn with no motion, OR
+    (3) the spawn falls inside exactly one candidate route's ACTIVATION SPHERE (race_triggers.tz) -- but the sphere is
+        the free-roam trigger, sited 136-778 m from the spawn line on every measured plaza pair, so it rescues an
+        event ACTIVATED from free-roam, essentially never a Rivals/PvP load-in. Kept as a safe last resort.
+    Every route CONFIRMS a start already proposed here (corroborate geometry, never name). session_event stores no
+    start_y, so elevation cannot disambiguate a learned start; surface (paved/loose) needs motion and the path-match
+    covers it once driving. rpos is the live RacePosition at spawn; None disables the mode gate."""
+    byroute = {}
+    for nm, rk, sx, sz, isr in _learned_starts():
+        d = math.hypot(sf[0] - sx, sf[1] - sz)
+        if rk not in byroute or d < byroute[rk][0]: byroute[rk] = (d, nm, isr)
+    near = sorted(((d, rk, nm, isr) for rk, (d, nm, isr) in byroute.items()), key=lambda x: x[0])
+    if not near or near[0][0] > thresh: return None
+    ambiguous = len(near) >= 2 and near[1][0] <= thresh * 2
+    if ambiguous and rpos is not None and rpos > 1:      # certain race -> keep only the race variant of the plaza
+        racers = [c for c in near if c[3] and c[0] <= thresh * 2]
+        if len(racers) == 1: return (racers[0][2], racers[0][1], True)
+        if racers: near = sorted(racers, key=lambda x: x[0]); ambiguous = len(near) >= 2 and near[1][0] <= thresh * 2
+    if ambiguous:                                        # still tied -> let the activation sphere break it (rare at a spawn)
+        try:
+            an = _an()
+            sph = an._sphere_for(sf[0], sf[1]) if an else None        # the one route whose sphere uniquely contains the spawn
+            if sph:
+                cand = next((c for c in near if c[1] == sph and c[0] <= thresh * 2), None)
+                if cand: return (cand[2], cand[1], True)
+        except Exception:                                # noqa: BLE001
+            pass
+    unamb = not ambiguous
+    return (near[0][2], near[0][1], unamb)
+
+def _end_auto_course(t_mono, p, c):
+    """A timed event ended (finish, crash, or restart). Complete the OPEN pass so nothing is wasted: this is a
+    point-to-point sprint's only pass, a circuit's final lap, OR a partial/crashed practice run — all of which carry
+    real cornering data (off-line data maps the grip envelope). Classify topology, then clear the auto-course."""
+    lp = ST.loop
+    if not lp or not ST._auto_loop:
+        ST._auto_loop = False
+        return
+    # Topology: only a completed lap (LapNumber increment -> "circuit") is provable LIVE. A single run that ends far
+    # from the start could equally be a genuine A->B finish OR a crashed circuit lap — indistinguishable here — so it
+    # stays "unknown" and the analyzer classifies it authoritatively across runs + the route registry.
+    topo = lp.get("topology", "unknown")
+    # complete the open pass if a meaningful distance was driven since the last start/lap boundary (skips instant aborts)
+    if ST._loop_state == "in" and ST._loop_away > 80:
+        ST.loop_lap += 1; ST.loop_last_s = round(t_mono - (ST._loop_t0 or t_mono), 2)
+        ST.emit("lap", {"loop": lp["name"], "lap": ST.loop_lap, "time_s": ST.loop_last_s, "final": True, "topology": topo, "dist_m": round(ST._loop_away)})
+        maybe_lap_analysis(t_mono, "event end (" + topo + ")")
+    with ST.lock:
+        ST.loop = None; ST._auto_loop = False; ST._loop_state = "start"; ST._loop_away = 0.0; ST._auto_suspend = None
+    ST.emit("loop", {"name": None})
+
 def ingest(p, t_mono):
     """Core pipeline for one decoded packet (live or replay)."""
     c = compact(p, t_mono)
@@ -111,6 +589,21 @@ def ingest(p, t_mono):
         if ST.last_drive_game is not None and g != ST.last_drive_game: ST._ev_edge = True   # event <-> free roam edge = new run (a pause mid-event is NOT an edge)
         ST.last_drive_game = g
     if g != ST.game:
+        if ST.game == "event" and ST._auto_loop:
+            if g == "menu": ST._auto_suspend = {"dist": c["dist"], "lapt": c["lapt"]}   # J7: a pause is NOT an event exit — suspend, decide on the way back out (ending here fabricated a final pass + re-anchored the course at the pause position)
+            else: _end_auto_course(t_mono, p, c)   # event finish / crash -> complete the open pass (P2P, final lap, or partial), then clear the auto-course
+        elif ST.game == "menu" and ST._auto_suspend is not None:
+            sus = ST._auto_suspend; ST._auto_suspend = None
+            resumed = g == "event" and c["dist"] >= sus["dist"] - 50 and c["lapt"] >= sus["lapt"] - 1   # odometer + lap timer CONTINUE across a resume, RESET on a pause-menu restart (analyzer precedent) — a resume keeps the loop untouched
+            if not resumed: _end_auto_course(t_mono, p, c)   # quit to free roam, or restart: the suspended run is over (its partial pass still counts); a restart re-anchors at the real grid via last_pos below
+        # RE-READ THE TUNE EVERY TIME YOU COME OUT OF A MENU. The menu is where sliders get changed, and the only
+        # other trigger is the file watcher's mtime poll — which fires on a SAVE, and only on a save. Coming out
+        # of the menu is the moment the change (saved or not) becomes true of the car you are about to drive, so
+        # it is the moment to look: a fresh decode catches a saved tweak immediately instead of on the next poll,
+        # and the live-PI-vs-save comparison catches an UNSAVED one, which no file watcher can ever see.
+        # _disk_dirty is the existing force-re-emit path, so this costs one 598-byte decode per menu exit.
+        if ST.game == "menu" and g != "menu":
+            ST._disk_dirty = True
         ST.game = g
         if g == "freeroam": ST.ev_maxpos = 0; ST.game_kind = None
         elif g == "event": ST.game_kind = ST.game_kind or ("race" if ST.ev_maxpos > 2 else "rivals / timed")   # kind survives a pause
@@ -123,12 +616,80 @@ def ingest(p, t_mono):
         gap = ST._zero_since is not None and t_mono - ST._zero_since >= 2.0
         if ST.prev_cfg is None or c["cid"] != ST.prev_cfg or ST._ev_edge or ST._force_split or (gap and eff == "course"):
             why = "first drive" if ST.prev_cfg is None else "build change" if c["cid"] != ST.prev_cfg else "event start / finish" if ST._ev_edge else "new run (manual)" if ST._force_split else "menu gap (course mode)"
-            ST.stint += 1; ST.stint_start = t_mono; ST._force_split = False; ST._ev_edge = False; ST.stint_starts[str(ST.stint)] = round(t_mono, 3)
+            # AN EVENT ENTRY IS ONE BOUNDARY, NOT TWO. The car is on-track for exactly one frame with the lap
+            # timer still at 0 before it starts ticking -- measured across three captures, EVERY entry is
+            # preceded by exactly one such frame. That frame opens a run (the course-mode gap rule) and sets
+            # last_drive_game = "freeroam", which guarantees _ev_edge on the very next frame ~5 ms later and
+            # opens a second. The analyzer assigns rows to the LAST boundary at or before them, so the first
+            # run gets a window narrower than a frame, collects nothing, and vanishes: 148 runs numbered to
+            # 165 on one session, 55 to 65 on another, with holes wherever an event loaded. 123 such pairs
+            # across 28 sessions. A boundary landing on top of one a moment old is the same boundary moving,
+            # not a new run -- unless the CAR changed, which is a real new run however fast it happened.
+            #
+            # 0.05 s comes from the data, not from taste. Across all 1387 recorded boundary gaps the histogram
+            # is: 129 under 0.02 s, then NOTHING AT ALL between 0.02 and 0.10 s, then 32 in 0.10-0.25, 44 in
+            # 0.25-0.50, and on up. The adjacent-frame pairs are separated from every real boundary by an empty
+            # band, and 0.05 sits inside it. My first cut used 1.0 s, which would have swallowed 126 boundaries
+            # that are nothing to do with this.
+            _fresh = ST.stint > 0 and ST.stint_start is not None and (t_mono - ST.stint_start) < 0.05
+            if _fresh and c["cid"] == ST.prev_cfg:
+                ST.stint_start = t_mono; ST.stint_starts[str(ST.stint)] = round(t_mono, 3)
+                ST._force_split = False; ST._ev_edge = False
+                why = "event start (boundary moved)"         # the run number does NOT advance: same run, later t0
+            else:
+                ST.stint += 1; ST.stint_start = t_mono; ST._force_split = False; ST._ev_edge = False; ST.stint_starts[str(ST.stint)] = round(t_mono, 3)
+            if why == "build change":   # a different cid = a different gearbox may be equipped — the old build's gears must not veto or fingerprint the new one
+                ST.gears_seen.pop(str(c["car"]), None); ST.live_fdg.pop(str(c["car"]), None); _ident_forget_gears(c["car"])
             ST.emit("stint", {"n": ST.stint, "t0": round(t_mono, 1), "id": c["cid"], "why": why}); _save_tags()
         ST._zero_since = None; ST.prev_cfg = c["cid"]
     elif ST._zero_since is None: ST._zero_since = t_mono
     c["stint"] = ST.stint
-    ST.last_pos = (p["PosX"], p["PosZ"])
+    if c["on"] and c["car"] and 1 <= (c["gear"] or 0) <= 10 and c["mph"] > 15:   # gears actually USED at speed — the cheapest exact identity evidence
+        _g = ST.gears_seen.setdefault(str(c["car"]), set())
+        if int(c["gear"]) not in _g:
+            _g.add(int(c["gear"])); _ident_remember("gears", c["car"], [int(c["gear"])], kwargs_cid=c.get("cid"))   # only on a NEW gear: one write per box, not per frame
+        # LIVE gear-ratio accrual (rpm/mph per gear at clean WOT, wheelspin-gated via slip ratios): the ladder's
+        # identity fingerprint, measured HERE — the analyzer's session output lags the cadence and dies on restart,
+        # which left WOT pulls undetected ("drive up through the gears" that could never satisfy itself).
+        if c["mph"] > 25 and (c["thr"] or 0) >= 90 and (c["rpm"] or 0) > 0:
+            try:
+                if max(abs(v[0]) for v in c["slip"].values()) < 0.12:
+                    sl = ST.live_fdg.setdefault(str(c["car"]), {}).setdefault(int(c["gear"]), [])
+                    sl.append(c["rpm"] / c["mph"])
+                    if len(sl) > 30: del sl[0]
+            except Exception:
+                pass
+    if c["on"] and (abs(p["PosX"]) > 1 or abs(p["PosZ"]) > 1): ST.last_pos = (p["PosX"], p["PosZ"])   # only real ON-TRACK positions — a menu / pre-race frame reports [0,0] and must NEVER become a loop start (the bug that put every marked loop at the origin)
+    # COURSE CHANGE inside a continuous event stream: a new race RESETS DistanceTraveled to 0 while laps only add to
+    # it (measured across an 8-race PvP session: every race reset the odometer at a distinct start, drops of 5,952+;
+    # laps never dropped it). PvP Horizon Open runs races back-to-back, and the 1.5 s event-exit hysteresis can mask
+    # the freeroam blip between them -- the loop then stayed named from the first race (Hokubu Ascent shown as the
+    # previous Goliath) because _ev_named blocked re-matching. TRACK the odometer across the whole on-track stream (the
+    # reset frame sits at CurrentLap 0, which may read freeroam), and on a drop close the active auto-loop so the block
+    # below re-identifies the new course. A menu clears the tracker; the next event starts fresh.
+    if c["on"]:
+        if ST._ev_dist is not None and c["dist"] < ST._ev_dist - 500 and ST.loop is not None and ST._auto_loop:
+            _end_auto_course(t_mono, p, c)
+        ST._ev_dist = c["dist"]
+    else:
+        ST._ev_dist = None
+    # AUTO-COURSE: a timed event (Rivals / race) auto-starts course recording at the S/F line — no manual mark needed.
+    # Reuses the loop machinery below for circuit laps; a point-to-point sprint's single pass and any partial/crashed
+    # practice run complete at event end (_end_auto_course). Never overrides a manually-marked loop.
+    if c["on"] and ST.game == "event" and ST.loop is None and ST.last_pos is not None:
+        sf = [round(ST.last_pos[0]), round(ST.last_pos[1])]
+        # LOAD-IN identification: the game spawns you ON the S/F line, so match that spawn to a route's DRIVEN S/F
+        # (learned from past laps) and name it instantly -- no driving. Fall back to the catalogued start, then to
+        # generic + the path-match. A learned match that is unambiguous is trusted; an ambiguous one (shared plaza)
+        # is provisional and the path-match confirms it.
+        learned = _match_learned_start(sf, rpos=p.get("RacePosition"))
+        rk = learned[1] if learned else None
+        nm = (learned[0] if learned else _match_route_name(sf)) or "Rivals course"
+        with ST.lock:
+            ST.loop = {"name": nm, "start": sf, "radius": 60, "min_dist": 250, "auto": True, "topology": "unknown", "sf_fixed": False, "route_key": rk}
+            ST.loop_lap = 0; ST._loop_state = "start"; ST._loop_away = 0.0; ST._loop_prev = None; ST._loop_t0 = t_mono; ST.loop_last_s = None; ST._auto_loop = True
+            ST.ev_path = []; ST._ev_named = bool(learned and learned[2]); ST._ev_match_next = 16   # unambiguous learned S/F = done; else the path-match confirms/upgrades
+        ST.emit("loop", {"name": nm, "start": sf, "lap": 0, "auto": True, "route_key": rk})
     # reference-loop live lap counting: each return through the start (after leaving by min_dist) = one lap
     if ST.loop and c["on"]:
         lx, lz = ST.loop["start"]; R = ST.loop.get("radius", 60); MIND = ST.loop.get("min_dist", 250)
@@ -139,20 +700,53 @@ def ingest(p, t_mono):
             if ST._loop_prev is not None: ST._loop_away += math.hypot(p["PosX"] - ST._loop_prev[0], p["PosZ"] - ST._loop_prev[1])
             if ST._loop_away > MIND and d0 <= R:
                 ST.loop_lap += 1; ST.loop_last_s = round(t_mono - (ST._loop_t0 or t_mono), 2)
-                ST.emit("lap", {"loop": ST.loop["name"], "lap": ST.loop_lap, "time_s": ST.loop_last_s})
+                ST.emit("lap", {"loop": ST.loop["name"], "lap": ST.loop_lap, "time_s": ST.loop_last_s}); maybe_lap_analysis(t_mono, "loop lap")
                 ST._loop_away = 0.0; ST._loop_t0 = t_mono
-    ST._loop_prev = (p["PosX"], p["PosZ"])
-    # CSV row (same layout as capture tool)
-    if ST.csv_writer:
+    if c["on"]: ST._loop_prev = (p["PosX"], p["PosZ"])   # menu frames report (0,0) — tracking them would add phantom kilometres to _loop_away across a pause (J7)
+    # LIVE catalogue naming (the daemon half): _match_route_name only knows a course whose catalogued start is
+    # within 120 m of the S/F crossing, so an OFFSET-START event (PvP / Rivals whose line is far from the start,
+    # e.g. Mt. Haruna 622 m) stays "Rivals course" live even though the analyzer names it at the lap boundary.
+    # Build the driven path and, once enough is down, PATH-match it and rename the loop the moment we are POSITIVE.
+    if ST.loop and ST._auto_loop and ST.game == "event" and c["on"] and not ST._ev_named and (abs(p["PosX"]) > 1 or abs(p["PosZ"]) > 1):
+        if not ST.ev_path or math.hypot(p["PosX"] - ST.ev_path[-1][0], p["PosZ"] - ST.ev_path[-1][1]) >= 25:
+            ST.ev_path.append((p["PosX"], p["PosZ"]))
+        if len(ST.ev_path) >= ST._ev_match_next:
+            ST._ev_match_next = len(ST.ev_path) + 20               # retry every ~500 m as coverage rises
+            m = _catalogue_match(ST.loop["start"][0], ST.loop["start"][1], ST.ev_path)
+            if m and m[0]:
+                if m[0] != ST.loop["name"]:                        # corrects a wrong/provisional load-in name
+                    with ST.lock: ST.loop["name"] = m[0]; ST.loop["route_key"] = m[1]
+                    ST.emit("loop", {"name": m[0], "start": ST.loop["start"], "lap": ST.loop_lap, "auto": True, "route_key": m[1]})
+                ST._ev_named = True                                # positively confirmed (or corrected) — stop matching
+            elif len(ST.ev_path) > 600:
+                ST._ev_named = True                                # ~15 km driven with no positive match — stop retrying (not a catalogued course / a fragment)
+    # CSV row (same layout as capture tool). MENU FRAMES ARE NOT WRITTEN (2026-09-03): every field
+    # in one is zeroed -- Speed, AccelX/Z, position, the lot -- so a menu dwell used to add nothing
+    # but dead rows to the capture, for however long the dwell lasted. Same reasoning as _loop_prev
+    # right above (J7): a pause is not data, and recording it as if it were bloats the file and pulls
+    # _roll_capture_if_big's 192 MB roll in sooner for no signal at all.
+    if ST.csv_writer and c["on"]:
         row = [time.time(), t_mono, p["Speed"] * 2.23694, p["AccelX"] / G, p["AccelZ"] / G, math.degrees(p["AngVelY"])]
         row += [(p["TireTempF" + w] - 32.0) * 5.0 / 9.0 for w in W] + [p[k] for k in FIELDS]
         ST.csv_writer.writerow(row)
+        _roll_capture_if_big(c)
     with ST.lock:
         ST.latest = c; ST.frames += 1; ST.last_pkt = time.monotonic()
         ST.pps_win.append(ST.last_pkt); ST.pps_win = [x for x in ST.pps_win if ST.last_pkt - x < 2.0]
-        if c["on"] and c["cid"] not in ST.cars:
+        existing = ST.cars.get(c["cid"])
+        # BUG (2026-09-03): this record used to be write-once ("cid not in ST.cars") -- whatever
+        # class/pi/cyl the FIRST frame for a cid carried was permanent for the rest of the process,
+        # even if that first frame was a transitional one (e.g. right at car-load or right after a
+        # daemon restart) whose CarClass byte didn't land in CLASS's table and fell back to "?". A
+        # later, perfectly good frame for the SAME cid (proven moments later by a pi-observations.json
+        # entry correctly reading class "A" for this exact car+PI) could never overwrite the stuck "?"
+        # -- one bad sample outlived every good one after it. Now: still write-once for a resolved
+        # class, but self-heal the one unresolved case the moment a real reading arrives.
+        if c["on"] and (existing is None or existing.get("class") == "?"):
             nm = (names_load().get("cars", {}).get(str(c["car"])) or {}).get("name")
-            ST.cars[c["cid"]] = {"id": c["cid"], "ordinal": c["car"], "pi": c["pi"], "class": c["cls"], "drivetrain": c["drv"], "cyl": p["NumCylinders"], "max_rpm": c["maxrpm"], "idle_rpm": round(p["EngineIdleRpm"]), "car_group": p["CarGroup"], "name": nm, "gears": [], "dyno": [], "live_s": 0}
+            prior = dict(existing) if existing else {}
+            ST.cars[c["cid"]] = {"id": c["cid"], "ordinal": c["car"], "pi": c["pi"], "class": c["cls"], "drivetrain": c["drv"], "cyl": p["NumCylinders"], "max_rpm": c["maxrpm"], "idle_rpm": round(p["EngineIdleRpm"]), "car_group": p["CarGroup"], "name": nm,
+                                  "gears": prior.get("gears", []), "dyno": prior.get("dyno", []), "live_s": prior.get("live_s", 0)}
             new_cfg = dict(ST.cars[c["cid"]])
         else: new_cfg = None
     if new_cfg: ST.emit("config", new_cfg)
@@ -167,7 +761,7 @@ def ingest(p, t_mono):
             else:
                 fr = max(max(abs(r["slip"]["FL"][2]), abs(r["slip"]["FR"][2])) for r in on)
                 rr = max(max(abs(r["slip"]["RL"][2]), abs(r["slip"]["RR"][2])) for r in on)
-                imp = any(abs(r["lat"]) > 3.0 or r["smash"] > 0 for r in on)
+                imp = any(r["smash"] > 0 for r in on)   # true contact only; kerb/terrain jolts (|lat|>3) are not impacts (matches analyze_session grip_code, 2026-09-18)
                 st = "impact" if imp else ("both" if fr > 1 and rr > 1 else "front" if fr > 1 else "rear" if rr > 1 else "calm")
                 e = {"t": s_prev, "state": st, "car": on[-1]["cid"], "mph": round(sum(r["mph"] for r in on) / len(on)), "f": round(fr, 2), "r": round(rr, 2), "g": round(max(abs(r["lat"]) for r in on), 2)}
             with ST.lock: ST.strip.append(e)
@@ -204,30 +798,159 @@ def ingest(p, t_mono):
                 v_min = min(r["mph"] for r in rows); ipk = max(range(len(rows)), key=lambda i: abs(rows[i]["lat"])); apx = rows[ipk]
                 # braking point: metres of odometer before the apex where the brakes first came on hard; throttle-on: metres after apex
                 brk_r = next((r for r in co["pre"] + rows[:ipk + 1] if r["brk"] > 40), None); imin = min(range(len(rows)), key=lambda i: rows[i]["mph"]); thr_r = next((r for r in rows[imin:] if r["thr"] > 100), None)
-                cc = {"t0": round(rows[0]["t"], 1), "t1": round(rows[-1]["t"], 1), "car": co["car"], "stint": ST.stint, "lapn": apx.get("lapn"), "dir": "R" if sign > 0 else "L",
+                cc = {"t0": round(rows[0]["t"], 1), "t1": round(rows[-1]["t"], 1), "car": co["car"], "stint": ST.stint,
+                      "lapn": (((apx.get("lapn") or 0) + 1) if apx.get("ev") else None),   # J11: 1-based in events, None outside — telemetry's 0-based lap read as falsy everywhere downstream
+                      "ev": 1 if sum(1 for r in rows if r.get("ev")) > len(rows) / 2 else 0,   # J14: on-course truth stamped at the source — free-roam corners must never share a canonical-turn key with course corners. Majority vote across the corner's own rows, not one apex frame: a single-frame read left one theoretical false-negative window (CurrentLap transiently reading 0 right at the apex frame) that a turn-matrix silently reads as "not driven" rather than "excluded"
+                      "dir": "R" if sign > 0 else "L",
                       "mph_in": round(rows[0]["mph"]), "mph_min": round(v_min), "mph_out": round(rows[-1]["mph"]), "mph_apex": round(apx["mph"]), "apex": [apx.get("px"), apx.get("pz")], "loop_lap": (ST.loop_lap if ST.loop else None),
                       "lat_g_peak": round(peak, 2), "phases": phases, "first_red": first, "usi": round(usi, 3), "drift": drift, "kink": v_min > 85 and peak < 0.9,
                       "brake_on_m": (round(apx.get("dist", 0) - brk_r["dist"]) if brk_r else None), "throttle_on_m": (round(thr_r["dist"] - apx.get("dist", 0)) if thr_r else None),
                       "brake_max": max([r["brk"] for r in co["pre"] + rows] or [0]), "hb": any(r["hb"] > 0 for r in rows)}
                 with ST.lock: ST.corners.append(cc)
                 ST.emit("corner", cc)
+    # LAP COMPLETION via LastLap CHANGE (robust, 2026-09-17): the winner-screen FREEZE injects a transition frame
+    # right at the S/F crossing (measured live: mph 117->0, CurrentLap->0.00, LapNumber steps, all in one frame; plus
+    # a brief on/ev drop the CAPTURE doesn't record, since only on==1 frames are written). Gating the lap on the
+    # LapNumber INCREMENT then missed it -- last_lapnum was nulled by that dropped frame, so `_ln > last_lapnum` was
+    # False: no _beat_lap_t was stamped (rival_beat never fired) and the winner lap got no PB (only the FIRST lap did,
+    # the one where the car kept moving). LastLap is the honest signal: it steps to the just-finished lap time and
+    # HOLDS, so its CHANGE marks a completed lap exactly once, immune to on/ev/LapNumber blips. Stamp the beat window
+    # + live PB + interim analysis on that. The LapNumber increment is kept ONLY for the loop S/F pin (needs POSITION).
+    if c["on"]:
+        _ln = c.get("lapn", 0); _last = c.get("last")
+        if _last and _last != getattr(ST, "_prev_last", None):   # a fresh LastLap = a lap just completed (blip-proof)
+            ST._prev_last = _last
+            ST._beat_lap_t = t_mono; ST._beat_lap_time = _last; ST._beat_lap_n = _ln
+            # LIVE PB (no OCR): the game's own BestLap dropping = a new personal best; a new-rival BestLap reset can't
+            # be < the prior best, so it never false-flags. Tracked per daemon run.
+            _best = c.get("best"); _pb_prev = getattr(ST, "_prev_best", None)
+            if _best is not None and (_pb_prev is None or _best < _pb_prev - 0.001):
+                ST._prev_best = _best
+                ST.emit("pb", {"last": _last, "best": _best, "prev": _pb_prev, "lap": _ln, "loop": ST.loop and ST.loop.get("name")})
+            maybe_lap_analysis(t_mono, "lap done")
+        if ST.last_lapnum is not None and _ln > ST.last_lapnum:
+            if ST._auto_loop and ST.loop and not ST.loop.get("sf_fixed"):   # the first LapNumber increment IS the exact S/F crossing (a real on-track position) — pin the loop there, and a lap counter proves it's a circuit
+                with ST.lock:
+                    ST.loop["start"] = [round(p["PosX"]), round(p["PosZ"])]; ST.loop["sf_fixed"] = True; ST.loop["topology"] = "circuit"
+                    ST._loop_state = "in"; ST._loop_away = 0.0; ST._loop_t0 = t_mono
+                ST.emit("loop", {"name": ST.loop["name"], "start": ST.loop["start"], "lap": ST.loop_lap, "auto": True, "topology": "circuit"})
+        ST.last_lapnum = _ln
+    else:
+        ST.last_lapnum = None
+    # STOPPED ON COURSE (2026-09-16): the car is on-track (IsRaceOn=1) but STATIONARY — the Rivals winner / "continue?"
+    # screen (which can RESET CurrentLap, so ev may be 0 here — this is deliberately NOT gated on ev), or just parked
+    # after some laps. Two things fire while stopped (the car isn't moving, so a background analysis costs no frame pacing):
+    #   (a) RIVAL-BEAT: a Rivals lap (ev==1) just completed (_beat_lap_t stamped) and we're now stopped -> the winner
+    #       screen; emit rival_beat for the toast.
+    #   (b) IMPORT: stopped after >=15 s of driving -> a full analysis + telemetry import so the dashboard's session /
+    #       single-lap / leaderboard views catch up WITHOUT waiting for a MENU (session-close needs on==0, which never
+    #       happens while you sit on-course — that is why laps stalled). Gated on cost (a big capture's analysis would
+    #       outlast the stop) and fired once per stop (re-armed when the car moves).
+    if c["on"] and (c.get("mph") or 0) < 2:
+        if not getattr(ST, "_stop_t0", 0): ST._stop_t0 = t_mono
+        _stopped = t_mono - ST._stop_t0
+        if _stopped > 1.2 and getattr(ST, "_beat_lap_t", 0) and (t_mono - ST._beat_lap_t) < 12 and not getattr(ST, "_beat_flagged", False):
+            ST._beat_flagged = True
+            ST.emit("rival_beat", {"last": getattr(ST, "_beat_lap_time", None), "best": c.get("best"), "lap": getattr(ST, "_beat_lap_n", None), "loop": ST.loop and ST.loop.get("name")})
+        if _stopped > 1.5 and ST.live_since_analysis > 15 and not getattr(ST, "_stop_imported", False) and not ST.analyzing and ST.csv_path:
+            _cost = getattr(ST, "_last_analysis_secs", 0.0) or 0.0
+            try: _sz = os.path.getsize(ST.csv_path) if not ST.replay else 0
+            except Exception: _sz = 0
+            # LAP-BOUNDARY IMPORT (Jett 2026-09-18): the size/cost gate below keeps a big capture's analysis off the
+            # game's frame pacing while you're driving — but a lap that JUST finished with the car now stopped is the
+            # results screen, a genuine pause. Firing there is frame-safe regardless of capture size, and it is what
+            # makes a Rivals lap reach the dashboard right after you set it instead of waiting for session-close
+            # (on==0, which never happens while you sit on the winner screen). run_analysis(final=True) both writes
+            # laps.db AND pings the telemetry rebuild, so the lap surfaces on the next reload out of the menu.
+            _just_lapped = getattr(ST, "_beat_lap_t", 0) and (t_mono - ST._beat_lap_t) < 12
+            if _just_lapped or (_cost and _cost <= 8.0) or (not _cost and _sz < 150e6):
+                ST._stop_imported = True; ST.live_since_analysis = 0; ST.drive_since_periodic = 0.0
+                threading.Thread(target=run_analysis, args=(t_mono, True), daemon=True).start()
+    elif (c.get("mph") or 0) > 5:
+        ST._stop_t0 = 0; ST._beat_flagged = False; ST._stop_imported = False   # moving again -> re-arm for the next stop
     # auto-analysis triggers: (a) every ~20 s of driving (live suggestions), (b) driving stopped > 5 s after >= 15 s of driving (session close)
     if c["on"]:
         ST.last_on_t = t_mono; ST.live_since_analysis += 1 / 100.0; ST.drive_since_periodic += 1 / 100.0
         try: sz = os.path.getsize(ST.csv_path) if ST.csv_path and not ST.replay else 0
         except Exception: sz = 0
-        period = 20 if sz < 60e6 else 45 if sz < 150e6 else 90   # re-analysis cadence scales with file size (use ↺ reset to start a fresh, fast session)
+        period = 20 if sz < 60e6 else 45 if sz < 150e6 else 90 if sz < 350e6 else 300   # re-analysis cadence scales with file size (use ↺ reset to start a fresh, fast session). Past ~350MB an analysis takes ~as long as the old 90s ceiling — back-to-back analyzer runs saturated a core + disk and lagged the GAME; 300s keeps a huge session usable until the reset
         if ST.drive_since_periodic > period and not ST.analyzing and ST.csv_path:
             ST.drive_since_periodic = 0; threading.Thread(target=run_analysis, args=(t_mono, False), daemon=True).start()
     elif ST.last_on_t is not None and t_mono - ST.last_on_t > 5 and ST.live_since_analysis > 15 and not ST.analyzing and ST.csv_path:
         ST.live_since_analysis = 0; threading.Thread(target=run_analysis, args=(t_mono, True), daemon=True).start()
 
+def maybe_lap_analysis(t_mono, why):
+    """Re-run the cross-lap analysis the instant a LAP completes — a finished lap adds one fresh pass of every turn,
+    which is exactly when the tune-vs-driver limiter can change. Debounced (6 s) so short laps can't thrash the
+    analyze_session subprocess; the periodic timer stays as the fallback for long laps / free roam."""
+    # THE DEBOUNCE MUST SCALE WITH WHAT IT IS DEBOUNCING. 6 s was chosen when a pass was cheap, but a pass
+    # re-reads the WHOLE capture, so its cost grows all session: measured on a 628 MB capture, one
+    # analyze_session pass takes 46.9 s. Re-firing 6 s later means the subprocess is running 89% of the time
+    # the player is on track -- 628 MB read and dozens of course models written, continuously, on the machine
+    # running the game. That is what Jett felt: frame pacing on the telemetry itself shows individual frames of
+    # 353-391 ms and 1% lows of 26-35 FPS during the window the daemon was analysing, against 135-141 FPS
+    # median once it stopped. Nothing was starved -- CPU 25%, GPU 32%, disk queue 0 -- because the cost is
+    # bursty, and the bursts land inside frames.
+    # So the interval is now bounded by the last pass's own cost, holding the analyser to roughly a fifth of
+    # the player's time. A cheap pass still re-fires in 6 s; an expensive one earns a proportional rest.
+    _cost = getattr(ST, "_last_analysis_secs", 0.0) or 0.0
+    _need = max(6.0, _cost * 4.0)
+    if ST.analyzing or not ST.csv_path or (t_mono - ST._last_lap_analysis) < _need:
+        return
+    ST._last_lap_analysis = t_mono; ST.drive_since_periodic = 0.0
+    threading.Thread(target=run_analysis, args=(t_mono, False), daemon=True).start()
+
+
+def _notify_rebuild(scope, why):
+    """Best-effort, fire-and-forget ping to the rebuild service (port 8001) to run one import scope.
+    The service coalesces per scope, so repeated pings cost at most one extra run; it being down (or not
+    yet started) must never affect the daemon or block the caller. Shared by both triggers below."""
+    def _go():
+        try:
+            req = urllib.request.Request("http://127.0.0.1:8001/rebuild",
+                data=json.dumps({"why": why, "scope": scope}).encode(),
+                headers={"Content-Type": "application/json"})
+            urllib.request.urlopen(req, timeout=3).read()
+        except Exception:
+            pass   # the rebuild service being down (or not yet started) must never affect the daemon
+    threading.Thread(target=_go, daemon=True).start()
+
+
+def _notify_telemetry_rebuild(why):
+    """Ping the rebuild service to import this session's new laps/corners into fh6.db (2026-09-03).
+    Fired ONLY on a genuine session-close boundary (final=True in run_analysis -- driving stopped for
+    5 s after >= 15 s of driving), never per-lap and never on the periodic mid-session passes: that is
+    the exact cadence this file already fought hard to keep off the game's frame pacing (see the cost
+    notes on _roll_capture_if_big and maybe_lap_analysis's backoff). scope=telemetry costs ~3 s
+    (measured), a session close happens at most a few times an hour, so this never competes with the
+    game the way a per-lap or fixed-timer trigger would.
+
+    Before this existed, NOTHING ever triggered a telemetry import automatically -- the live daemon
+    never called the rebuild service at all, and the dashboard's own auto-trigger only ever ran
+    scope=containers on a new save. corner_obs/lap/session silently fell behind for hours at a time.
+    See memory fh6-telemetry-rebuild-scope-gap.
+
+    Best-effort and fire-and-forget: the rebuild service may not be running, and that must never
+    affect the daemon or block this thread."""
+    _notify_rebuild("telemetry", why)
+
+
 def run_analysis(until=None, final=True):
     ST.analyzing = True
+    _t_start = time.monotonic()
     try:
         if ST.csv_file: ST.csv_file.flush()
-        # replay analyses go to a scratch dir so they never overwrite the canonical session JSON
-        outdir = os.path.join(ROOT, "data", "sessions") if not ST.replay else os.path.join(ROOT, "captures", "_replay_analysis")
+        # replay analyses go to a scratch dir so they never overwrite the canonical session JSON. Interim
+        # live analyses (final=False -- fired every lap and menu-exit) also go to a gitignored scratch dir, so
+        # the IDE watching the worktree does not re-diff data/sessions on every write (the CMD-popup fix). Only
+        # the session-close analysis (final=True) publishes the canonical, importable data/sessions/<sid>.json;
+        # an interim state lost to an abrupt kill is recoverable by re-analysing the CSV in captures/.
+        if ST.replay:
+            outdir = os.path.join(ROOT, "captures", "_replay_analysis")
+        elif final:
+            outdir = os.path.join(ROOT, "data", "sessions")
+        else:
+            outdir = os.path.join(ROOT, "captures", "_analysis")
         os.makedirs(outdir, exist_ok=True)
         cmd = [sys.executable, os.path.join(HERE, "analyze_session.py"), ST.csv_path, "--out", outdir]
         if ST.replay and until is not None: cmd += ["--until", str(until)]
@@ -236,19 +959,1123 @@ def run_analysis(until=None, final=True):
         path = os.path.join(outdir, sid + ".json")
         if os.path.exists(path):
             with open(path) as f: js = json.load(f)
-            an = {"id": js["id"], "summary": js["summary"], "final": final, "cars": [{k: c.get(k) for k in ("id", "ordinal", "name", "class", "pi", "drivetrain", "cyl", "build_id", "coverage", "advice", "decode", "clone_sheet", "temps_med_f", "live_s")} for c in js["cars"]],
+            an = {"id": js["id"], "summary": js["summary"], "final": final, "cars": [{k: c.get(k) for k in ("id", "ordinal", "name", "class", "pi", "drivetrain", "cyl", "build_id", "coverage", "advice", "general", "decode", "clone_sheet", "temps_med_f", "live_s")} for c in js["cars"]],
                   "courses": [{k: v for k, v in co.items() if k != "geometry"} for co in js.get("courses", [])[:4]],   # geometry (maps, layouts) is heavy and lives in /session.json, which the dashboard fetches after every analysis
                   "stints": [{k: st.get(k) for k in ("n", "id", "label", "role", "t0", "t1")} for st in js.get("stints", [])][-20:]}
             with ST.lock: ST.session_json = js; ST.session_path = path; ST.analysis = an
             ST.emit("analysis", an)
-            if final: ST.emit("session", {"id": js["id"], "summary": js["summary"], "path": os.path.relpath(path, ROOT)})
+            if final:
+                ST.emit("session", {"id": js["id"], "summary": js["summary"], "path": os.path.relpath(path, ROOT)})
+                _notify_telemetry_rebuild("session closed " + js["id"])
             print(f"[analysis{' final' if final else ''}] {js['id']} -> {js['summary']}")
         else:
             print("[analysis] failed:", r.stdout[-300:], r.stderr[-300:])
     finally:
+        ST._last_analysis_secs = time.monotonic() - _t_start   # what the next debounce is measured against
         ST.analyzing = False
 
 # ---------------- HTTP / SSE ----------------
+def _session_car_for(sj, ordn, want_cyl=None):
+    """The analyzer session-car record for THIS build — never 'any car with this ordinal'. Preference: the LIVE
+    frame's exact cid, then a PI match to the live frame, then an UNAMBIGUOUS cyl match. Session cars are keyed by
+    full cid (ordinal|drv|cyl|pi), so a multi-build ordinal has several records — first-match took the WRONG one,
+    and its boost/hp/gears then manufactured conflicts and poisoned the caches. No record beats the wrong record."""
+    cands = [c for c in ((sj or {}).get("cars") or []) if str(c.get("ordinal")) == str(ordn)]
+    if not cands: return None
+    fr = ST.latest
+    if fr and fr.get("on") and str(fr.get("car")) == str(ordn):
+        hit = next((c for c in cands if str(c.get("id")) == str(fr.get("cid"))), None)
+        if hit is not None: return hit
+        if fr.get("pi"):
+            hit = next((c for c in cands if c.get("pi") == fr.get("pi")), None)
+            if hit is not None: return hit
+    if want_cyl:
+        cyls = [c for c in cands if c.get("cyl") == want_cyl]
+        if len(cyls) == 1: return cyls[0]
+        return None   # >1 same-cyl = ambiguous; 0 = POSITIVE contradiction (every record's cyl differs) — the lone-candidate fallback served the contradicted record anyway
+    return cands[0] if len(cands) == 1 else None
+
+
+def _enrich_gears(deliverable, ordn):
+    """Upgrade decoded gears from band-DERIVED to telemetry-MEASURED: the analyzer's fd_gear is the exact FD*gear
+    product per gear (from WheelRotSpeed, wheelspin-immune), so gear = fd_gear / final_drive is a measured ratio
+    (drops the gear-band assumption; final drive stays band-derived). Best-effort: only when this car was driven
+    through its gears this session."""
+    try:
+        import re as _re
+        with ST.lock:
+            sj = ST.session_json
+        if not sj:
+            return
+        fdg = None
+        _sc = _session_car_for(sj, ordn, _deliverable_cyl(deliverable))   # THIS build's record only — a sibling build's ladder faked gear conflicts and poisoned the cache
+        if _sc is not None:
+            gl = {g["gear"]: g["fd_gear"] for g in (_sc.get("gears") or []) if g.get("fd_gear")}
+            if gl: fdg = gl
+        # STABILITY: cache the measured ladder so gears don't pop out of 'measured' when a fresh analysis briefly
+        # lacks them (sparse WOT frames in the last window) — the ladder is a physical property of the build. Keyed by
+        # BUILD identity (ordinal + gear count + decoded cyl), never bare ordinal: a stale ladder from a DIFFERENT
+        # build of the same car isn't data for this one, and serving it manufactured phantom gear conflicts.
+        if not hasattr(ST, "fdg_cache"):
+            ST.fdg_cache = {}
+        ckey = f"{ordn}|{deliverable.get('gear_count')}|{_deliverable_cyl(deliverable)}"
+        now_t = time.time()
+        for k in [k for k, v in ST.fdg_cache.items() if now_t - v["t"] > 3600]:   # evict, don't just ignore — the dict must not grow for the daemon's lifetime
+            ST.fdg_cache.pop(k, None)
+        if fdg:
+            if max(fdg) <= (deliverable.get("gear_count") or 99):   # a ladder with more gears than this save's box belongs to another build — don't cache it against this one
+                prev = ST.fdg_cache.get(ckey)
+                if prev and now_t - prev["t"] < 1800:   # MERGE: a sparse fresh sample must not clobber a fuller recent ladder (fresh gears win per-gear)
+                    merged = dict(prev["fdg"]); merged.update(fdg); fdg = merged
+                ST.fdg_cache[ckey] = {"fdg": fdg, "t": now_t}
+            else:
+                fdg = {}
+        if not fdg:
+            cached = ST.fdg_cache.get(ckey)
+            if cached and now_t - cached["t"] < 1800:
+                fdg = cached["fdg"]
+        if not fdg:
+            return
+        fd = None
+        for t in deliverable.get("tabs", []):
+            for r in t.get("rows", []):
+                if r.get("field") == "final_drive" and r.get("value"):
+                    fd = r["value"]
+        if not fd:
+            return
+        ratios = []   # val/sv per reconciled gear — a CONSTANT factor across gears means the shared DIVISOR (final drive) is off, not the gears
+        for t in deliverable.get("tabs", []):
+            if t.get("tab") != "Gearing":
+                continue
+            for r in t["rows"]:
+                m = _re.match(r"gear_(\d+)$", str(r.get("field", "")))
+                if m and int(m.group(1)) in fdg:
+                    val = round(fdg[int(m.group(1))] / fd, 3)
+                    # RECONCILE, don't silently overwrite: keep the save's band-derived value alongside the telemetry
+                    # measurement. Agreement (within 4%) CORROBORATES (conf 0.97); disagreement is a CONFLICT — surfaced
+                    # to the union strip with BOTH numbers, confidence dropped, telemetry shown (it's the direct read).
+                    sv = r.get("value")
+                    r["save_value"] = sv
+                    r["value"] = val; r["display"] = f"{val}:1"; r["telemetry"] = True; r["derived"] = False
+                    if sv is not None and sv > 0:
+                        ratios.append(val / sv)
+                    # HYSTERESIS: verdicts were flapping — each ~20s analysis re-measures the ladder with a little
+                    # jitter, and a single 4% cutoff flipped agree<->conflict constantly. Now: clearly out (>=7%) ->
+                    # conflict; clearly in (<=3.5%) -> agree; the band between KEEPS the previous verdict (per
+                    # ordinal+gear+save-value, so a new save/tune naturally resets it).
+                    if not hasattr(ST, "gear_verdicts"):
+                        ST.gear_verdicts = {}
+                    if sv is not None and sv > 0:
+                        dev = abs(val - sv) / sv
+                        vkey = f"{ordn}|{m.group(1)}|{round(sv, 3)}"
+                        # first-seen inside the dead band is NEAR — measured but neither corroborated nor conflicting.
+                        # It resolves to agree/conflict only when the evidence clearly crosses a line; a persistent
+                        # 4-7% mismatch must not masquerade as 'agree 0.97' forever.
+                        verdict = "conflict" if dev >= 0.07 else ("agree" if dev <= 0.035 else ST.gear_verdicts.get(vkey, "near"))
+                        ST.gear_verdicts[vkey] = verdict
+                        if verdict == "conflict":
+                            r["conflict"] = {"save": sv, "telemetry": val}; r["confidence"] = 0.5
+                        elif verdict == "agree":
+                            r["agree"] = True; r["confidence"] = 0.97
+                        else:
+                            r["confidence"] = 0.85   # near: shown as measured, no corroborated/conflict flag
+                    else:
+                        r["confidence"] = 0.97
+        # DIAGNOSE a systematic gear conflict. Both sides are derived through bands (save: gear band; telemetry:
+        # exact fd_gear / band-derived FD), so when they disagree the question is WHICH band is off. If every gear is
+        # off by the SAME factor k, the shared divisor — the final drive — is the culprit (a per-gear problem would
+        # scatter). fd_implied = fd * k is what the FD would have to be for the two sources to agree.
+        if len(ratios) >= 3:
+            mean_k = sum(ratios) / len(ratios)
+            spread = max(ratios) - min(ratios)
+            if abs(mean_k - 1.0) > 0.04 and spread / mean_k < 0.03:
+                deliverable["gear_diag"] = {"kind": "fd", "factor": round(mean_k, 4), "fd_used": fd,
+                                            "fd_implied": round(fd * mean_k, 3), "n": len(ratios)}
+            elif abs(mean_k - 1.0) > 0.04 or spread / mean_k > 0.06:
+                deliverable["gear_diag"] = {"kind": "scattered", "n": len(ratios), "spread": round(spread, 3)}
+    except Exception:
+        return
+
+
+_ENG_CAT_LOCK = threading.Lock()
+def _learn_engine_catalog(family, cyl=None, redline=None, peak_hp=None, drivetrain=None, pi=None, displacement_l=None):
+    """Accrue a driven engine's MEASURED signature into data/engine-swaps.json, keyed by engine family — the
+    per-part signature the decode then reuses to describe OTHER cars that share this engine but were never driven
+    (cross-car transfer). This is the 'track the signature/PI per part' accrual. Only fills gaps / improves samples;
+    never invents a family. Atomic write, lock-guarded."""
+    if family is None:
+        return
+    try:
+        path = os.path.join(ROOT, "data", "engine-swaps.json")
+        with _ENG_CAT_LOCK:
+            try:
+                with open(path, encoding="utf-8") as fh:
+                    doc = json.load(fh)
+            except Exception:
+                return
+            rec = (doc.get("families") or {}).get(str(family))
+            if rec is None:
+                return
+            changed = False
+            for k, v in (("cyl", int(cyl) if cyl else None), ("redline", int(redline) if redline else None),
+                         ("displacement_l", displacement_l), ("resulting_drivetrain", drivetrain)):
+                # cyl/redline: verified-OVERWRITE (every caller now passes the identity guard, so a fresh verified
+                # measurement CORRECTS a pre-guard wrong value — fill-only meant a bad cyl blocked its own repair,
+                # since the guard compared live cyl against the catalog's own wrong entry). Others stay fill-only
+                # (resulting_drivetrain conflates conversion state; don't churn it).
+                over = k in ("cyl", "redline")
+                if v is not None and (rec.get(k) is None or (over and rec.get(k) != v)):
+                    rec[k] = v; changed = True
+            if peak_hp and peak_hp > (rec.get("sample_hp") or 0):
+                rec["sample_hp"] = int(peak_hp); changed = True
+            if pi and rec.get("sample_pi") is None:
+                rec["sample_pi"] = int(pi); changed = True
+            if changed:
+                if rec.get("source") == "save-mined":
+                    rec["source"] = "save-mined+telemetry"
+                tmp = path + ".tmp"
+                with open(tmp, "w", encoding="utf-8") as fh:
+                    json.dump(doc, fh, indent=1, ensure_ascii=False)
+                os.replace(tmp, path)
+                try:
+                    TUNE._ENGINE_CATALOG = None   # the decode module caches the catalog — without this, freshly-learned cyl/redline never reach the matcher until a restart (the stale-obs-cache bug, catalog edition)
+                except Exception:
+                    pass
+    except Exception:
+        return
+
+
+def _gear_log(ordn, ts):
+    """Identity TIMELINE: intervals of which save was verified-equipped, so a livery can be attributed to the build
+    equipped AT ITS SAVE MOMENT — a plain 'recent livery -> current build' rule mis-pins across a car swap."""
+    if not hasattr(ST, "gear_id_log"):
+        ST.gear_id_log = {}
+    lg = ST.gear_id_log.setdefault(str(ordn), [])
+    now = time.time()
+    if lg and lg[-1]["ts"] == str(ts) and lg[-1]["t1"] is None:
+        return
+    if lg and lg[-1]["t1"] is None:
+        lg[-1]["t1"] = now
+    lg.append({"ts": str(ts), "t0": now, "t1": None})
+
+
+def _auto_assoc_livery(ordn, window_s=14400):
+    """TRUE AUTO-ASSOCIATION: a livery saved while build X was verified-equipped belongs to build X — you paint the
+    car you're sitting in. Each unassociated recent livery is matched to the identity-timeline interval covering its
+    save mtime (±2 min slack). A livery saved when NO identity was verified is left alone (manual pin / guess).
+    Never overwrites an existing pin; never re-assigns an associated livery. Throttled; source='auto'."""
+    try:
+        if not hasattr(ST, "_aa_last"):
+            ST._aa_last = {}
+        if time.time() - ST._aa_last.get(str(ordn), 0) < 30:
+            return
+        ST._aa_last[str(ordn)] = time.time()
+        log = getattr(ST, "gear_id_log", {}).get(str(ordn)) or []
+        if not log:
+            return
+        root_lv = TUNE.find_containers_root(); tag_lv = f"{int(ordn):04d}"
+        now = time.time()
+        bp2 = os.path.join(ROOT, "data", "build-liveries.json")
+        try:
+            with open(bp2, encoding="utf-8") as f2:
+                bobj2 = json.load(f2)
+        except Exception:
+            bobj2 = {"schema_version": "1.0.0", "assoc": {}}
+        a2 = bobj2.setdefault("assoc", {}).setdefault(str(ordn), {})
+        assigned = {(v.get("dir") if isinstance(v, dict) else v) for v in a2.values()}
+        metas2, _ = TUNE.tunes_for_ordinal(int(ordn))
+        import hashlib as _h2
+        changed = False
+        for d_ in os.listdir(root_lv):
+            if not d_.startswith((f"Livery_{tag_lv}_", f"SoulBoundLivery_{tag_lv}_", f"BaseLivery_{tag_lv}_")) or d_ in assigned:
+                continue
+            try:
+                mt = os.path.getmtime(os.path.join(root_lv, d_, "C_livery"))
+            except Exception:
+                continue
+            if now - mt > window_s:
+                continue
+            iv = next((e for e in log if e["t0"] - 120 <= mt <= (e["t1"] or now) + 120), None)
+            if iv is None:
+                continue   # saved while no identity was verified — not ours to claim
+            idm = next((mm2 for mm2 in metas2 if str(mm2["ts"]) == str(iv["ts"])), None)
+            if idm is None:
+                continue
+            t_id = TUNE.parse_tune(idm["path"], ordinal_hint=int(ordn))
+            items2 = tuple(sorted((k, v) for k, v in (t_id["parts"] or {}).items() if v is not None))
+            sig2 = _h2.sha1(repr(items2).encode()).hexdigest()[:8]
+            if sig2 in a2:
+                continue   # that build already has a pin — keep it
+            a2[sig2] = {"dir": d_, "source": "auto"}
+            assigned.add(d_); changed = True
+            print(f"auto-associated livery {d_} -> build {sig2} of {ordn} (saved while that build was verified equipped)", file=sys.stderr)
+        if changed:
+            tmpb = bp2 + ".tmp"
+            with open(tmpb, "w", encoding="utf-8") as f2:
+                json.dump(bobj2, f2, indent=1)
+            os.replace(tmpb, bp2)
+            ST._disk_dirty = True   # force the next disk emit so the dashboard shows it immediately
+    except Exception:
+        pass
+
+
+def _pick_meta(metas, ordn, ts_want=None, ts_explicit=False):
+    """A car can have MANY saved tunes on disk (different engines / PIs). Picking the newest file shows the WRONG
+    build when you switch around. Instead match each save's decoded signature (cylinders from the engine-family
+    catalog, exact PI from recorded observations) to the LIVE car you're in. Returns (meta, match_info). ts_want
+    forces a specific save; ts_explicit says that force came from an EXPLICIT URL browse ("show me THIS save") and so
+    pins unconditionally. A STORED HOLD (ts_explicit False -- e.g. a pick restored from identity-evidence.json) only
+    pins while its build stays consistent with the live gear/cyl evidence (it would survive into 'ties'); a
+    gear-impossible / wrong-cyl held pick is dropped, and forgotten from disk on a HARD contradiction. Also builds the
+    roster of all saves so the dashboard can offer a picker."""
+    if TUNE is None or not metas:
+        return (metas[0] if metas else None), {"how": "newest", "live": False, "saves": []}
+    cat = TUNE.load_engine_catalog()
+    fr = ST.latest
+    live = bool(fr and fr.get("on") and int(fr.get("car") or 0) == int(ordn))
+    # J20: parking must not evaporate the laps just driven — remember the last live signature per ordinal and hold
+    # it for 2h (same window + idiom as the sticky gear identity), so the confirm gate doesn't demand "drive once"
+    # for a car verified minutes ago. A fresh live frame always overrides; reset_session clears the memory.
+    if live:
+        if not hasattr(ST, "live_seen"): ST.live_seen = {}
+        ST.live_seen[str(ordn)] = {"t": time.time(), "cyl": fr.get("cyl"), "pi": fr.get("pi")}
+    seen = getattr(ST, "live_seen", {}).get(str(ordn))
+    live_recent = bool(not live and seen and time.time() - seen["t"] < 7200)
+    live_cyl = fr.get("cyl") if live else (seen.get("cyl") if live_recent else None)
+    live_pi = fr.get("pi") if live else (seen.get("pi") if live_recent else None)
+    roster = []
+    for m in metas:
+        try:
+            t = TUNE.parse_tune(m["path"], ordinal_hint=ordn)
+        except Exception:
+            continue
+        efam = TUNE.engine_family_of(t["parts"])
+        cyl = (cat.get(str(efam)) or {}).get("cyl")
+        pi = TUNE.observed_car_pi(ordn, t["parts"])   # exact PI if this exact config was ever driven & recorded
+        red = (cat.get(str(efam)) or {}).get("redline")   # the family's MEASURED redline — the engine's live fingerprint
+        score = m["mtime"] * 1e-13                     # newest as a faint tiebreak
+        if ts_want and ts_explicit and str(m["ts"]) == str(ts_want):
+            score += 1e6   # ONLY an EXPLICIT URL browse pins (for VIEWING). A stored pick NEVER pins identity: it is inert here and yields to the instant signals scored below.
+        # CYL-BOOTSTRAP for stub / new-car builds (2026-09-13): an uncatalogued engine (cyl == None) is the NEW-CAR
+        # case — the decoded game DB predates the car, so no catalog cyl exists. The live frame authoritatively
+        # reports the equipped car's cylinders, so credit that as the build's effective cyl for scoring.
+        cyl_eff = cyl if cyl else (live_cyl if (live or live_recent) and live_cyl else None)
+        if (live or live_recent) and live_cyl and cyl_eff:
+            score += 100 if int(cyl_eff) == int(live_cyl) else -100   # cyl (4 vs 8 vs 3) is the strong INSTANT signal
+        if (live or live_recent) and live_pi and pi:
+            score += 60 if int(pi) == int(live_pi) else -min(60, abs(int(pi) - int(live_pi)) * 0.6)
+        live_red = (fr.get("maxrpm") if live and fr else None)
+        if live_red and red:                           # two same-cyl same-PI builds with DIFFERENT ENGINES separate here: redline is telemetry-exact (INSTANT)
+            score += 50 if abs(int(red) - int(live_red)) <= 400 else -min(50, abs(int(red) - int(live_red)) * 0.02)
+        # SAVE-TUNE METHOD OUTRANKS OBSERVATION (Jett 2026-09-17): a save WRITTEN in the last ~30 min, on the car
+        # you are in and with a matching cylinder count, IS the build you just equipped and saved. A brand-new save
+        # has no observed PI yet (observed_car_pi -> None), so without this it loses the +60 PI credit to an OLDER
+        # observed save of the same car and never becomes `best` -- which is exactly why a fresh self-made save
+        # failed to settle (ordinal 2866, 2026-09-17: newest save chose an older 20260911 sibling). Give the freshest
+        # cyl-consistent save a decisive boost so it wins `best`, then fresh_dl (below) settles the signature tie to
+        # it. The mtime tiebreak already keeps the NEWEST of several equally-fresh saves. This is instant-signal +
+        # the write timestamp only -- no gearbox (HARD RULE [[fh6-identity-two-directions]]).
+        _mt = m.get("mtime") or 0
+        if (live or live_recent) and _mt and (time.time() - _mt) < 1800 and (not live_cyl or not cyl_eff or int(cyl_eff) == int(live_cyl)):
+            score += 500
+        roster.append({"ts": m["ts"], "cyl": cyl, "pi": pi, "red": red, "locked": t["locked"], "_score": score, "_meta": m, "_tune": t})
+    # A stored pick no longer denies / forces anything here: the tie-picker is retired and identity uses NO gearbox,
+    # so a stored pick is INERT unless it is an EXPLICIT URL browse. A fresh in-game save is what supersedes / clears
+    # a stale pick (disk_watcher new_save).
+    if not roster:
+        return metas[0], {"how": "newest", "live": live, "saves": []}
+    roster.sort(key=lambda r: -r["_score"])
+    # SAME-SIGNATURE SAVES stay tied — identity uses NO gearbox (Jett 2026-09-17, [[fh6-identity-two-directions]]).
+    # Fingerprint each save's PARTS (byte-exact) so slider-iterations of ONE build collapse to a single signature and
+    # DISTINCT builds each count. There is no gear-ladder step: same-signature saves are resolved only by the
+    # save-tune method (equip + save), never by driving.
+    try:
+        import hashlib as _hl0
+        for r in roster:
+            items0 = tuple(sorted((k, v) for k, v in ((r["_tune"] or {}).get("parts") or {}).items() if v is not None))
+            r["_bsig"] = _hl0.sha1(repr(items0).encode()).hexdigest()[:8]
+    except Exception:
+        pass
+    # candidates = every same-cylinder save (the INSTANT signal). Two same-signature saves are indistinguishable
+    # standing still, and a locked download cannot be told from its twins at all — NO gearbox filter (that was the
+    # WOT-pull path the directive removed). n_signature_ties counts DISTINCT build fingerprints (_bsig) among these.
+    ties = [r for r in roster if (not live_cyl or not r.get("cyl") or int(r["cyl"]) == int(live_cyl))]
+    n_ties = len({r.get("_bsig") for r in ties}) if ties and all(r.get("_bsig") for r in ties) else max(1, len(ties))
+    # best = the top INSTANT-signal score. No ratio-ladder disambiguation and no sticky gear-verified hold exist any
+    # more (Jett 2026-09-17): same-signature saves stay tied and are resolved only by the save-tune method. The
+    # instant 2 h hold across a pause is already covered by live_seen -> live_recent (how == "signature").
+    best = roster[0]
+    # BUILD CATEGORIZATION: group saves by their exact PARTS fingerprint (byte-exact in every save file). Saves
+    # sharing a fingerprint are slider iterations of ONE build; different fingerprints are DIFFERENT builds — and at a
+    # class cap several builds share cyl+PI, so PARTS (not PI) are the true category. Each non-base build carries the
+    # exact part diffs vs Build A (the newest), so the dashboard can say WHAT differs, not just that something does.
+    builds = []
+    try:
+        import hashlib as _hl
+        def _build_letters(ordn2, sigs_in_order):
+            """Permanent per-ordinal build letters (data/build-letters.json): first sight of a fingerprint assigns
+            the next free letter, FOREVER. Newest-first re-lettering renamed every build whenever a save landed —
+            an identity must not drift. First migration freezes the letters currently on screen."""
+            path2 = os.path.join(ROOT, "data", "build-letters.json")
+            with _BL_LOCK:
+                try:
+                    with open(path2, encoding="utf-8") as f2: doc2 = json.load(f2)
+                except Exception:
+                    doc2 = {"schema_version": "1.0.0", "letters": {}}
+                mm = doc2.setdefault("letters", {}).setdefault(str(ordn2), {})
+                changed2 = False
+                for h2 in sigs_in_order:
+                    if h2 not in mm:
+                        used2 = set(mm.values())
+                        mm[h2] = next((chr(65 + i2) for i2 in range(26) if chr(65 + i2) not in used2), "Z" + str(len(mm)))
+                        changed2 = True
+                if changed2:
+                    tmp2 = path2 + ".tmp"
+                    with open(tmp2, "w", encoding="utf-8") as f2: json.dump(doc2, f2, indent=1)
+                    os.replace(tmp2, path2)
+                return {h2: mm[h2] for h2 in sigs_in_order}
+        sig_groups = {}
+        for r in roster:
+            items = tuple(sorted((k, v) for k, v in ((r["_tune"] or {}).get("parts") or {}).items() if v is not None))
+            h = _hl.sha1(repr(items).encode()).hexdigest()[:8]
+            r["_bsig"] = h; sig_groups.setdefault(h, []).append(r)
+        order = sorted(sig_groups, key=lambda h: -max(float(x["_meta"]["mtime"]) for x in sig_groups[h]))
+        labels = _build_letters(ordn, order)   # PERMANENT letters: a build keeps its letter for life — a new save must never re-letter the garage (identity volatility)
+        def _tw(v):
+            if v is None: return "—"
+            ix = v % 1000
+            return "Stock" if ix == 0 else (TUNE._tier_word(ix) if ix <= 3 else f"t{ix}")
+        base = order[0] if order else None
+        for h in order:
+            mem = sig_groups[h]
+            diffs = []
+            if base and h != base:
+                pa = (sig_groups[base][0]["_tune"] or {}).get("parts") or {}
+                pb = (mem[0]["_tune"] or {}).get("parts") or {}
+                for slot in sorted(set(pa) | set(pb)):
+                    va, vb = pa.get(slot), pb.get(slot)
+                    if va != vb:
+                        disp = TUNE.CATEGORY_DISPLAY.get(slot, slot.replace("_", " ").title())
+                        diffs.append(f"{disp}: {_tw(va)} → {_tw(vb)}")
+            builds.append({"build": h, "label": labels.get(h, "?"), "saves": [x["ts"] for x in mem], "n": len(mem),
+                           "cyl": mem[0].get("cyl"), "pi": next((x["pi"] for x in mem if x.get("pi")), None),
+                           "gears": (mem[0]["_tune"] or {}).get("gear_count"),
+                           "diff_base": labels.get(base, "?"),   # letters are permanent, so the diff base is NOT always 'A' — name it
+                           "diff_vs_A": diffs[:12], "n_diffs": len(diffs)})
+        # LIVERY ASSOCIATION per build: no tune↔livery link exists on disk, so a manual PIN
+        # (data/build-liveries.json) wins; otherwise GUESS by save-time proximity — a build's tune save and its
+        # livery save usually come from the same garage session. Guesses are labelled as guesses.
+        try:
+            root_ = TUNE.find_containers_root(); tag_ = f"{int(ordn):04d}"
+            livs = []
+            for d_ in os.listdir(root_):
+                if d_.startswith((f"Livery_{tag_}_", f"SoulBoundLivery_{tag_}_", f"BaseLivery_{tag_}_")):
+                    nm_ = _livery_strings(os.path.join(root_, d_, "header"))
+                    livs.append({"dir": d_, "name": (nm_[0] if nm_ else None),
+                                 "thumb": os.path.exists(os.path.join(root_, d_, "bigThumb.webp")),
+                                 "ts": d_.split("_")[-1]})
+            pins = {}
+            try:
+                with open(os.path.join(ROOT, "data", "build-liveries.json"), encoding="utf-8") as f_:
+                    pins = (json.load(f_).get("assoc") or {}).get(str(ordn), {})
+            except Exception:
+                pins = {}
+            def _ep(ts):
+                try: return time.mktime(time.strptime(str(ts)[:14], "%Y%m%d%H%M%S"))
+                except Exception: return None
+            for b in builds:
+                pv_ = pins.get(b["build"])
+                pin_dir = (pv_.get("dir") if isinstance(pv_, dict) else pv_)
+                pin_src = (pv_.get("source") if isinstance(pv_, dict) else None) or "pinned"   # str = user pin; dict may be an auto-association
+                pl = next((l for l in livs if l["dir"] == pin_dir), None) if pin_dir else None
+                if pl is not None:
+                    b["livery"] = {"dir": pl["dir"], "name": pl["name"], "thumb": pl["thumb"], "source": pin_src}
+                    continue
+                best_l = None; best_dt = None
+                for l in livs:
+                    le = _ep(l["ts"])
+                    if le is None: continue
+                    for ts_ in b["saves"]:
+                        te = _ep(ts_)
+                        if te is None: continue
+                        dt_ = abs(le - te)
+                        if best_dt is None or dt_ < best_dt: best_dt, best_l = dt_, l
+                if best_l is not None and best_dt is not None and best_dt <= 6 * 3600:
+                    b["livery"] = {"dir": best_l["dir"], "name": best_l["name"], "thumb": best_l["thumb"],
+                                   "source": "guess", "dt_h": round(best_dt / 3600, 1)}
+        except Exception:
+            pass
+    except Exception:
+        builds = []
+    saves = [dict({k: r[k] for k in ("ts", "cyl", "pi", "locked")}, gears=(r["_tune"] or {}).get("gear_count"),
+                  build=next((b["label"] for b in builds if r.get("_bsig") == b["build"]), None)) for r in roster]
+    how = "picked" if (ts_want and ts_explicit) else ("signature" if (live or live_recent) and (live_cyl or live_pi) else "newest")   # only an EXPLICIT URL browse is a 'picked' view; a stored pick is inert and reads as signature/newest
+    # 'no save matches your engine' must mean NO save: when ANY roster save matches the live cylinders, a chosen-save
+    # mismatch is a wrong tie-pick (scoring interplay), not a missing file — universality checked against the whole set.
+    mism = bool((live or live_recent) and live_cyl and best["cyl"] and int(best["cyl"]) != int(live_cyl)
+                and not any(r.get("cyl") and int(r["cyl"]) == int(live_cyl) for r in roster if r is not best))
+    final_how = how if (ts_want and ts_explicit) else ("no-match" if mism else how)
+    # LIVE TRUTH OVERRIDE: while the equipped build is strongly identified and on track, the frame's CarPI IS this
+    # build's PI — a stored stamp that disagrees is stale or misattributed and must never outrank the live read
+    # (the "identifies as A700 while driving it at S1 800" bug).
+    # ...but RECORD that it fired. The override adopts the live PI so the display is not wrong, and in doing so
+    # it consumes the only evidence that the car has been MODIFIED SINCE ITS LAST SAVE. The game writes a
+    # Tuning_*/Data file only when a tune is SAVED — browsing the upgrade shop, swapping rims or dragging
+    # sliders writes nothing — so no amount of polling can see an in-menu change. But a live CarPI that matches
+    # NO save on file is proof one happened, and swallowing it is how the decode came to show a month-old
+    # snapshot of ordinal 4167 while the user was changing its wheels (PI 850 -> 851 in the shop; no save has 851).
+    stale = None
+    if live_pi and (live or live_recent) and (final_how == "picked" or (final_how == "signature" and (n_ties or 1) <= 1)):
+        try:
+            _lp = int(live_pi)
+            _known = {int(s2["pi"]) for s2 in saves if s2.get("pi") is not None}
+            eq = next((b for b in builds if any(str(t2) == str(best["ts"]) for t2 in (b.get("saves") or []))), None)
+            # `_known` empty means no save has EVER been stamped, so "PI matches nothing" is not evidence of a
+            # modification — it is evidence this build is simply new. Both cases mean the sliders on screen may
+            # not describe the car, but only the first is a change since the last save.
+            if _known and _lp not in _known:
+                stale = {"live_pi": _lp, "save_pi": (eq or {}).get("pi"), "save_ts": best.get("ts"),
+                         "why": "the car reads PI %d live, and no save on file records that PI — it has been "
+                                "modified since its last save, so the values below describe the save, not the car. "
+                                "Save the tune in-game and it will be read exactly." % _lp}
+            if eq is not None and eq.get("pi") != _lp:
+                eq["pi"] = _lp; eq["pi_src"] = "live"
+            for s2 in saves:
+                if str(s2.get("ts")) == str(best["ts"]) and s2.get("pi") != _lp: s2["pi"] = _lp
+        except Exception:
+            pass
+    # A PICK THE LIVE CAR CORROBORATES. The pick itself is just a declaration, so it is not evidence on its own —
+    # but a picked save that survives the hard-evidence filters (same cylinders as the live engine, gearbox big
+    # enough for the gears actually used) is a declaration the car does not contradict. That, and only that, is what
+    # the PI stamp accepts as a substitute for the ladder (audit T1); identity scoring is untouched.
+    picked_ok = bool(ts_want and ts_explicit and str(best["ts"]) == str(ts_want) and any(r is best for r in ties)
+                     and (live or live_recent) and live_cyl and best.get("cyl") and int(best["cyl"]) == int(live_cyl))
+    # A FRESH SAVE SETTLES A SIGNATURE TIE (Jett 2026-09-07; extended from locked-only to any fresh save 2026-09-17):
+    # a container the matcher already picked (best), written in the last ~30 min, is the tune you just equipped and
+    # saved -- the container mtime is the 100%-confidence signal of the SAVE-TUNE METHOD. Other saves that merely
+    # SHARE its cyl/PI signature are not real ambiguity; you are demonstrably in THIS one, so report it settled
+    # (n_signature_ties -> 1) instead of asking you to pick. This covers BOTH a downloaded (locked byte 1) tune AND
+    # a SELF-MADE save (locked byte 0) -- the primary "equip the build, save the tune in-game" workflow -- because
+    # either is "you just wrote this file and are sitting in the car." The `locked` gate used to exclude self-made
+    # saves, so following the on-screen "equip + save" instruction still left the identity unsettled (Jett hit this
+    # live on ordinal 2866, 2026-09-17: a fresh self-made save, 13-way signature tie, never settled).
+    # Needs a live frame for the car (live/live_recent) -- with no equipped car there is nothing to confirm against.
+    # The recency window keeps a STALE newest-save from wrongly settling; once it expires the tie returns until the
+    # next equip + save (a durable last-equipped memory that survives a long session is the separate Fold-1 work).
+    fresh_dl = False
+    try:
+        _bmt = float((best.get("_meta") or {}).get("mtime") or 0)
+        if n_ties > 1 and _bmt and (time.time() - _bmt) < 1800 and (live or live_recent):
+            fresh_dl = True; n_ties = 1
+            if live:
+                _remember_equipped(ordn, best)   # FOLD 1: a fresh equip+save IS the last-equipped build — record it durably
+    except Exception:
+        pass
+    # PROFILE-EQUIPPED SETTLE (2026-09-18): the decrypted C_ProfileData names the CURRENT car's equipped
+    # Tuning_<ord>_<ts> exactly (identify-on-equip, [[fh6-equipped-tune-in-profiledata]]). If a fresh save did
+    # not already settle it, and the profile's equipped ts for this ordinal matches a roster entry
+    # (cyl-consistent), settle to it. This is authoritative for an EQUIP — which writes NO Tuning_* file, so the
+    # fresh_dl/mtime path cannot see it. Setting n_ties=1 here naturally disables the Fold-1 recall below.
+    profiled = False
+    try:
+        pe = _recall_profile_equipped(ordn) if (not fresh_dl and n_ties > 1) else None
+        pr = next((r for r in roster if pe and str(r["ts"]) == str(pe.get("ts"))), None) if pe else None
+        if pr and (not live_cyl or (pr.get("cyl") and int(pr["cyl"]) == int(live_cyl))):
+            best = pr; n_ties = 1; profiled = True
+    except Exception:
+        pass
+    # FOLD 1 RECALL -- DURABLE LAST-EQUIPPED MEMORY (Jett 2026-09-17). If a fresh save did not just settle it, but we
+    # remember the build last equipped+saved on THIS car, settle to it -- PROVIDED the remembered save still exists on
+    # disk, the live car's cylinders still match it, and NO newer cyl-matching save has superseded it (a newer save
+    # would mean you equipped+saved a different build since). This extends the save-tune method past the 30-min fresh
+    # window and across a restart; because it re-writes itself on every save it cannot rot the way the old manual pick
+    # did. NO gearbox (HARD RULE [[fh6-identity-two-directions]]) -- it settles on the recorded save signature only.
+    remembered = False
+    try:
+        eq = _recall_equipped(ordn) if (not fresh_dl and n_ties > 1 and (live or live_recent)) else None
+        rem = next((r for r in roster if eq and str(r["ts"]) == str(eq["ts"])), None) if eq else None
+        if rem and (not live_cyl or (rem.get("cyl") and int(rem["cyl"]) == int(live_cyl))):
+            _rmt = float((rem.get("_meta") or {}).get("mtime") or 0)
+            _newer = any(float((r.get("_meta") or {}).get("mtime") or 0) > _rmt
+                         and (not live_cyl or (r.get("cyl") and int(r["cyl"]) == int(live_cyl)))
+                         for r in roster if r is not rem)
+            if not _newer:
+                best = rem; n_ties = 1; remembered = True
+    except Exception:
+        pass
+    return best["_meta"], {"how": ("profile" if profiled else "remembered" if remembered else final_how), "live": live, "live_recent": live_recent, "live_cyl": live_cyl,
+                           "live_pi": live_pi, "chosen_cyl": best["cyl"], "chosen_pi": best["pi"],
+                           "n_saves": len(roster), "n_signature_ties": n_ties,
+                           "fresh_download": fresh_dl, "remembered": remembered, "profiled": profiled,
+                           "picked_ok": picked_ok, "stale": stale,
+                           "builds": builds, "saves": saves}
+
+
+def _deliverable_cyl(deliverable):
+    """The decoded tune's cylinder count (from the engine-family catalog) — used to pick the RIGHT build of a
+    multi-build car when enriching from telemetry."""
+    for m in (deliverable or {}).get("menus", []):
+        if m.get("menu") == "Conversions":
+            for r in m["rows"]:
+                if r.get("item") == "powertrain":
+                    return ((r.get("engine_catalog") or {}).get("cyl")) or ((r.get("engine_bits") or {}).get("cat_cyl"))
+    return None
+
+
+def _match_car(ordn, want_cyl=None):
+    """Pick the ST.cars entry for this ordinal that matches the build we mean: the exact car you're driving now, else
+    the one whose cylinders match the decoded tune, else the first seen. ST.cars holds EVERY build of an ordinal
+    (a 4-cyl AWD tune and an 8-cyl RWD tune share the ordinal), so 'first match' showed the wrong drivetrain/engine."""
+    with ST.lock:
+        fr = ST.latest
+        live_cid = fr.get("cid") if (fr and fr.get("on") and int(fr.get("car") or 0) == int(ordn)) else None
+        cand = [(str(cid), dict(c)) for cid, c in ST.cars.items() if str(cid).split("|")[0] == str(ordn)]
+    if not cand:
+        return None
+    if live_cid:                                                   # 1. the exact car you're in
+        for cid, c in cand:
+            if cid == str(live_cid):
+                return c
+    if want_cyl:                                                   # 2. the build whose cylinders match the decoded tune
+        for cid, c in cand:
+            if c.get("cyl") and int(c["cyl"]) == int(want_cyl):
+                return c
+    return cand[0][1]                                              # 3. fallback
+
+
+def _verified_identity(match):
+    """The ok_stamp standard, reusable: identity strong enough to WRITE with (stores are shared/cross-car)."""
+    if not match or match.get("how") in ("no-match", "unsaved-build"): return False
+    return (match.get("n_signature_ties") or 1) <= 1   # gearless: a single instant-signature tie settles it (a fresh save/download forces n_signature_ties -> 1)
+
+
+def _stamp_identity(match):
+    """The PI-STAMP write standard ONLY — deliberately NOT _verified_identity itself.
+
+    _verified_identity also guards the CROSS-CAR engine-family catalog bootstrap (:_enrich_engine_desc), where one
+    wrong write teaches a whole family the wrong engine permanently and then self-confirms it. That predicate must
+    stay strict. The PI store is per-(ordinal, parts_hash): a wrong write there mis-prices ONE config and is
+    correctable by a later verified read, so it can accept one more kind of evidence — the user's explicit save pick,
+    but only when the live car does not contradict it (`picked_ok`). Without this, the manual pick the dashboard
+    itself offers as THE escape from a signature tie unblocked tuning advice and nothing else, and parts-pi.json
+    stayed starved of the one datum that exists nowhere on disk (audit T1)."""
+    if match and match.get("how") == "picked":
+        # how=='picked' now only ever arises from an EXPLICIT URL browse (gearless identity). A pick forces
+        # final_how='picked', which BYPASSES the no-match test, so a flatly contradicted pick would read as
+        # "unambiguous"; picked_ok is the corroboration (same cylinders as the live engine). Never fall through
+        # to _verified_identity here.
+        return bool(match.get("picked_ok"))
+    return _verified_identity(match)
+
+
+def _stamp_state(match, ordn=None):
+    """Why the PI stamp is (not) allowed, in words the user can act on. The guard is otherwise SILENT: the ribbon can
+    read '⚙ verified · held' while stamping stays refused, and the ledger then asks for a drive that cannot help
+    (audit T13). Returns (ok, reason) — the reason is empty when ok."""
+    try:
+        if ordn is not None and ST.clone_lock is not None and int(ST.clone_lock) == int(ordn):
+            return False, "PI accrual is PAUSED for this car — it is pinned as a clone TARGET, so half-built configs can't be recorded. Clear the clone lock to resume stamping"
+    except Exception:
+        pass
+    if not match:
+        return False, "no build match yet"
+    if match.get("how") in ("no-match", "unsaved-build"):
+        return False, "this build has no file on disk — its live PI would be stamped onto another build's parts. Change any part or slider and SAVE first"
+    if _stamp_identity(match):
+        return True, ""
+    if match.get("how") == "picked":
+        return False, "the live car contradicts the save you pinned (engine or gearbox disagree), or it isn't on track right now — the PI stamp needs the pin to match what you're driving"
+    # SAY WHAT IS ACTUALLY AMBIGUOUS. The tie filter (see `ties`) is CYLINDERS only (the instant signal) — PI is
+    # not in it. Claiming the builds "share this engine + PI" sent the user
+    # hunting for a matching build that does not exist: the live car read PI 805, a number no save has ever
+    # carried, while all six saves had pi=None. A PI nothing shares cannot be what makes them ambiguous.
+    _n = match.get('n_signature_ties') or 2
+    _pis = [s2.get("pi") for s2 in (match.get("saves") or []) if s2.get("pi") is not None]
+    _lp = match.get("live_pi")
+    if not _pis:
+        _why = (f"{_n} saved builds share this engine, and none of them has a recorded PI yet — so PI cannot tell "
+                f"them apart" + (f" (the car reads {_lp} live, which no save carries)" if _lp else "") + ". ")
+    elif _lp and int(_lp) not in {int(x) for x in _pis}:
+        _why = (f"{_n} saved builds share this engine. The car reads PI {int(_lp)} live and no save records it "
+                f"(saves have {sorted({int(x) for x in _pis})}) — this build has not been stamped before. ")
+    else:
+        _why = f"{_n} saved builds share this engine and PI. "
+    return False, _why + "Equip the build and save the tune in-game — the fresh save is read exactly and pins the identity."
+
+
+def _equipped_fresh_download(deliverable, ordn, meta):
+    """THE TUNING-MODIFICATION CHECK (Jett 2026-09-07): a fresh DOWNLOADED tune you just equipped can't be
+    identified from the save alone -- FH6 saves store no cylinder count, so a never-driven swap's engine family
+    is unknown to the catalog and the live (e.g.) 12-cyl car matches no save -> IDENTITY CONTRADICTED. But the
+    newest Tuning container's directory-name timestamp IS the install datetime, the tune is `locked` (downloaded),
+    and the live frame is authoritatively reporting cyl/PI for the car you are sitting in. So when the picked/newest
+    LOCKED container's ts has ADVANCED since we last learned this ordinal AND its engine family is still catalog-
+    unknown (the contradiction case only), let _enrich_engine_desc bootstrap the family's cyl from the live frame
+    right here -- identity settles the instant you install, no drive required. Cheap enough to run on EVERY menu
+    exit: a _match_car + a dict check; the 598-byte decode already happened. Learn-once per container ts.
+    Fires when the family is UNKNOWN (bootstrap) OR its cached cyl CONFLICTS with the car you're in (the family
+    468=10 vs live-12 case): a fresh equipped download is the 100%-confidence signal to correct it."""
+    try:
+        if not (deliverable.get("locked") and meta and meta.get("ts")):
+            return False
+        if str(meta["ts"]) == ST._eng_bootstrapped.get(str(ordn)):
+            return False                                   # already learned from this exact container
+        car = _match_car(ordn, _deliverable_cyl(deliverable))
+        live_cyl = (car or {}).get("cyl")
+        if not live_cyl:
+            return False                                   # no live frame for this car yet -> retry on the next menu exit
+        cat = _deliverable_cyl(deliverable)
+        return cat is None or int(cat) != int(live_cyl)    # engine family UNKNOWN, or its cached cyl disagrees with the equipped car
+    except Exception:
+        return False
+
+
+def _enrich_engine_desc(deliverable, ordn, verified=False, equipped_fresh=False):
+    """Feature A: turn the Conversions 'Engine' row into a specific engine TYPE using live telemetry. The save
+    holds no engine specs; this joins the active car's cylinders / redline (ST.cars, keyed by cid whose prefix is
+    the ordinal) and peak dyno hp (ST.session_json, the analyzer's measured curve — ST.cars.dyno stays empty).
+    Sets an authoritative `engine_type` string + `engine_type_conf`='measured', and also folds a short form into
+    value/upgrade so it shows without the dashboard change. Best-effort: a non-driven car keeps its save-only
+    descriptor. Never invents a swap donor name."""
+    try:
+        car = _match_car(ordn, _deliverable_cyl(deliverable))   # the build that matches THIS tune / the car you're in
+        with ST.lock:
+            sj = ST.session_json
+        # peak hp: prefer the analyzer's dyno (session_json); fall back to any ST.cars dyno
+        peak_hp = None
+        if sj:
+            for c in sj.get("cars", []):
+                if str(c.get("ordinal")) == str(ordn):
+                    dl = [d["hp"] for d in (c.get("dyno") or []) if d.get("hp")]
+                    if dl:
+                        peak_hp = max(dl)
+                    break
+        if peak_hp is None and car:
+            dl = [d["hp"] for d in (car.get("dyno") or []) if d.get("hp")]
+            if dl:
+                peak_hp = max(dl)
+        for m in deliverable.get("menus", []):
+            if m.get("menu") != "Conversions":
+                continue
+            for r in m["rows"]:
+                if r.get("item") != "powertrain":
+                    continue
+                bits = r.get("engine_bits") or {}
+                electric = bool(r.get("electric") or bits.get("electric"))
+                if not car and peak_hp is None:
+                    if not electric:      # no telemetry at all: keep the save-only engine_type, hint to drive
+                        r["value"] = r["upgrade"] = r["value"] + " — drive it to read cylinders, redline & power"
+                        r["needs_drive"] = True
+                    return
+                cyl = car.get("cyl") if car else None
+                redline = car.get("max_rpm") if car else None
+                if TUNE is not None:
+                    r["engine_type"] = TUNE.compose_engine_type(
+                        asp_short=bits.get("asp"), displacement_l=bits.get("displacement_l"),
+                        cyl=cyl, peak_hp=peak_hp, redline=redline,
+                        swapped=bool(bits.get("swapped")), electric=electric,
+                        build_level=bits.get("build_level") or 0,
+                        disp_from_build=bool(bits.get("disp_from_build")))
+                    r["engine_type_conf"] = "measured"
+                fold = []
+                if not electric:
+                    if cyl:
+                        fold.append(f"{int(cyl)}-cyl")
+                    if redline:
+                        fold.append(f"{int(redline)} rpm redline")
+                if peak_hp:
+                    fold.append(f"~{int(peak_hp)} hp")
+                if fold:
+                    r["value"] = r["upgrade"] = r["value"] + " · " + " · ".join(fold)
+                r["telemetry"] = True
+                # IDENTITY GUARD (mirrors the PI stamp guard): the catalog is CROSS-CAR — one wrong write teaches a
+                # family the WRONG engine's cyl/redline permanently and self-confirms the mismatch (+100 cyl score)
+                # for every car sharing it. Learn only when the save's decoded cyl is KNOWN and matches the live car;
+                # an unknown-cyl family learns nothing from an unverifiable pairing.
+                _want_c = _deliverable_cyl(deliverable)
+                # unknown-cyl families BOOTSTRAP only on a verified identity (ok_stamp standard) -- OR when a fresh
+                # downloaded tune was just equipped (equipped_fresh): the newest locked container's timestamp is the
+                # 100%-confidence signal that the live frame's cyl IS this tune's engine, so we can learn it without
+                # a drive. Same identity guard otherwise: only ever writes the LIVE car's measured cyl.
+                _ok_learn = (bool(_want_c and cyl and int(_want_c) == int(cyl))
+                             or bool((verified or equipped_fresh) and cyl and not _want_c)
+                             or bool(equipped_fresh and cyl and _want_c and int(_want_c) != int(cyl)))   # a fresh equipped download CORRECTS a conflicting family cyl (cyl is verified-overwrite; the live frame is authoritative for the car you're in)
+                if not electric and ST.clone_lock != ordn and _ok_learn:
+                    _learn_engine_catalog(bits.get("engine_family"), cyl=cyl, redline=redline, peak_hp=peak_hp,
+                                          drivetrain=(car.get("drivetrain") if car else None),
+                                          pi=(car.get("pi") if car else None), displacement_l=bits.get("displacement_l"))
+                return
+    except Exception:
+        return
+
+
+def _enrich_drivetrain(deliverable, ordn):
+    """Fill the Conversions 'drivetrain' row's RESULTING layout from live telemetry. The save records only
+    stock-vs-swapped (the slot has no FWD/RWD/AWD value); DrivetrainType — read every frame and stored on
+    ST.cars[cid]['drivetrain'] — is the actual resulting layout. Sets `resulting_drivetrain` ('FWD'/'RWD'/'AWD')
+    and folds it into value/upgrade ('Converted / swapped → AWD', or 'Stock layout (RWD)') so it shows without a
+    dashboard change. Best-effort: a non-driven car keeps resulting_drivetrain=null (no fabrication)."""
+    try:
+        car = _match_car(ordn, _deliverable_cyl(deliverable))   # match the build we're decoding, not just any 2866 seen
+        drv = car.get("drivetrain") if car else None
+        if not drv or drv == "?":
+            return
+        for m in deliverable.get("menus", []):
+            if m.get("menu") != "Conversions":
+                continue
+            for r in m["rows"]:
+                if r.get("item") != "drivetrain":
+                    continue
+                r["resulting_drivetrain"] = drv
+                r["value"] = r["upgrade"] = (f"{r['value']} ({drv})" if r.get("stock")
+                                             else f"{r['value']} → {drv}")
+                r["telemetry"] = True
+                return
+    except Exception:
+        return
+
+
+def _build_union(deliverable, ordn, match=None):
+    """THE UNION: reconcile the save decode against every telemetry measurement available for this build, so the two
+    sources BOLSTER each other instead of living as separate deliverables. Emits deliverable['union']:
+      fields[] — each reconcilable field with save+telemetry values and a status:
+                 agree (both sources, corroborated) · conflict (competing expected values -> low confidence)
+                 tele-fill (telemetry filled a save blind spot) · await (telemetry WOULD raise confidence; not captured)
+      asks[]   — the ranked, deduplicated 'drive X to raise confidence' prompts the dashboard shows prominently.
+    Best-effort: never raises; an undriven car simply yields awaits."""
+    try:
+        u = {"fields": [], "asks": []}
+        def fld(name, save_v, tele_v, status, note=None):
+            # INVARIANT: a conflict needs TWO actual values. When one source has no data, the other is simply the
+            # only source of that field — never a conflict. (Measured absence WITH evidence, e.g. 0 psi during a
+            # redline pull, is data and must be passed as an explicit value string, not None.)
+            if status == "conflict" and (save_v is None or tele_v is None):
+                status = "tele-fill" if save_v is None else "await"
+                note = None
+            u["fields"].append({"name": name, "save": save_v, "telemetry": tele_v, "status": status, "note": note or ""})
+        def ask(key, text, gain, rank):
+            if not any(a["key"] == key for a in u["asks"]):
+                u["asks"].append({"key": key, "text": text, "gain": gain, "rank": rank})
+        car = _match_car(ordn, _deliverable_cyl(deliverable))
+        # sig (boost_max / hp_peak / rpm_at_peak) lives on the ANALYZER's session cars — NOT on ST.cars (the live
+        # config registry _match_car returns). Reading it off the wrong record left aspiration stuck on 'await'
+        # forever, even after a full pull to redline.
+        sig = {}; sj_car = None
+        with ST.lock:
+            sj = ST.session_json
+        if sj:
+            want = _deliverable_cyl(deliverable)
+            # STRICT build match — never fall back to "any car with this ordinal": another build's boost/hp signature
+            # would manufacture aspiration/power conflicts for a perfectly consistent save. Live-cid first, then PI,
+            # then unambiguous cyl (a cyl-only first-match let a stale turbo record flip every fresh NA save forever).
+            sj_car = _session_car_for(sj, ordn, want)
+            sig = (sj_car or {}).get("sig") or {}
+        conv = next((m for m in deliverable.get("menus", []) if m.get("menu") == "Conversions"), {"rows": []})
+        rows = {r.get("item"): r for r in conv.get("rows", [])}
+        # -- build identity (from the matcher) is the foundation every other confidence stands on
+        if match and match.get("how") == "no-match":
+            ask("identity", "capture this build's file — no save matches your live engine, so every decoded value may be another build's: change any part/slider and SAVE (if yours), or apply this build's tune from Find Tunes (if it's already active, apply a different tune first — re-applying the active tune writes nothing)", "unblocks everything", 0)
+        # A tied identity resolves itself, silently, the moment enough clean WOT gears accumulate — _pick_meta
+        # already runs that comparison on every frame; there is nothing to ask the user to go and DO. Telling them
+        # to "drive up through the gears" implied a drill that either already ran (and the tie survived it — see
+        # ladder_tied) or needs nothing more than normal driving. The one thing that actually resolves it now is
+        # the pick, which the dashboard's identity card already offers (Jett, 2026-09-03: eliminate this ask).
+        # -- engine cylinders: save-side catalog vs live NumCylinders
+        cat_cyl = _deliverable_cyl(deliverable); live_cyl = (car or {}).get("cyl")
+        if cat_cyl and live_cyl:
+            fld("Engine cylinders", f"{cat_cyl}-cyl", f"{live_cyl}-cyl", "agree" if int(cat_cyl) == int(live_cyl) else "conflict",
+                None if int(cat_cyl) == int(live_cyl) else "the save's engine family disagrees with the engine you're driving — likely decoding the wrong build")
+        elif cat_cyl:
+            fld("Engine cylinders", f"{cat_cyl}-cyl", None, "await", "one on-track frame confirms it")
+            ask("drive-once", "drive this car once — one frame confirms cylinders, redline & drivetrain layout", "engine + drivetrain", 3)
+        # -- drivetrain layout: save literally can't know FWD/RWD/AWD
+        drv = (car or {}).get("drivetrain")
+        dr_row = rows.get("drivetrain") or {}
+        if drv and drv != "?":
+            fld("Drivetrain layout", "stock/swapped only (save can't know layout)", drv, "tele-fill")
+        else:
+            fld("Drivetrain layout", "stock/swapped only", None, "await", "the save never records FWD/RWD/AWD")
+            ask("drive-once", "drive this car once — one frame confirms cylinders, redline & drivetrain layout", "engine + drivetrain", 3)
+        # -- aspiration vs measured boost
+        asp_row = rows.get("aspiration") or {}
+        asp_lbl = str(asp_row.get("value") or "")
+        boost = sig.get("boost_max")
+        if asp_lbl:
+            na = "Naturally Aspirated" in asp_lbl or "no aspiration" in asp_lbl
+            if boost is None:   # no analyzer sig yet for this build — nothing measured to check against
+                fld("Aspiration", asp_lbl, None, "await", "a full-throttle pull reads boost and verifies it")
+                ask("wot-pull", "one full-throttle pull to redline — measures peak hp, boost & verifies aspiration", "hp + aspiration", 2)
+            elif na and boost > 0.5:
+                fld("Aspiration", asp_lbl, f"{boost} psi boost seen", "conflict", "the save says NA but the stream shows boost — wrong build or wrong slot read")
+            elif (not na) and boost <= 0.5 and sig.get("hp_peak"):
+                fld("Aspiration", asp_lbl, "no boost in the stream", "conflict", "the save says forced induction but WOT pulls show no boost")
+            elif (not na) and boost <= 0.5:
+                # forced induction on the save but no boost seen AND no pull evidence — that's absent data, not agreement
+                fld("Aspiration", asp_lbl, None, "await", "no boosted pull measured yet — a full-throttle pull to redline verifies the charger")
+                ask("wot-pull", "one full-throttle pull to redline — measures peak hp, boost & verifies aspiration", "hp + aspiration", 2)
+            else:
+                fld("Aspiration", asp_lbl, (f"{boost} psi" if boost and boost > 0.5 else "NA confirmed"), "agree")
+        # -- transmission: the measured gear COUNT is a PART-level cross-check. At a class cap (e.g. S1 800) different
+        # part combos converge to the SAME PI, so cyl×PI can't separate them — but driving gear 8 at WOT while the
+        # save holds a 6-speed box is definitive: a DIFFERENT build is equipped.
+        meas_gears = [g.get("gear") for g in ((sj_car or {}).get("gears") or []) if g.get("gear")]
+        gc_save = deliverable.get("gear_count")
+        if meas_gears and gc_save:
+            mx = max(meas_gears)
+            if mx > gc_save:
+                fld("Transmission", f"{gc_save}-speed (saved tune)", f"gear {mx} measured at WOT", "conflict",
+                    "the live gearbox has MORE gears than the saved tune's transmission — a different build is equipped")
+            elif mx == gc_save and len(set(meas_gears)) >= gc_save:
+                fld("Transmission", f"{gc_save}-speed", f"all {gc_save} gears seen at WOT", "agree")
+        # -- gears: aggregate the per-row reconciliation _enrich_gears recorded
+        g_meas = g_agree = g_conf = g_tot = 0
+        for t in deliverable.get("tabs", []):
+            if t.get("tab") != "Gearing":
+                continue
+            for r in t["rows"]:
+                if str(r.get("field", "")).startswith("gear_"):
+                    g_tot += 1
+                    if r.get("telemetry"):
+                        g_meas += 1
+                        if r.get("conflict"): g_conf += 1
+                        elif r.get("agree"): g_agree += 1
+        if g_tot:
+            if g_conf:
+                gd = deliverable.get("gear_diag") or {}
+                if gd.get("kind") == "fd":
+                    note = (f"all {gd['n']} gears disagree by the SAME ×{gd['factor']} factor — the shared divisor is the culprit: "
+                            f"the band-derived FINAL DRIVE ({gd['fd_used']}), not the gears. If the sources agreed, FD would be ~{gd['fd_implied']}. "
+                            f"Type your exact in-game final drive in the 🎯 calibration card — that arbitrates & fixes every gear at once")
+                elif gd.get("kind") == "scattered":
+                    note = (f"gear disagreements are SCATTERED (not one factor) — likely decoding a different save than the build you drove, "
+                            f"or the drive predates your last gearing change. Equip the build and save the tune in-game — the fresh save is read exactly.")
+                else:
+                    note = f"{g_conf} gear{'s' if g_conf > 1 else ''} disagree with the save — competing values shown on the rows"
+                fld("Gear ratios", f"{g_tot} gears (band-derived)", f"{g_meas} measured", "conflict", note)
+            elif g_meas:
+                fld("Gear ratios", f"{g_tot} gears (verified band)", f"{g_meas} measured", "agree",
+                    None if g_meas >= g_tot else f"{g_tot - g_meas} gear{'s' if g_tot - g_meas > 1 else ''} not yet telemetry-confirmed, but already exact from the save")
+            else:
+                # 2026-09-03 (Jett, final): the [0.48, 6.00] global band is VERIFIED — reproduces the
+                # game's own GEARING tab to 0.01 on every gear of a 9-speed, from the save alone, no
+                # driving. This used to say "~85%" and ask for a WOT run "to measure exact ratios";
+                # both were wrong, since data/global-slider-ranges.json has carried the verified band
+                # since 2026-09-01. No ask() here any more — there is nothing left to ask for.
+                fld("Gear ratios", f"{g_tot} gears (verified band)", None, "agree", None)
+        # -- peak hp (feeds the engine descriptor)
+        if not sig.get("hp_peak"):
+            ask("wot-pull", "one full-throttle pull to redline — measures peak hp, boost & verifies aspiration", "hp + aspiration", 2)
+        else:
+            fld("Peak power", "save holds no hp", f"~{int(sig['hp_peak'])} hp @ {sig.get('rpm_at_peak') or '?'} rpm", "tele-fill")
+        # -- PI: exact observed CarPI for THIS config vs live
+        sm = deliverable.get("summary", {}) or {}
+        live_pi = (car or {}).get("pi")
+        if sm.get("pi_total") is not None and live_pi:
+            same = abs(int(sm["pi_total"]) - int(live_pi)) <= 1
+            fld("PI", f"{sm['pi_total']} (observed for this config)", str(live_pi), "agree" if same else "conflict",
+                None if same else "live PI differs from the recorded observation — the config on disk may not be what you're driving")
+        elif sm.get("pi_total") is None:
+            # THE STAMP GUARD MUST SPEAK. Driving is only half the requirement — the write also needs a verified
+            # identity, and when that half fails the old ask sent the user to do a lap that could never satisfy it
+            # (audit T13). Say which half is missing. u["stamp"] carries the same verdict structurally.
+            _stok, _swhy = _stamp_state(match, ordn)
+            fld("PI", None, (str(live_pi) if live_pi else None), "await",
+                "PI is telemetry-exact but only recorded once THIS exact config is driven" if _stok else f"PI cannot stamp: {_swhy}")
+            ask("drive-build", "drive this exact build once — records its exact PI against the config" if _stok
+                else f"PI cannot stamp yet — {_swhy}", "PI exact", 4)
+        # -- per-car sliders still relative -> calibration ask (the guided card does the capture)
+        rel = sm.get("sliders_relative") or 0
+        if rel:
+            ask("calibrate", f"{rel} slider{'s' if rel > 1 else ''} still read as % — use the 🎯 calibration card (two saved positions each locks them exact)", "sliders exact", 5)
+        u["asks"].sort(key=lambda a: a["rank"])
+        u["n_agree"] = sum(1 for f in u["fields"] if f["status"] == "agree")
+        u["n_conflict"] = sum(1 for f in u["fields"] if f["status"] == "conflict")
+        u["n_fill"] = sum(1 for f in u["fields"] if f["status"] == "tele-fill")
+        u["n_await"] = sum(1 for f in u["fields"] if f["status"] == "await")
+        _s_ok, _s_why = _stamp_state(match, ordn)
+        u["stamp"] = {"ok": _s_ok, "why": _s_why}   # the PI-stamp guard's verdict, structurally — the ledger's 'PI stamped' row can say WHY instead of an unexplained red (T13)
+        deliverable["union"] = u
+        # NO WOT-PULL IDENTITY FLIP (Jett 2026-09-17, [[fh6-identity-two-directions]]): aspiration and transmission
+        # are MEASURED signals (boost, the gear ladder) — WOT-pull evidence the directive bars from IDENTITY. A build
+        # that matches no save on its INSTANT signature is already flagged 'no-match' in _pick_meta, and a
+        # same-signature tie already reads "equip + save the tune in-game". The measured Aspiration/Transmission
+        # decode conflicts still SHOW on the build sheet (the fld() rows above) as a DISPLAY cross-check only — they
+        # no longer flip match.how to 'unsaved-build' or suggest a build by its gearbox.
+    except Exception:
+        pass
+
+
+def _livery_strings(path, max_strings=3):
+    """Tolerant scan of a Livery container's `header` for its length-prefixed UTF-16LE strings — observed layout:
+    [u32 ver][u32 n]["name" n chars][u32 n]["description"]...["creator"]. Scans forward so unknown binary between
+    strings is skipped. READ-ONLY; returns up to max_strings printable strings (name, description, creator)."""
+    try:
+        b = open(path, "rb").read()
+    except Exception:
+        return []
+    out = []; i = 0
+    while i + 4 <= len(b) and len(out) < max_strings:
+        n = int.from_bytes(b[i:i + 4], "little")
+        # accept 1-char strings too (a 1-2 char name is legal; rejecting it shifted creator into the desc slot);
+        # guard against binary noise by requiring at least one alphanumeric character
+        if 0 < n <= 96 and i + 4 + 2 * n <= len(b):
+            try:
+                s = b[i + 4:i + 4 + 2 * n].decode("utf-16-le")
+                if s and s.strip() and any(c.isalnum() for c in s) and all(c.isprintable() for c in s):
+                    out.append(s); i += 4 + 2 * n; continue
+            except Exception:
+                pass
+        i += 1
+    return out
+
+
+def _tune_header_strings(data_path):
+    """THE TUNE'S OWN NAME — the thing the player actually calls this setup, and the creator it came
+    from. It lives in the container's `header` as length-prefixed UTF-16LE, the SAME layout liveries
+    use, so `_livery_strings` reads it unmodified (that function is misnamed: it is a generic
+    container-header string scanner).
+
+    Measured over the whole corpus, 2026-09-08: all 663 `Tuning_*` containers yield at least one
+    string, and 662 (99.8%) yield a usable name + creator. The scanner also picks up a single glyph
+    of binary noise sitting between the strings — always one non-ASCII character — which is dropped
+    here. Two strings mean [name, creator]; three mean [name, description, creator]. The single
+    one-string container is treated as a name.
+
+    Until this existed, /disk-tune reported `name` = the CAR's name from names.json, so the header's
+    tune slot fell back to the car name and printed it twice on any car the database did not yet
+    hold. READ-ONLY; never raises."""
+    try:
+        ss = [x for x in _livery_strings(os.path.join(os.path.dirname(data_path), "header"), max_strings=4)
+              if not (len(x) == 1 and ord(x) > 127)]
+    except Exception:
+        return {}
+    if not ss:
+        return {}
+    if len(ss) == 1:
+        return {"tune_name": ss[0], "tune_desc": None, "creator": None}
+    return {"tune_name": ss[0], "tune_desc": ss[1] if len(ss) >= 3 else None, "creator": ss[-1]}
+
+
+def _lap_class_counts(route_key):
+    """How many laps this route holds per class — ALWAYS every class, even when the caller filtered to one,
+    because the UI can only offer a class switch if it knows which other classes exist. A separate GROUP BY
+    rather than a count over get_laps(): a class-filtered read sees one class, and the competitive filter
+    truncates. Opened mode=ro — the analyzer owns the writes, this process must never create or touch the db."""
+    p = lap_store.db_path(ROOT)
+    if not os.path.exists(p):
+        return {}
+    try:
+        import sqlite3 as _sq
+        cx = _sq.connect("file:" + p.replace("\\", "/") + "?mode=ro", uri=True, timeout=5)
+        try:
+            rows = cx.execute("SELECT class, COUNT(*) FROM lap_traces WHERE route_key=? GROUP BY class", (route_key,)).fetchall()
+        finally:
+            cx.close()
+        return {str(c): n for c, n in rows if c}
+    except Exception:
+        return {}
+
+
+def _lap_contact_counts(route_key):
+    """How many of this route's laps carried contact, and how many that VOIDED — a header-level count so the
+    course view can say "3 of 11 laps void" without walking every lap's pts. Route-wide like _lap_class_counts
+    (never narrowed by the class filter) and mode=ro for the same reason: the analyzer owns the writes.
+    Tolerates a pre-migration db — the columns are added by lap_store, and a daemon running ahead of that
+    migration must answer zeros, not 500."""
+    p = lap_store.db_path(ROOT)
+    zero = {"laps": 0, "impacted": 0, "void": 0}
+    if not os.path.exists(p):
+        return zero
+    try:
+        import sqlite3 as _sq
+        cx = _sq.connect("file:" + p.replace("\\", "/") + "?mode=ro", uri=True, timeout=5)
+        try:
+            cols = {r[1] for r in cx.execute("PRAGMA table_info(lap_traces)").fetchall()}
+            if not {"impacts", "void"} <= cols:
+                n = cx.execute("SELECT COUNT(*) FROM lap_traces WHERE route_key=?", (route_key,)).fetchone()[0]
+                return dict(zero, laps=n)
+            n, i, v = cx.execute(
+                "SELECT COUNT(*), SUM(impacts > 0), SUM(void <> 0) FROM lap_traces WHERE route_key=?",
+                (route_key,)).fetchone()
+        finally:
+            cx.close()
+        return {"laps": int(n or 0), "impacted": int(i or 0), "void": int(v or 0)}
+    except Exception:
+        return zero
+
+
+def _thin_pts(pts, cap=200):
+    """Downsample one lap's pts to at most `cap` points — WITHOUT ever dropping an impact.
+
+    WHY the extra bookkeeping: an impact is a SINGLE sample (one [arc, mph, 4, x, z] point). A naive strided
+    walk keeps every Nth point, so it deletes the exact samples the map markers and trace ticks are drawn
+    from — the lap would report impacts:3 and render zero markers. So: keep the first point, the last point,
+    and EVERY grip_code==4 point unconditionally, then stride-fill the remainder up to the cap. Indices are
+    emitted in ascending order, so the polyline still draws front-to-back.
+
+    The thinning still matters: at ~26 bytes a point an unthinned 40-lap answer is 600 KB of coordinates no
+    560 px trace can resolve, and shipping it stalls the repaint. Ceil division on the REMAINING budget so
+    the result lands at or under the cap (floor division overshoots: 599 // 200 = 2 keeps 300 points). The
+    one deliberate exception is a lap with more than `cap` impact points: contact is the payload there, so
+    every one of them ships.
+    """
+    n = len(pts)
+    if n <= cap:
+        return pts
+    keep = {0, n - 1}                                                     # the finish line is the sample a stride always misses
+    keep.update(i for i, p in enumerate(pts) if len(p) > 2 and p[2] == 4)  # grip_code 4 = impact: never thinnable
+    room = cap - len(keep)
+    if room > 0:
+        keep.update(range(0, n, max(1, -(-n // room))))
+    return [pts[i] for i in sorted(keep)]
+
+
+def _laps_payload(route_key, cls=None, limit=40, competitive_only=True, cap=200):
+    """Historical laps for one course, contract-shaped for the dashboard. READ-ONLY over data/laps.db.
+
+    Each lap carries `impacts` (how many contact samples it holds) and `void` (contact invalidated the time —
+    a Rivals/time-trial lap with contact is not slow, it is VOID). Void laps are still shipped: the time is
+    dead but the grip and cornering data is not, and the UI strikes the time through rather than hiding it.
+    pts is thinned by _thin_pts, which keeps every impact sample so the count and the markers agree.
+    """
+    out = {"route_key": route_key, "class": cls or None, "n": 0, "laps": [], "best": None,
+           "by_class": _lap_class_counts(route_key) if route_key else {},
+           "contact": _lap_contact_counts(route_key) if route_key else {"laps": 0, "impacted": 0, "void": 0}}
+    if not route_key:
+        return out
+    try:
+        rows = lap_store.get_laps(ROOT, route_key, cls=cls or None, competitive_only=competitive_only, limit=limit)
+    except Exception:
+        return out   # a locked/half-written db must answer empty, not 500 — the course view renders around it
+    for r in rows:
+        pts = r.get("pts") or []
+        n4 = sum(1 for p in pts if len(p) > 2 and p[2] == 4)
+        pts = _thin_pts(pts, cap)
+        # Prefer the stored count (taken pre-stride at write time, so it is the truer one), but fall back to
+        # what the pts actually hold: rows written before the column existed read 0 while their trace still
+        # carries impact samples, and a badge that contradicts the visible markers is worse than either alone.
+        out["laps"].append({"cid": r.get("cid"), "build_id": r.get("build_id"), "class": r.get("class"),
+                            "pi": r.get("pi"), "drivetrain": r.get("drivetrain"), "lap_s": r.get("lap_s"),
+                            # tune_hash travels with the lap so the client can filter traces by WHICH SLIDER
+                            # REVISION drove them. The store has held it all along; it simply was not sent, so
+                            # the one dimension that separates two laps of the same car on the same build was
+                            # invisible to the only surface that overlays them.
+                            "tune_hash": r.get("tune_hash"),
+                            "pct_off": r.get("pct_off"), "competitive": r.get("competitive"),
+                            "solo": r.get("solo"), "impacts": int(r.get("impacts") or 0) or n4,
+                            "void": bool(r.get("void")),
+                            # PARTIAL travels with the row, like VOID. The store now returns partial laps instead
+                            # of discarding them, and arc_m is what lets the UI say "58% of the course" rather
+                            # than presenting a fragment's short time as a record.
+                            "partial": bool(r.get("partial")), "arc_m": r.get("arc_m"),
+                            "session": r.get("session"), "t0": r.get("t0"), "pts": pts})
+    out["n"] = len(out["laps"])
+    # nor may a PARTIAL be the best: it is not a lap of this course, only of part of it
+    fastest = next((l for l in out["laps"] if l["lap_s"] and not l["void"] and not l["partial"]), None)
+    out["best"] = {"lap_s": fastest["lap_s"], "cid": fastest["cid"]} if fastest else None
+    return out
+
+
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a): pass
     def _cors(self):
@@ -259,7 +2086,7 @@ class H(BaseHTTPRequestHandler):
             last_seq = ST.seq; last_frame_t = 0.0; last_status = 0.0
             try:
                 # initial snapshot: strip + corners + cars
-                with ST.lock: snap = {"strip": ST.strip[-1800:], "corners": ST.corners[-60:], "cars": list(ST.cars.values()), "analysis": ST.analysis, "stint": ST.stint, "tags": ST.stint_tags, "loop": ST.loop and {"name": ST.loop["name"], "start": ST.loop["start"], "lap": ST.loop_lap, "last_s": ST.loop_last_s}, "game": ST.game, "mode": {"suggest": ST.mode_suggest, "reason": ST.mode_reason, "kind": ST.game_kind, "game": ST.game}, "session": ST.session_json and {"id": ST.session_json["id"], "summary": ST.session_json["summary"]}}
+                with ST.lock: snap = {"strip": ST.strip[-1800:], "corners": ST.corners[-60:], "cars": list(ST.cars.values()), "analysis": ST.analysis, "stint": ST.stint, "tags": ST.stint_tags, "loop": ST.loop and {"name": ST.loop["name"], "start": ST.loop["start"], "lap": ST.loop_lap, "last_s": ST.loop_last_s}, "game": ST.game, "mode": {"suggest": ST.mode_suggest, "reason": ST.mode_reason, "kind": ST.game_kind, "game": ST.game}, "session": ST.session_json and {"id": ST.session_json["id"], "summary": ST.session_json["summary"]}, "clone_lock": ST.clone_lock}
                 self.wfile.write(f"event: snapshot\ndata: {json.dumps(snap)}\n\n".encode()); self.wfile.flush()
                 while True:
                     now = time.monotonic()
@@ -270,7 +2097,7 @@ class H(BaseHTTPRequestHandler):
                     if fr and now - last_frame_t >= 0.05 and now - lp < 1.0:
                         self.wfile.write(f"event: frame\ndata: {json.dumps(fr)}\n\n".encode()); last_frame_t = now
                     if now - last_status >= 1.0:
-                        self.wfile.write(f"event: status\ndata: {json.dumps({'pps': round(pps, 1), 'frames': frames, 'receiving': now - lp < 1.0, 'cars': list(ST.cars.values()), 'stint': ST.stint, 'loop': ST.loop and {'name': ST.loop['name'], 'lap': ST.loop_lap, 'last_s': ST.loop_last_s}, 'game': ST.game, 'mode': {'suggest': ST.mode_suggest, 'reason': ST.mode_reason, 'kind': ST.game_kind, 'game': ST.game}, 'csv': ST.csv_path and os.path.relpath(ST.csv_path, ROOT)})}\n\n".encode()); last_status = now
+                        self.wfile.write(f"event: status\ndata: {json.dumps({'pps': round(pps, 1), 'frames': frames, 'receiving': now - lp < 1.0, 'cars': list(ST.cars.values()), 'stint': ST.stint, 'loop': ST.loop and {'name': ST.loop['name'], 'lap': ST.loop_lap, 'last_s': ST.loop_last_s}, 'game': ST.game, 'mode': {'suggest': ST.mode_suggest, 'reason': ST.mode_reason, 'kind': ST.game_kind, 'game': ST.game}, 'csv': ST.csv_path and os.path.relpath(ST.csv_path, ROOT), 'clone_lock': ST.clone_lock})}\n\n".encode()); last_status = now   # the PERIODIC event is what live.status actually reads — omitting the lock made the orphan-lock chip unreachable
                     self.wfile.flush(); time.sleep(0.02)
             except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
                 return
@@ -283,8 +2110,16 @@ class H(BaseHTTPRequestHandler):
         elif self.path.startswith("/session.json"):
             body = json.dumps(ST.session_json or {}).encode()
             self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
+        elif self.path.startswith("/laps"):   # every lap ever driven on one course — the historical traces the course view overlays
+            import urllib.parse as _up; q = _up.parse_qs(_up.urlparse(self.path).query)
+            rk = (q.get("route_key") or [""])[0]   # parse_qs already unquotes, so "loop:<name>" keys arrive intact
+            cls = (q.get("class") or [""])[0]      # optional: omit for every class
+            try: lim = max(1, min(200, int((q.get("limit") or ["40"])[0])))
+            except Exception: lim = 40
+            body = json.dumps(_laps_payload(rk, cls, lim, competitive_only=(q.get("all") or ["0"])[0] not in ("1", "true"))).encode()
+            self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
         elif self.path.startswith("/health"):
-            with ST.lock: body = json.dumps({"pps": round(len(ST.pps_win) / 2.0, 1), "frames": ST.frames, "receiving": time.monotonic() - ST.last_pkt < 1.0, "cars": list(ST.cars.keys()), "shots": bool(getattr(ST, "shots_dirs", None))}).encode()
+            with ST.lock: body = json.dumps({"pps": round(len(ST.pps_win) / 2.0, 1), "frames": ST.frames, "receiving": time.monotonic() - ST.last_pkt < 1.0, "cars": list(ST.cars.keys()), "shots": bool(getattr(ST, "shots_dirs", None)), "clone_lock": ST.clone_lock, "lab": getattr(ST, "lab", None)}).encode()   # the lock GATES stamping/accrual — an invisible lock silently blocked both after a reload; `lab` = which checkout this daemon writes to
             self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
         elif self.path.startswith("/shots"):   # recent in-game screenshots from the watched folder(s), newest first
             import urllib.parse as _up; q = _up.parse_qs(_up.urlparse(self.path).query); n = int((q.get("n") or ["24"])[0])
@@ -304,6 +2139,122 @@ class H(BaseHTTPRequestHandler):
             ct = {"png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg", "bmp": "image/bmp", "webp": "image/webp"}.get(fn.lower().rsplit(".", 1)[-1], "application/octet-stream")
             data = open(path, "rb").read()
             self.send_response(200); self._cors(); self.send_header("Content-Type", ct); self.send_header("Content-Length", str(len(data))); self.send_header("Cache-Control", "no-cache"); self.end_headers(); self.wfile.write(data)
+        elif self.path.startswith("/disk-tunes"):   # every car with an on-disk tune (Data file) — the decode library index
+            payload = {"available": False, "cars": []}
+            if TUNE is not None:
+                try:
+                    names = names_load().get("cars", {}); by_ord, root = TUNE.scan_tunes(newest_only=False)
+                    cars = []
+                    for ordn, metas in by_ord.items():
+                        nm = names.get(str(ordn)); nm = (nm.get("name") if isinstance(nm, dict) else nm)
+                        t = TUNE.parse_tune(metas[0]["path"], ordinal_hint=ordn)
+                        cars.append({"ordinal": ordn, "name": nm, "tunes": len(metas), "locked": t["locked"], "gears": t["gear_count"]})
+                    cars.sort(key=lambda c: (c["name"] or "zzz"))
+                    payload = {"available": True, "root": root, "count": len(cars), "cars": cars}
+                except Exception as e:
+                    payload = {"available": False, "error": str(e)}
+            body = json.dumps(payload).encode()
+            self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
+        elif self.path.startswith("/disk-tune"):   # decoded tune + decode-section deliverable for one car (?ordinal=N, or active car)
+            import urllib.parse as _up; q = _up.parse_qs(_up.urlparse(self.path).query)
+            ordn = q.get("ordinal", [None])[0]
+            if ordn is None:
+                # fall back to the live/active car, then the LAST DRIVEN car if we're in a menu right
+                # now -- CarOrdinal drops to 0 there (same fact disk_watcher already builds on, J3,
+                # ~line 2224: "the FIRST save happens IN the tune menu"). Before this fix a client
+                # asking "who's on the car" with no ordinal -- e.g. a fresh tab opened while the game
+                # is in a menu, with no cached car of its own to hold -- got nothing back and had no
+                # way to show anything at all, not even the paused/held state. 2026-09-03.
+                fr = ST.latest
+                ordn = (fr and fr.get("car")) or getattr(ST, "last_car", None)
+            payload = {"available": False}
+            if TUNE is not None and ordn is not None:
+                try:
+                    ordn = int(ordn); metas, _ = TUNE.tunes_for_ordinal(ordn)
+                    if metas:
+                        names = names_load().get("cars", {}); nm = names.get(str(ordn)); nm = (nm.get("name") if isinstance(nm, dict) else nm)
+                        ts_want = q.get("ts", [None])[0]   # optional manual pick — decode a specific saved tune
+                        ts_explicit = bool(ts_want)        # a ts in the URL is an EXPLICIT browse — pin it unconditionally
+                        # A STORED PICK IS STILL A PICK. This read the query string ONLY, so a declaration the user
+                        # made in the drawer — persisted to identity-evidence.json and faithfully restored into
+                        # ST.picked_id at startup — was never consulted when answering. The PI-recording path below
+                        # already falls back to it (same 2 h window); this one did not, which is why a car with a
+                        # valid stored pick still reported "signature" against six candidates. Same bug shape as the
+                        # comment right below: one side of the pair could not see what the other side knew.
+                        if not ts_want:
+                            _spk = (getattr(ST, "picked_id", {}) or {}).get(str(ordn))
+                            if _spk and time.time() - _spk.get("t", 0) < 7200:
+                                ts_want = _spk["ts"]
+                        meta, match = _pick_meta(metas, ordn, ts_want=ts_want, ts_explicit=ts_explicit)   # match the save to the car you're in, not just the newest; a stored-hold ts (not ts_explicit) yields if the live car now contradicts it
+                        # REMEMBER A CORROBORATED PICK. The disk watcher re-picks on its own clock and never sees the
+                        # query string, so the pick the dashboard calls "THE escape" from a signature tie reached the
+                        # decode panel and nothing else. Held for 2h like the gear-verified identity, and only when
+                        # the live car agrees with the pinned save (picked_ok) — browsing another build while parked
+                        # must not become a licence to write that build's parts into the PI store.
+                        if ts_want and match.get("picked_ok"):
+                            ST.picked_id[str(ordn)] = {"ts": str(ts_want), "t": time.time()}
+                            _ident_remember("picked", ordn, ts_want)   # a declaration outlives the process that heard it
+                        tune = TUNE.parse_tune(meta["path"], ordinal_hint=ordn)
+                        deliverable = TUNE.tune_to_deliverable(tune, nm)
+                        _ef = _equipped_fresh_download(deliverable, ordn, meta)   # same check on an on-demand /disk-tune read
+                        _enrich_engine_desc(deliverable, ordn, verified=_verified_identity(match), equipped_fresh=_ef)
+                        if _ef:
+                            ST._eng_bootstrapped[str(ordn)] = str(meta["ts"]); ST._disk_dirty = True
+                        _enrich_drivetrain(deliverable, ordn)
+                        _enrich_gears(deliverable, ordn)
+                        _build_union(deliverable, ordn, match=match)   # reconcile save vs telemetry: agreements, conflicts, ranked drive-asks
+                        try: _ch = TUNE.setup_hash(meta["path"])
+                        except Exception: _ch = None
+                        payload = {"available": True, "ordinal": ordn, "name": nm, "ts": meta["ts"], "chash": _ch,
+                                   "tune": tune, "deliverable": deliverable, "match": match}
+                        payload.update(_tune_header_strings(meta["path"]))   # the tune's own name/creator — `name` above stays the CAR
+                    else:
+                        payload = {"available": False, "ordinal": ordn, "reason": "no on-disk tune for this car"}
+                except Exception as e:
+                    payload = {"available": False, "error": str(e)}
+            body = json.dumps(payload).encode()
+            self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
+        elif self.path.startswith("/liveries"):   # livery designs saved for one car — THE visual identity players use to tell builds apart. READ-ONLY.
+            import urllib.parse as _up; q = _up.parse_qs(_up.urlparse(self.path).query)
+            ordn = q.get("ordinal", [None])[0]
+            out = {"liveries": []}
+            if TUNE is not None and ordn is not None:
+                try:
+                    root = TUNE.find_containers_root(); tag = f"{int(ordn):04d}"
+                    for d in sorted(os.listdir(root), reverse=True):
+                        if not (d.startswith(f"Livery_{tag}_") or d.startswith(f"SoulBoundLivery_{tag}_") or d.startswith(f"BaseLivery_{tag}_")):
+                            continue
+                        full = os.path.join(root, d)
+                        names = _livery_strings(os.path.join(full, "header"))
+                        out["liveries"].append({"dir": d, "kind": d.split("_")[0], "ts": d.split("_")[-1],
+                                                "name": (names[0] if names else None), "desc": (names[1] if len(names) > 1 else None),
+                                                "creator": (names[2] if len(names) > 2 else None),
+                                                "thumb": os.path.exists(os.path.join(full, "bigThumb.webp"))})
+                except Exception as e_:
+                    out["error"] = str(e_)
+            body = json.dumps(out).encode()
+            self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
+        elif self.path.startswith("/livery-thumb"):   # the livery's thumbnail image (bigThumb.webp), streamed READ-ONLY
+            data = None
+            try:
+                import urllib.parse as _up; q = _up.parse_qs(_up.urlparse(self.path).query)
+                d = os.path.basename(q.get("d", [""])[0])   # basename() blocks path traversal
+                ok_prefix = d.startswith("Livery_") or d.startswith("SoulBoundLivery_") or d.startswith("BaseLivery_")
+                if TUNE is not None and ok_prefix:
+                    root = TUNE.find_containers_root()
+                    if root:
+                        p = os.path.join(root, d, "bigThumb.webp")
+                        if os.path.exists(p):
+                            data = open(p, "rb").read()
+            except Exception:
+                data = None   # missing root / mid-save file swap must yield a clean 404, not a dead socket
+            if data:
+                # NOTE: no _cors() here — it stamps Cache-Control: no-cache, which would defeat the max-age below
+                self.send_response(200); self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Content-Type", "image/webp"); self.send_header("Cache-Control", "max-age=3600")
+                self.send_header("Content-Length", str(len(data))); self.end_headers(); self.wfile.write(data)
+            else:
+                self.send_response(404); self._cors(); self.end_headers()
         else:
             self.send_response(404); self._cors(); self.end_headers()
     def do_OPTIONS(self):
@@ -318,7 +2269,21 @@ class H(BaseHTTPRequestHandler):
                     if str(c["ordinal"]) == str(body["ordinal"]): c["name"] = obj["cars"][str(body["ordinal"])]["name"]
         elif self.path.startswith("/reset"):
             reset_session(); ok = True
-        elif (self.path.startswith("/tag") or self.path.startswith("/role")) and (body.get("label") is not None or body.get("role") is not None):
+        elif self.path.startswith("/profile-decrypt"):
+            # Manual profile read. The watcher now does this automatically and OFFLINE whenever the profile
+            # changes, so this endpoint is the on-demand / fallback path. It only needs {approved:true} when
+            # the offline decryptor is missing, because then the read would fall back to the UPLOADING tool.
+            _offline = False
+            try: _offline = PROFILE is not None and PROFILE.local_decrypt_available()
+            except Exception: _offline = False
+            if not _offline and not body.get("approved"):
+                out = json.dumps({"ok": False, "err": "approval required (offline decryptor unavailable; fallback uploads the save)"}).encode()
+                self.send_response(400); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(out))); self.end_headers(); self.wfile.write(out); return
+            threading.Thread(target=_profile_decrypt_and_record,
+                             kwargs={"allow_upload": bool(body.get("approved"))}, daemon=True).start()
+            out = json.dumps({"ok": True, "started": True}).encode()
+            self.send_response(200); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(out))); self.end_headers(); self.wfile.write(out); return
+        elif (self.path.startswith("/tag") or self.path.startswith("/role")) and ("label" in body or "role" in body):
             n = int(body.get("stint") or ST.stint)
             with ST.lock:
                 cur = dict(ST.stint_tags.get(str(n)) or {})
@@ -336,8 +2301,66 @@ class H(BaseHTTPRequestHandler):
             ST.emit("tag", {"n": n, "label": cur.get("label"), "role": cur.get("role")}); ok = True
         elif self.path.startswith("/mode"):
             m = body.get("mode"); ST.lab_mode = m if m in ("course", "decode", "free") else None; ok = True   # effective lab mode from the dashboard (auto-detected or manual override)
+        elif self.path.startswith("/clone-lock"):
+            o = body.get("ordinal"); ST.clone_lock = int(o) if o else None; ok = True   # pin/clear a clone TARGET — pauses PI/catalog accrual for it so building the replica can't poison it
         elif self.path.startswith("/new-run"):
             ST._force_split = True; ok = True   # split at the next driving frame (after a slider change in Decode / Free mode)
+        elif self.path.startswith("/analyze"):   # force a fresh analysis NOW (the 're-test' button after you implement a tune change)
+            if ST.csv_path and not ST.analyzing:
+                ST._last_lap_analysis = 0.0; ST.drive_since_periodic = 0.0
+                threading.Thread(target=run_analysis, args=(None, False), daemon=True).start()
+            ok = True; resp = {"ok": True, "analyzing": bool(ST.analyzing)}
+        elif self.path.startswith("/tune-range") and body.get("field") is not None:   # register a (norm, displayed-value) point to back-solve a per-car slider range
+            resp = {"ok": False}
+            if TUNE is not None:
+                try:
+                    ordn = int(body.get("ordinal")); field = str(body["field"])
+                    # Read the CURRENT position straight from the newest save rather than trusting the client's cached
+                    # norm — the calibration card doesn't re-render on every save (the disk-watch only re-decodes while a
+                    # car is in-frame, not in the menu), so a downforce/aero re-save was registering the SAME position
+                    # twice and the range never solved. Pair the newest-save norm with the value the user just read.
+                    #
+                    # BUT NEVER GUESS WHICH POSITION WAS READ. data/car-tune-ranges.json is shared and persisted, and
+                    # back_solve republishes what lands here as "exact": one mis-paired (norm, value) silently poisons
+                    # every later decode of that field, for every save of that car. "Newest" is an ASSUMPTION — the
+                    # card renders whatever save the 🪪 picker (or the matcher) chose, which is often not metas[0]
+                    # (audit T2). So pick the source save on evidence, and refuse when the evidence is missing:
+                    #   ts sent by the client  -> that save (it says which one it rendered; today's client sends none)
+                    #   newest save is FRESH   -> metas[0]: a save written minutes ago IS what the tune screen shows
+                    #   otherwise              -> the MATCHED save, i.e. the build the car is identified as = the card
+                    # Then cross-check against the position the client rendered; a disagreement we cannot explain is a
+                    # refusal, not a coin flip. A retry costs one refresh; a bad range costs every later reading.
+                    metas, _ = TUNE.tunes_for_ordinal(ordn)
+                    if not metas: raise ValueError("no saved tune on disk for this car")
+                    fresh = (time.time() - float(metas[0]["mtime"])) < 600
+                    ts_seen = body.get("ts")   # the save the card was rendered from, when the client tells us
+                    if ts_seen is not None:
+                        src = next((m for m in metas if str(m["ts"]) == str(ts_seen)), None)
+                        if src is None: raise ValueError("the save this calibration card was rendered from is no longer on disk — refresh the decode and enter the number again")
+                    elif fresh:
+                        src = metas[0]
+                    else:
+                        src, _mr = _pick_meta(metas, ordn)
+                    e = (TUNE.parse_tune(src["path"], ordinal_hint=ordn).get("sliders") or {}).get(field)
+                    norm = float(e["norm"]) if (e and e.get("norm") is not None) else None
+                    if norm is None: raise ValueError(f"that save carries no position for {field}")
+                    cli = body.get("norm")
+                    # A card whose position disagrees with the source has two opposite causes with the SAME symptom:
+                    # the benign one (you just re-saved and the card hasn't re-rendered — what the newest-save re-read
+                    # was written for, covered by `fresh`) and the corrupting one (the card is showing another build).
+                    # Outside the fresh window nothing here can tell them apart, so say so instead of writing a guess.
+                    if cli is not None and len(metas) > 1 and not (fresh and src is metas[0]) and abs(float(cli) - norm) > 1e-3:
+                        ST._disk_dirty = True   # push a fresh decode so the card can re-render, then the retry lands
+                        raise ValueError(f"the position this card is showing ({round(float(cli)*100,1)}%) isn't the one I'd pair it with ({round(norm*100,1)}%), and this car has {len(metas)} saves — I won't guess which tune you read that number off. Re-save the tune you're reading (or refresh the decode), then enter it again")
+                    solved = TUNE.register_range(ordn, field, norm, float(body["value"]), unit=body.get("unit"))
+                    npts, distinct = TUNE.range_points(ordn, field)
+                    resp = {"ok": True, "solved": solved, "points": npts, "distinct": distinct,
+                            "need": max(0, 2 - distinct), "norm": round(norm, 4), "field": field, "ordinal": ordn,
+                            "ts": src["ts"]}   # WHICH save the point was paired with — the pairing is the whole risk, so name it
+                except Exception as ex_:
+                    print("tune-range not saved:", repr(ex_), file=sys.stderr); resp = {"ok": False, "error": str(ex_)}
+            out2 = json.dumps(resp).encode()
+            self.send_response(200 if resp.get("ok") else 400); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(out2))); self.end_headers(); self.wfile.write(out2); return
         elif self.path.startswith("/build-field") and body.get("cid"):   # save a 'shop check' value (from a screenshot) into the build record data/builds/<cid>.json
             try:
                 import re as _re2
@@ -362,7 +2385,7 @@ class H(BaseHTTPRequestHandler):
                 os.replace(bp + ".tmp", bp); ok = True
             except Exception as ex_: print("build-field not saved:", repr(ex_), file=sys.stderr); ok = False
         elif self.path.startswith("/mark-start") and body.get("name"):
-            if ST.last_pos is None: ok = False
+            if ST.last_pos is None or (abs(ST.last_pos[0]) < 5 and abs(ST.last_pos[1]) < 5): ok = False   # no valid ON-TRACK position yet (menu / pre-race reports [0,0]) — drive onto the track first, then mark
             else:
                 name = str(body["name"]).strip()[:60]; lp = {"name": name, "start": [round(ST.last_pos[0]), round(ST.last_pos[1])], "radius": int(body.get("radius") or 60), "min_dist": int(body.get("min_dist") or 250)}
                 rp = os.path.join(ROOT, "data", "reference-loops.json")
@@ -391,12 +2414,40 @@ class H(BaseHTTPRequestHandler):
                     os.replace(mp + ".tmp", mp)
                 ok = True
             except Exception as ex_: print("course-expected not saved:", repr(ex_), file=sys.stderr)
+        elif self.path.startswith("/build-livery") and body.get("ordinal") and body.get("build") is not None:   # pin (or clear) a build↔livery association — user-confirmed truth over the save-time guess
+            bp = os.path.join(ROOT, "data", "build-liveries.json")
+            try:
+                with open(bp, encoding="utf-8") as f: bobj = json.load(f)
+            except Exception:
+                bobj = {"schema_version": "1.0.0", "assoc": {}}
+            a_ = bobj.setdefault("assoc", {}).setdefault(str(int(body["ordinal"])), {})
+            d_ = body.get("dir")
+            if d_: a_[str(body["build"])] = os.path.basename(str(d_))
+            else: a_.pop(str(body["build"]), None)
+            tmp_ = bp + ".tmp"
+            with open(tmp_, "w", encoding="utf-8") as f: json.dump(bobj, f, indent=1)
+            os.replace(tmp_, bp); ok = True
+        elif self.path.startswith("/route") and body.get("route_key") and "rivals" in body:
+            # DECLARED Rivals — the packet has no game-mode field, so the player's own word settles what the
+            # RacePosition heuristic can only guess (a race led wire-to-wire looks identical to a time trial).
+            rp = os.path.join(ROOT, "data", "routes.json")
+            try:
+                with open(rp, encoding="utf-8") as f: robj = json.load(f)
+            except Exception: robj = {"schema_version": "1.0.0", "routes": {}}
+            _rk = str(body["route_key"]); _prev = (robj.setdefault("routes", {}).get(_rk) or {})
+            robj["routes"][_rk] = dict(_prev, rivals=bool(body["rivals"]))
+            with open(rp, "w", encoding="utf-8") as f: json.dump(robj, f, indent=2, ensure_ascii=False)
+            ok = True
         elif self.path.startswith("/route") and body.get("route_key") and body.get("name"):
             rp = os.path.join(ROOT, "data", "routes.json")
             try:
                 with open(rp, encoding="utf-8") as f: robj = json.load(f)
             except Exception: robj = {"schema_version": "1.0.0", "routes": {}}
-            robj.setdefault("routes", {})[str(body["route_key"])] = {"name": str(body["name"]).strip()[:80], "source": f"dashboard {time.strftime('%Y-%m-%d')}", "mode": body.get("mode")}
+            # MERGE, never replace: this used to overwrite the whole entry, wiping start/heading/length_m — and
+            # attribute_route skips start-less routes, so NAMING a course made it unmatchable and every later run of
+            # it minted a duplicate. The courses you care enough to name were the ones that fragmented worst.
+            _rk = str(body["route_key"]); _prev = (robj.setdefault("routes", {}).get(_rk) or {})
+            robj["routes"][_rk] = dict(_prev, name=str(body["name"]).strip()[:80], source=f"dashboard {time.strftime('%Y-%m-%d')}", mode=body.get("mode") or _prev.get("mode"))
             with open(rp, "w", encoding="utf-8") as f: json.dump(robj, f, indent=2, ensure_ascii=False)
             ok = True
         elif self.path.startswith("/build") and body.get("build_id") and body.get("label"):
@@ -405,14 +2456,77 @@ class H(BaseHTTPRequestHandler):
         out = json.dumps({"ok": ok, "cars": obj.get("cars", {}), "builds": obj.get("builds", {})}).encode()
         self.send_response(200 if ok else 400); self._cors(); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(out))); self.end_headers(); self.wfile.write(out)
 
+CAPTURE_ROLL_MB = 192          # one analyze_session pass over this much capture costs ~15 s
+
+
+def _roll_capture_if_big(c=None):
+    """Start a fresh capture file once this one is large. Jett's call, and it is the better fix.
+
+    THE COST OF ANALYSIS IS THE SIZE OF THE CAPTURE. Every pass re-reads the whole file, so on a session that
+    runs for hours the pass grows without bound: measured, 628 MB takes 46.9 s, and the lap trigger re-fires
+    every 6 s, so the subprocess was running 89% of the time the player was on track -- reading 628 MB and
+    rewriting dozens of course models, continuously, on the machine running the game. The frame pacing in the
+    telemetry shows what that cost: individual frames of 353-391 ms and 1% lows of 26-35 FPS while it ran,
+    against 135-141 FPS median once it stopped. Nothing looked starved -- CPU 25%, GPU 32%, disk queue 0 --
+    because the cost is bursty and the bursts land inside frames.
+    Backing the debounce off caps the SHARE of time spent analysing but not the LATENCY: a 47 s pass is 47 s
+    stale, and gets staler all session. Rolling the file bounds the work itself, so analysis stays quick
+    however long the session runs. Nothing is lost by rolling: course models accumulate across sessions and
+    every lap is already in data/laps.db, so a roll is just a session boundary.
+    """
+    try:
+        if ST.replay or not ST.csv_file or not ST.csv_path:
+            return
+        if ST.frames % 512:                       # stat() is not free at 60 Hz; check every ~8 s of driving
+            return
+        if ST.csv_file.tell() < CAPTURE_ROLL_MB * 1024 * 1024:
+            return
+        # NEVER MID-LAP (2026-09-06). Three of the five captures of 2026-09-05 opened inside a timed lap
+        # because this roll fired on size alone, and every lap it cut became two fragments. Once the file
+        # is big, wait for the game's own lap boundary (CurrentLap reset) or the end of the timed event;
+        # a lap that outlasts twice the budget is cut anyway so a marathon cannot grow the file forever.
+        c = c if c is not None else (ST.latest or {})   # the frame whose row was just written
+        in_lap = bool(c.get("ev")) and (c.get("lapt") or 0.0) >= 1.0
+        if in_lap and ST.csv_file.tell() < 2 * CAPTURE_ROLL_MB * 1024 * 1024:
+            if not getattr(ST, "_roll_deferred", False):
+                ST._roll_deferred = True
+                print(f"[roll] capture reached {CAPTURE_ROLL_MB} MB mid-lap -> rolling at the next lap boundary")
+            return
+        ST._roll_deferred = False
+        old = ST.csv_path
+        try: ST.csv_file.close()
+        except Exception: pass
+        ST.csv_path = os.path.join(os.path.dirname(old), f"fh6_{time.strftime('%Y%m%d_%H%M%S')}.csv")
+        ST.csv_file = open(ST.csv_path, "w", newline="")
+        ST.csv_writer = csv.writer(ST.csv_file)
+        ST.csv_writer.writerow(["t_wall", "t_mono", "speed_mph", "lat_g", "long_g", "yaw_rate_dps"]
+                               + [f"TireTempC{w}" for w in W] + FIELDS)
+        ST.frames = 0; ST.t0 = time.monotonic()
+        ST._last_lap_analysis = 0.0; ST._last_analysis_secs = 0.0   # the new file is cheap again
+        ST.stint_starts = {}
+        print(f"[roll] capture reached {CAPTURE_ROLL_MB} MB -> {os.path.basename(ST.csv_path)}")
+        ST.emit("reset", {"csv": os.path.relpath(ST.csv_path, ROOT)})
+    except Exception as e:
+        print(f"[roll] capture roll failed: {e!r}", file=sys.stderr)
+
+
+
 def reset_session():
     """Start a fresh session on request: clear live accumulators and rotate the CSV (live mode)."""
     with ST.lock:
         ST.strip = []; ST.corners = []; ST._corner = None; ST._sec = None; ST._sec_rows = []; ST.cars = {}
         ST.analysis = None; ST.session_json = None; ST.session_path = None
+        ST.fdg_cache = {}; ST.gear_verdicts = {}   # measured-ladder cache + hysteresis state die with the session — stale telemetry must not outlive it
         ST.last_on_t = None; ST.live_since_analysis = 0.0; ST.drive_since_periodic = 0.0
         ST.stint = 0; ST.stint_start = None; ST._zero_since = None; ST.prev_cfg = None; ST.stint_tags = {}
-        ST.loop_lap = 0; ST._loop_state = "start"; ST._loop_away = 0.0; ST._loop_prev = None; ST._loop_t0 = None; ST.loop_last_s = None   # keep the loop DEFINITION, reset its lap count
+        ST.loop_lap = 0; ST._loop_state = "start"; ST._loop_away = 0.0; ST._loop_prev = None; ST._loop_t0 = None; ST.loop_last_s = None; ST._auto_suspend = None   # keep the loop DEFINITION, reset its lap count
+        ST.live_seen = {}   # J20: the parked-identity hold is session telemetry — it dies with the session
+        ST.gears_seen = {}; ST.live_fdg = {}
+        # A new session does NOT clear the picks. A declaration is about a BUILD, not about a session, and
+        # wiping it here is half of why the same question kept coming back; a fresh save or a contradicting
+        # live read still supersedes it, which is the evidence that should.
+        ST.picked_id = dict(ST.picked_id)
+        ST.clone_lock = None   # an orphaned lock silently blocked PI stamping + catalog accrual with no surface — a session reset is a clean slate
         ST.game = "menu"; ST.game_kind = None; ST._noev_since = None; ST.ev_maxpos = 0; ST.mode_suggest = None; ST.mode_reason = None
         ST._force_split = False; ST._ev_edge = False; ST.stint_starts = {}; ST.last_drive_game = None   # lab_mode (dashboard override) intentionally kept
         ST.events = []; ST.seq += 1
@@ -450,6 +2564,272 @@ def replay_loop(path, speed):
             ingest(p, t - tbase)
     print("[replay] done")
 
+_PI_SOLVE_AT = [0.0]
+def _maybe_solve_pi():
+    """Auto-accrue: re-run the per-part PI solver in the background as observations grow (throttled to 120 s),
+    then invalidate the decode's parts-pi cache so the next deliverable reflects freshly-solved estimates.
+    Subprocess = clean module state; all failures are non-fatal (PI stays whatever it last solved)."""
+    now = time.time()
+    if now - _PI_SOLVE_AT[0] < 120:
+        return
+    _PI_SOLVE_AT[0] = now
+    def _run():
+        try:
+            subprocess.run([sys.executable, os.path.join(HERE, "fh6_pi_solve.py")], cwd=ROOT, timeout=60,
+                           capture_output=True)
+            if TUNE is not None:
+                TUNE._PARTS_PI = None      # force reload of data/parts-pi.json on the next pi_for()
+        except Exception:
+            pass
+    threading.Thread(target=_run, daemon=True).start()
+
+
+def _record_pi_observation(ordn, tune):
+    """Feature B: append/refresh one observation pairing the active car's decoded config (its 50 slot tiers)
+    with the live CarPI, in data/pi-observations.json. Guards: only when THIS car is the active, on-track car
+    with a plausible CarPI (a car in a menu drops CarOrdinal->0 / CarPI absent). Deduped by parts_hash (same
+    exact config recorded once, latest CarPI kept). Safe-write (temp + os.replace). Never touches the save."""
+    if TUNE is None:
+        return
+    fr = ST.latest
+    if not fr or not fr.get("on"):
+        return
+    try:
+        if int(fr.get("car") or 0) != int(ordn):
+            return
+        pi = int(fr.get("pi") or 0)
+    except (TypeError, ValueError):
+        return
+    if pi <= 0 or pi > 999:              # CarPI is 100..999; 0/absent means a menu / no valid read
+        return
+    try:
+        ph = TUNE.parts_hash(ordn, tune["parts"])
+    except Exception:
+        return
+    key = (int(ordn), ph, pi)
+    if key == _PI_LAST[0]:               # same config + same PI already written — nothing to do
+        return
+    with _PI_LOCK:
+        try:
+            with open(PI_OBS_PATH, encoding="utf-8") as f:
+                doc = json.load(f)
+            if not isinstance(doc, dict):
+                doc = {}
+        except Exception:
+            doc = {}
+        doc.setdefault("schema_version", "1.0.0")
+        doc.setdefault("purpose", "decoded-config <-> live CarPI observations; single-part diffs give per-part "
+                                  "PI cost — see scripts/telemetry/fh6_pi_solve.py")
+        obs = doc.setdefault("observations", [])
+        rec = {"ordinal": int(ordn), "ts": round(time.time(), 1), "car_pi": pi, "car_class": fr.get("cls"),
+               "parts": TUNE.parts_tiers(tune["parts"]), "parts_hash": ph}
+        for i, o in enumerate(obs):
+            if o.get("parts_hash") == ph and int(o.get("ordinal", -1)) == int(ordn):
+                if int(o.get("car_pi") or 0) != pi:   # same config cannot have two PIs — the earlier stamp was misattributed (pre-guard era) or pre-family-hash; the fresh VERIFIED read wins
+                    print(f"[pi-obs] CONFLICTING re-stamp ord {ordn} {ph}: {o.get('car_pi')} -> {pi} (earlier stamp replaced)")
+                obs[i] = rec; break
+        else:
+            obs.append(rec)
+        data = json.dumps(doc, indent=1, ensure_ascii=False)
+        if len(data) < 20:               # sanity: never truncate to garbage
+            return
+        tmp = PI_OBS_PATH + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            f.write(data)
+        if os.path.getsize(tmp) < 20:
+            os.remove(tmp); return
+        os.replace(tmp, PI_OBS_PATH)
+    _PI_LAST[0] = key
+    # the decode module CACHES observations — without this, /disk-tune serves pre-stamp PIs for the daemon's
+    # whole lifetime (the "identifies as A700 while the live frame says S1 800" bug). Refresh + force a re-emit.
+    try:
+        TUNE._PI_OBS = None
+    except Exception:
+        pass
+    ST._disk_dirty = True
+
+
+def disk_watcher():
+    """Watch the FH save folder for the ACTIVE car and push a fresh decode (+ a diff vs the previous
+    save) over SSE the instant a new tune Data file appears. Saving a tune in-game then updates the
+    dashboard within ~1s, hands-free. Diff only fires on a genuine re-save of the same car, not a car change."""
+    if TUNE is None:
+        return
+    last = None
+    # THE NEW-SAVE EDGE IS PER CAR AND NEVER RESET BY A FORCED RE-EMIT (Jett 2026-09-11: "downloading new tunes and
+    # saving them results in identity unsettled"). new_save used to be `last[0] == ordn`, but `last` is ONE slot
+    # that every forced re-emit (_disk_dirty -- set on every menu exit, on a verdict change, on an equipped fresh
+    # download) replaces with (None, None), and that polling another car overwrites. A tune saved during a menu
+    # dwell then landed with new_save False, so the sticky identity was never re-anchored to the just-written file
+    # and a 2-hour hold kept serving an older build (seen live: ordinal 3429 held on a 13:35 save with two newer
+    # saves unconsumed). `seen` remembers each car's newest mtime on its own; `last` only decides whether to emit.
+    seen = {}
+    while True:
+        time.sleep(1.5)
+        try:
+            # PROFILE trigger: C_ProfileData's mtime moves on an equip / save (the game flushes live), which is
+            # exactly when the equipped-tune pointer changes. With the OFFLINE decryptor built we read it
+            # ourselves - nothing leaves the machine, it costs ~0.3 s, and identify-on-equip needs no click.
+            # Without it, keep the old behaviour: announce, and let the dashboard offer an approved (uploading)
+            # decrypt. Never both, and never more than one read in flight.
+            if PROFILE is not None:
+                try:
+                    _pmt = PROFILE.profile_mtime()
+                    if _pmt and _pmt != getattr(ST, "_profile_mtime", None):
+                        _first = getattr(ST, "_profile_mtime", None) is None
+                        if _first:
+                            ST._profile_mtime = _pmt   # baseline only — never decrypt on the first observation
+                        else:
+                            try: _offline = PROFILE.local_decrypt_available()
+                            except Exception: _offline = False
+                            if _offline:
+                                if not getattr(ST, "_profile_reading", False):
+                                    # ADVANCE ONLY WHEN WE CONSUME IT (audit 2026-09-18): a save that lands while a
+                                    # previous read is in flight must NOT be marked seen, or it's dropped forever;
+                                    # leaving _profile_mtime stale lets the next poll re-trigger once the read clears.
+                                    ST._profile_mtime = _pmt
+                                    ST._profile_reading = True
+                                    threading.Thread(target=_profile_decrypt_and_record,
+                                                     kwargs={"allow_upload": False, "auto": True},
+                                                     daemon=True).start()
+                                # else: a read is in flight — leave the mtime stale and retry next poll
+                            else:
+                                ST._profile_mtime = _pmt   # nothing to read offline; announce once, don't re-spin
+                                ST.emit("profile_stale", {"ordinal": getattr(ST, "last_car", None), "mtime": _pmt})
+                except Exception:
+                    pass
+            fr = ST.latest; ordn = fr and fr.get("car")
+            if ordn:
+                ST.last_car = int(ordn)
+            else:
+                ordn = getattr(ST, "last_car", None)   # J3: the FIRST save happens IN the tune menu, where CarOrdinal drops to 0 — watch the last driven car so the save is detected without requiring another drive
+            if not ordn:
+                continue
+            ordn = int(ordn)
+            metas, _ = TUNE.tunes_for_ordinal(ordn)
+            if not metas:
+                if last != (ordn, None):
+                    last = (ordn, None); ST.emit("disk", {"ordinal": ordn, "available": False})
+                continue
+            # Feature B: record a PI observation for the current on-disk config whenever this car is being
+            # driven (cheap 598-byte re-decode; deduped by _PI_LAST so the file isn't rewritten needlessly).
+            try:
+                # PAUSE accrual for a locked clone target: while you build the replica, half-built configs must not be
+                # recorded (a stale on-disk parts snapshot paired with live PI corrupts real configs — see audit).
+                if fr.get("on") and int(fr.get("car") or 0) == ordn and int(fr.get("pi") or 0) > 0 and ST.clone_lock != ordn:
+                    _pk = (getattr(ST, "picked_id", {}) or {}).get(str(ordn))
+                    _pts = _pk["ts"] if _pk and time.time() - _pk["t"] < 7200 else None   # the user's own pick, if they made one for this car recently
+                    rec_meta, _rm = _pick_meta(metas, ordn, ts_want=_pts)   # pair the LIVE build's parts (matched by cyl, or the build the user pinned) with the live PI — not the newest file, which may be a different build
+                    # J6: a verdict CHANGE (e.g. the gear ladder just verified the build mid-event) must reach the
+                    # client — no file changed, so the mtime watcher alone would never re-emit and the confirm gate
+                    # stayed blocked on 'drive the gears' the user had already driven.
+                    if not hasattr(ST, "_last_verdict"):
+                        ST._last_verdict = {}
+                    _v = f"{_rm.get('how')}|{rec_meta.get('ts')}" if _rm else ""
+                    if ST._last_verdict.get(str(ordn)) != _v:
+                        ST._last_verdict[str(ordn)] = _v; ST._disk_dirty = True
+                    # STAMP ONLY ON A VERIFIED IDENTITY: with several same-cyl builds, a cyl/PI pick can't prove WHICH
+                    # build is equipped (at a class cap they converge; unstamped PIs are unknown) — stamping then would
+                    # pair the live PI with the wrong build's parts and poison the observation store. Require a single
+                    # candidate or a gear-ladder-verified pick.
+                    ok_stamp = _stamp_identity(_rm)   # the ladder standard (no-match/UNSAVED-BUILD never stamp, a pure HOLD is a memory not a verification), PLUS an explicit pick the live car corroborates. The catalog bootstrap keeps the STRICTER _verified_identity — see _stamp_identity
+                    if ok_stamp:
+                        _record_pi_observation(ordn, TUNE.parse_tune(rec_meta["path"], ordinal_hint=ordn))
+                    _maybe_solve_pi()   # keep parts-pi.json fresh as configs accrue (throttled, background)
+            except Exception:
+                pass
+            if getattr(ST, "_disk_dirty", False):
+                ST._disk_dirty = False; last = (None, None)   # an auto-association changed the deliverable — re-emit even without a file change
+            # NEW-SAVE EDGE ON CONTENT, NOT MTIME (2026-09-13): the game rewrites the active tune's container
+            # (a fresh Tuning_<ordinal>_<ts>, new mtime) on every re-equip / event load-in, so an mtime edge
+            # fired "new save" -- re-anchoring identity + re-importing -- on byte-identical content over and over
+            # (worst for downloaded/locked tunes, which get re-applied per event). setup_hash is the raw-bytes
+            # identity of hardware+sliders+gears; it ignores title, timestamp AND the locked flag, so a same-
+            # content rewrite no longer counts as new, while a genuinely different build (even one sharing a
+            # title) still does. Falls back to mtime only when the file can't be hashed (wrong size/unreadable).
+            chash = None
+            try: chash = TUNE.setup_hash(metas[0]["path"])
+            except Exception: chash = None
+            key = (ordn, chash if chash else round(metas[0]["mtime"], 2))
+            prev_h = seen.get(ordn)
+            new_save = prev_h is not None and chash is not None and chash != prev_h   # different content for this car = a real new save
+            if chash is not None:
+                seen[ordn] = chash
+            if key == last and not new_save:
+                continue
+            last = key
+            if new_save:
+                # a fresh save may change gearing/identity — drop this car's measured-ladder cache + gear verdicts so
+                # stale telemetry can't be compared against the new tune (phantom conflicts), and its livery may have
+                # changed too (the client clears its own livery cache off this event)
+                if hasattr(ST, "fdg_cache"):
+                    for k in [k for k in ST.fdg_cache if k.startswith(f"{ordn}|")]:
+                        ST.fdg_cache.pop(k, None)
+                if hasattr(ST, "gear_verdicts"):
+                    for k in [k for k in ST.gear_verdicts if k.startswith(f"{ordn}|")]:
+                        ST.gear_verdicts.pop(k, None)
+                ST.gears_seen.pop(str(ordn), None); ST.live_fdg.pop(str(ordn), None); _ident_forget_gears(ordn)   # the new tune may have a SMALLER box — the old top gear must not veto the fresh save (permanent false Transmission conflict)
+                # an in-game save is a POSITIVE identity signal — the just-written file IS the equipped build. It
+                # supersedes an older declaration; no sticky gear-identity is anchored (that mechanism is retired).
+                ST.picked_id.pop(str(ordn), None); _ident_forget_pick(ordn)
+                _gear_log(ordn, metas[0]["ts"]); _auto_assoc_livery(ordn)
+                # IMPORT THE JUST-WRITTEN BUILD without waiting for a dashboard to notice it. Before this, only the
+                # dashboard triggered scope=containers (client identify -> /disk-tune -> fingerprint fails ->
+                # ensureHeld posts /rebuild), so a tune downloaded and applied with no dashboard open sat unimported
+                # until one was next opened. new_save is edge-triggered (fires once per new file, see `key`/`last`
+                # above) and the service coalesces per scope, so a burst of applied tunes costs at most one run.
+                _notify_rebuild("containers", "new save " + str(metas[0]["ts"]))
+            nm = names_load().get("cars", {}).get(str(ordn)) or {}
+            nm = nm.get("name") if isinstance(nm, dict) else nm
+            diff = None
+            if new_save and len(metas) >= 2:
+                try:
+                    diff = TUNE.tune_diff(TUNE.parse_tune(metas[1]["path"], ordinal_hint=ordn),
+                                          TUNE.parse_tune(metas[0]["path"], ordinal_hint=ordn))
+                except Exception:
+                    diff = None
+            # decode the MATCHED save (same _pick_meta as /disk-tune) and CARRY the match — the emit used to decode
+            # metas[0] with no match key, which made the client's confirm gate read every save event as
+            # 'single save — unambiguous' and bypassed applyDiskTune's no-match guard.
+            meta_m, match_m = _pick_meta(metas, ordn)
+            tune = TUNE.parse_tune(meta_m["path"], ordinal_hint=ordn)
+            deliverable = TUNE.tune_to_deliverable(tune, nm)
+            _ef = _equipped_fresh_download(deliverable, ordn, meta_m)   # tuning-modification check, every menu exit
+            _enrich_engine_desc(deliverable, ordn, verified=_verified_identity(match_m), equipped_fresh=_ef); _enrich_drivetrain(deliverable, ordn); _enrich_gears(deliverable, ordn)
+            if _ef:   # learned/corrected this family's cyl from the live frame -> record (learn-once) and re-emit so the now-settled identity shows immediately
+                ST._eng_bootstrapped[str(ordn)] = str(meta_m["ts"]); ST._disk_dirty = True
+            _build_union(deliverable, ordn, match=match_m)
+            _hs = _tune_header_strings(meta_m["path"])
+            try: _ch_emit = TUNE.setup_hash(meta_m["path"])
+            except Exception: _ch_emit = None
+            ST.emit("disk", dict({"ordinal": ordn, "name": nm, "ts": meta_m["ts"], "available": True,
+                                  "deliverable": deliverable, "match": match_m, "diff": diff,
+                                  "new_save": new_save, "chash": _ch_emit}, **_hs))
+        except Exception:
+            pass
+
+def _compress_old_captures(out_dir):
+    """LOSSLESS retention: gzip capture CSVs older than 3 days (never the live one), oldest first, in the background.
+    Raw captures were growing unbounded (16+ GB found across checkouts) with no policy at all. Reversible: gunzip
+    restores the original byte-for-byte; the analyzer only ever reads the CURRENT session's CSV."""
+    import gzip, shutil
+    try:
+        now = time.time()
+        olds = sorted((p for p in glob.glob(os.path.join(out_dir, "*.csv"))
+                       if now - os.path.getmtime(p) > 3 * 86400 and not os.path.exists(p + ".gz")), key=os.path.getmtime)
+        for p in olds:
+            try:
+                with open(p, "rb") as fi, gzip.open(p + ".gz", "wb", compresslevel=6) as fo:
+                    shutil.copyfileobj(fi, fo, 1 << 20)
+                if os.path.getsize(p + ".gz") > 0:
+                    os.remove(p)
+                    print(f"[retention] compressed {os.path.basename(p)} ({os.path.getsize(p + '.gz') // 1048576} MB gz)")
+            except Exception as e:
+                print(f"[retention] skip {os.path.basename(p)}: {e!r}")
+    except Exception:
+        pass
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--port", type=int, default=9876); ap.add_argument("--http", type=int, default=8765)
@@ -457,6 +2837,9 @@ def main():
     ap.add_argument("--no-csv", action="store_true")
     ap.add_argument("--shots-dir", action="append", help="folder(s) of in-game screenshots to serve to the dashboard (repeatable); defaults to Pictures/Screenshots + Videos/Captures")
     a = ap.parse_args()
+    sys.path.insert(0, os.path.join(HERE, ".."))
+    from lab_root import require_lab_root
+    ST.lab = require_lab_root(ROOT, "daemon")   # never again from master: 2026-09-05 a second session did, and half an hour of telemetry landed in the stale mirror
     # screenshot folders for the dashboard's shop-capture panel — default to the common Windows capture locations
     home = os.path.expanduser("~")
     defaults = [os.path.join(home, "Pictures", "Screenshots"), os.path.join(home, "Videos", "Captures"), os.path.join(home, "Documents", "ShareX", "Screenshots")]
@@ -464,14 +2847,27 @@ def main():
     if ST.shots_dirs: print("[shots] serving screenshots from:", " · ".join(ST.shots_dirs))
     if not a.no_csv and not a.replay:
         os.makedirs(a.out, exist_ok=True)
+        threading.Thread(target=_compress_old_captures, args=(a.out,), daemon=True).start()
         ST.csv_path = os.path.join(a.out, f"fh6_{time.strftime('%Y%m%d_%H%M%S')}.csv")
         ST.csv_file = open(ST.csv_path, "w", newline=""); ST.csv_writer = csv.writer(ST.csv_file)
         ST.csv_writer.writerow(["t_wall", "t_mono", "speed_mph", "lat_g", "long_g", "yaw_rate_dps"] + [f"TireTempC{w}" for w in W] + FIELDS)
         print(f"[csv] {ST.csv_path}")
     elif a.replay:
         ST.csv_path = os.path.abspath(a.replay); ST.replay = True   # analysis runs on the replayed file, capped at replay time
-    srv = ThreadingHTTPServer(("127.0.0.1", a.http), H); srv.daemon_threads = True
+    class _QuietTCP(ThreadingHTTPServer):
+        # A client that reloads the dashboard, reconnects SSE, or cancels a fetch drops the socket while the daemon
+        # is mid-response; Python's http.server then prints a full ConnectionAborted/Reset/BrokenPipe traceback per
+        # hang-up (WinError 10053). That is the client's normal behaviour, not a server fault -- swallow it so the
+        # log stays readable. Any other error still surfaces.
+        daemon_threads = True
+        def handle_error(self, request, client_address):
+            if issubclass(sys.exc_info()[0] or Exception, (ConnectionAbortedError, ConnectionResetError, BrokenPipeError)):
+                return
+            super().handle_error(request, client_address)
+    srv = _QuietTCP(("127.0.0.1", a.http), H)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
+    if TUNE is not None:
+        threading.Thread(target=disk_watcher, daemon=True).start()   # push on-disk tune decode on save / car change
     print(f"[http] http://localhost:{a.http}/events  (SSE)  /session.json  /health")
     try:
         if a.replay: replay_loop(a.replay, a.speed); time.sleep(8)

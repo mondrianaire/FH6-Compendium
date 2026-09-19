@@ -1,0 +1,284 @@
+{
+ "car": "1992 Honda NSX-R (ordinal 412)",
+ "captured": "2026-09-02",
+ "source": "Upgrade Shop > Platform and Handling; Y page 3; setups brkN/sprN/farN/rarN/chsN/wgtN",
+ "brakes": {
+  "menu": "3 tiles, no Street tier; banner UNLOCKS BRAKE TUNING on the Race tile only",
+  "side_effect": "no slider rewritten",
+  "tiles": [
+   {
+    "tile": 1,
+    "name": "Stock Brakes",
+    "index": 0,
+    "installed": true,
+    "brake_60_ft": 85.5,
+    "brake_100_ft": 197.6,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "brk1"
+   },
+   {
+    "tile": 2,
+    "name": "Sport Brakes",
+    "index": 2,
+    "brake_60_ft": 73.6,
+    "brake_100_ft": 170.0,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "brk2"
+   },
+   {
+    "tile": 3,
+    "name": "Race Brakes",
+    "index": 3,
+    "brake_60_ft": 66.9,
+    "brake_100_ft": 151.9,
+    "latg_60": 1.22,
+    "latg_120": 1.51,
+    "banner": "UNLOCKS BRAKE TUNING",
+    "setup": "brk3"
+   }
+  ]
+ },
+ "springs_dampers": {
+  "menu": "4 tiles: Stock, Race, Rally, Drift (no Street/Sport tier). Banner UNLOCKS SPRING, DAMPER, AND ALIGNMENT TUNING on every non-stock tile.",
+  "side_effect": "Installing a spring kit rewrites camber, caster (incl. the rear_caster field), springs, ride height, bump and rebound to the kit's defaults (normalised). Rally pins ride height to 1.000, Drift to 0.000: two free anchors for the per-car ride-height band. Stock restores 0.500 everywhere with camber 0.350/0.450 and caster 0.667.",
+  "tiles": [
+   {
+    "tile": 1,
+    "name": "Stock Spring and Dampers",
+    "index": 0,
+    "installed": true,
+    "brake_60_ft": 85.8,
+    "brake_100_ft": 198.0,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "spr1",
+    "defaults": {
+     "front_camber": 0.35,
+     "rear_camber": 0.45,
+     "front_caster": 0.667,
+     "rear_caster": 0.667,
+     "front_spring": 0.5,
+     "rear_spring": 0.5,
+     "front_ride_height": 0.5,
+     "rear_ride_height": 0.5,
+     "front_bump": 0.5,
+     "rear_bump": 0.5,
+     "front_rebound": 0.5,
+     "rear_rebound": 0.5
+    }
+   },
+   {
+    "tile": 2,
+    "name": "Race Spring and Dampers",
+    "index": 3,
+    "brake_60_ft": 84.7,
+    "brake_100_ft": 196.8,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "spr2",
+    "defaults": {
+     "front_camber": 0.3,
+     "rear_camber": 0.35,
+     "front_caster": 0.667,
+     "rear_caster": 0.0,
+     "front_spring": 0.229,
+     "rear_spring": 0.482,
+     "front_ride_height": 0.327,
+     "rear_ride_height": 0.327,
+     "front_bump": 0.264,
+     "rear_bump": 0.407,
+     "front_rebound": 0.454,
+     "rear_rebound": 0.684
+    }
+   },
+   {
+    "tile": 3,
+    "name": "Rally Spring and Dampers",
+    "index": 4,
+    "price_cr": 2050,
+    "brake_60_ft": 85.6,
+    "brake_100_ft": 197.6,
+    "latg_60": 1.22,
+    "latg_120": 1.49,
+    "setup": "spr3",
+    "defaults": {
+     "front_camber": 0.45,
+     "rear_camber": 0.45,
+     "front_caster": 0.917,
+     "rear_caster": 0.0,
+     "front_spring": 0.141,
+     "rear_spring": 0.0,
+     "front_ride_height": 1.0,
+     "rear_ride_height": 1.0,
+     "front_bump": 0.028,
+     "rear_bump": 0.061,
+     "front_rebound": 0.352,
+     "rear_rebound": 0.512
+    }
+   },
+   {
+    "tile": 4,
+    "name": "Drift Spring and Dampers",
+    "index": 5,
+    "price_cr": 2050,
+    "brake_60_ft": 86.8,
+    "brake_100_ft": 203.1,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "spr4",
+    "defaults": {
+     "front_camber": 0.0,
+     "rear_camber": 0.35,
+     "front_caster": 1.0,
+     "rear_caster": 0.0,
+     "front_spring": 0.229,
+     "rear_spring": 0.482,
+     "front_ride_height": 0.0,
+     "rear_ride_height": 0.0,
+     "front_bump": 0.264,
+     "rear_bump": 0.407,
+     "front_rebound": 0.454,
+     "rear_rebound": 0.684
+    }
+   }
+  ]
+ },
+ "front_arb": {
+  "menu": "2 tiles: Stock, Race. Banner UNLOCKS FRONT ANTI-ROLL BAR STIFFNESS TUNING on the Race tile.",
+  "side_effect": "install rewrites the front_arb slider to the bar's default (Stock 0.500, Race 0.480)",
+  "tiles": [
+   {
+    "tile": 1,
+    "name": "Stock Front Anti-roll Bars",
+    "index": 0,
+    "brake_60_ft": 85.5,
+    "brake_100_ft": 197.6,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "far1",
+    "default_front_arb": 0.5
+   },
+   {
+    "tile": 2,
+    "name": "Race Front Anti-roll Bars",
+    "index": 3,
+    "installed": true,
+    "brake_60_ft": 85.7,
+    "brake_100_ft": 197.9,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "far2",
+    "default_front_arb": 0.48
+   }
+  ]
+ },
+ "rear_arb": {
+  "menu": "2 tiles: Stock, Race. Banner UNLOCKS REAR ANTIROLL BAR STIFFNESS TUNING (game spelling) on the Race tile.",
+  "side_effect": "install rewrites the rear_arb slider to the bar's default (Stock 0.500, Race 0.378)",
+  "tiles": [
+   {
+    "tile": 1,
+    "name": "Stock Rear Anti-roll Bars",
+    "index": 0,
+    "brake_60_ft": 85.5,
+    "brake_100_ft": 197.6,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "rar1",
+    "default_rear_arb": 0.5
+   },
+   {
+    "tile": 2,
+    "name": "Race Rear Anti-roll Bars",
+    "index": 3,
+    "installed": true,
+    "brake_60_ft": 85.7,
+    "brake_100_ft": 197.9,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "rar2",
+    "default_rear_arb": 0.378
+   }
+  ]
+ },
+ "roll_cage": {
+  "menu": "Chassis Reinforcement / Roll Cage: 3 tiles Stock, Sport, Race. No banner.",
+  "scheme": "DENSE inside the body variant: ids 412100 / 412101 / 412102 (variant 1 = widebody kit, tier = tile position). Not the global ladder.",
+  "side_effect": "none",
+  "tiles": [
+   {
+    "tile": 1,
+    "name": "Stock Chassis Reinforcement / Roll Cage",
+    "index": 100,
+    "installed": true,
+    "brake_60_ft": 85.8,
+    "brake_100_ft": 197.9,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "chs1"
+   },
+   {
+    "tile": 2,
+    "name": "Sport Chassis Reinforcement / Roll Cage",
+    "index": 101,
+    "price_cr": 1400,
+    "brake_60_ft": 86.0,
+    "brake_100_ft": 198.2,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "chs2"
+   },
+   {
+    "tile": 3,
+    "name": "Race Chassis Reinforcement / Roll Cage",
+    "index": 102,
+    "brake_60_ft": 84.8,
+    "brake_100_ft": 198.5,
+    "latg_60": 1.22,
+    "latg_120": 1.49,
+    "setup": "chs3"
+   }
+  ]
+ },
+ "weight_reduction": {
+  "menu": "3 tiles Stock, Sport, Race. No banner.",
+  "scheme": "DENSE inside the body variant: 412100 / 412101 / 412102 (variant 1 = widebody kit, tier = tile position).",
+  "side_effect": "none",
+  "tiles": [
+   {
+    "tile": 1,
+    "name": "Stock Weight Reduction",
+    "index": 100,
+    "brake_60_ft": 86.7,
+    "brake_100_ft": 202.6,
+    "latg_60": 1.19,
+    "latg_120": 1.43,
+    "setup": "wgt1"
+   },
+   {
+    "tile": 2,
+    "name": "Sport Weight Reduction",
+    "index": 101,
+    "brake_60_ft": 86.6,
+    "brake_100_ft": 200.8,
+    "latg_60": 1.2,
+    "latg_120": 1.45,
+    "setup": "wgt2"
+   },
+   {
+    "tile": 3,
+    "name": "Race Weight Reduction",
+    "index": 102,
+    "installed": true,
+    "brake_60_ft": 85.7,
+    "brake_100_ft": 197.9,
+    "latg_60": 1.22,
+    "latg_120": 1.5,
+    "setup": "wgt3"
+   }
+  ]
+ },
+ "_complete": "Platform and Handling fully proven on the NSX-R 2026-09-02: brakes/springs/bars on the global ladder, roll cage and weight reduction dense within the body variant."
+}

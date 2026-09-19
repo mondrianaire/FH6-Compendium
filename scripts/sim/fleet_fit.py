@@ -56,6 +56,7 @@ def car_errors(car, cst):
     """Signed fractional errors of the sim vs the oracle for one car under a constant set `cst`."""
     W.ROLL_CRR = cst["roll"]
     W.TIRE_LOAD = cst["tire_load"]
+    W.CG_FRAC = cst.get("cg_frac", W.CG_FRAC)
     de = cst["eff"].get(car["drivetype"], cst["eff_default"])
     sim = W.simulate(car, dt=0.006, tmax=14, drag_unit=cst["drag"], drive_eff=de, grip_mult=cst["grip"])
     top = W.top_speed_fast(car, drag_unit=cst["drag"], drive_eff=de)
@@ -87,9 +88,12 @@ def fleet_cost(fleet, cst, keys=FIT_KEYS):
     return statistics.median(costs) if costs else 9e9
 
 
+LAUNCH_KEYS = ("t60", "t100")
+
+
 def fit(fleet):
-    # grip is fixed (it only moves the launch, which we do not fit on); the rest are fitted on FIT_KEYS
-    cst = {"drag": 0.0026, "grip": 1.8, "roll": 0.012, "tire_load": 0.975,
+    # grip/cg_frac move the LAUNCH (fit separately on LAUNCH_KEYS); the rest are fitted on FIT_KEYS
+    cst = {"drag": 0.0026, "grip": 1.8, "roll": 0.012, "tire_load": 0.975, "cg_frac": 0.38,
            "eff": {}, "eff_default": 0.88}
     grids = {
         "drag": lambda x: [x * m for m in (0.80, 0.88, 0.94, 0.98, 1.0, 1.02, 1.06, 1.13, 1.25)],
@@ -109,6 +113,19 @@ def fit(fleet):
             cst[p] = best_v
     # NOTE: a per-drivetrain efficiency split was tried and dropped — it produced physically-backwards values
     # (AWD > RWD) by absorbing unrelated drag/part-ID errors on the heavy AWD GTs. A single global eff is honest.
+    # LAUNCH: now that weight transfer is modelled, fit the launch grip (grip) + CG-height fraction (cg_frac)
+    # on 0-60 / 0-100. These do NOT affect top speed / trap, so the drag/power fit above stays put.
+    lgrids = {"grip": [1.3, 1.5, 1.7, 1.9, 2.1, 2.3, 2.5],
+              "cg_frac": [0.30, 0.34, 0.38, 0.42, 0.46, 0.50]}
+    for _round in range(3):
+        for p in ("grip", "cg_frac"):
+            best_v, best_c = cst[p], fleet_cost(fleet, cst, LAUNCH_KEYS)
+            for v in lgrids[p]:
+                cst[p] = v
+                c = fleet_cost(fleet, cst, LAUNCH_KEYS)
+                if c < best_c:
+                    best_c, best_v = c, v
+            cst[p] = best_v
     return cst
 
 
@@ -133,6 +150,7 @@ def main():
     print("\n== LOCKED GLOBAL CONSTANTS ==")
     print("  DRAG_UNIT   = %.5f" % cst["drag"])
     print("  GRIP_MULT   = %.3f" % cst["grip"])
+    print("  CG_FRAC     = %.3f" % cst["cg_frac"])
     print("  ROLL_CRR    = %.4f" % cst["roll"])
     print("  TIRE_LOAD   = %.4f" % cst["tire_load"])
     print("  DRIVE_EFF   = %.3f (default) · per-drivetrain %s"

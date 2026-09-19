@@ -29,18 +29,18 @@ MPH = 2.2369362921  # m/s -> mph
 QMILE_M = 402.336   # quarter mile in metres
 
 # ---- GLOBAL constants (FLEET-CALIBRATED 2026-09-18, scripts/sim/fleet_fit.py) -----------------------
-# ONE set for the whole fleet, fit by coordinate descent against Data_Car.Sim* over 118 cars on the
-# DRAG/POWER/GEARING metrics (top speed, 1/4-mile time, 1/4-mile trap), which the model captures well:
-# ~6% median top-speed error, ~8-10% on the 1/4 mile. Fitting was deliberately NOT done on 0-60 / 0-100:
-# those are launch-dominated (~27% median) and need a per-car friction-curve + weight-transfer launch model
-# we do not have yet -- that is the identified next improvement. GRIP_MULT (launch) is held provisional.
+# ONE set for the whole fleet, fit by coordinate descent against Data_Car.Sim* over 118 cars. The drag/power/
+# gearing constants (DRAG_UNIT/DRIVE_EFF/ROLL_CRR/TIRE_LOAD) are fit on top speed / 1/4-mile / trap (~6% median
+# top speed, ~5% 1/4 mile). The LAUNCH constants (GRIP_MULT + CG_FRAC, the weight-transfer term) are fit on
+# 0-60 / 0-100 -- adding weight transfer cut the launch error roughly in half (0-60 median ~27% -> ~16%).
 # Run --fit to re-fit any ONE car (a single car reaches ~2%; the fleet trades that for one universal set).
-DRIVE_EFF   = 0.90     # driveline efficiency (emergent in-game; global fit)
+DRIVE_EFF   = 0.86     # driveline efficiency (emergent in-game; global fit)
 DRAG_UNIT   = 0.00208  # F_drag = DRAG_UNIT * BodyAeroLongitudinalDrag * GameDragScale * v^2  (internal-unit -> N)
 ROLL_CRR    = 0.013    # rolling-resistance coefficient
 ROT_INERTIA = 0.05     # rotating-mass fraction added to inertial mass (lumped; refine per-gear from MomentInertia)
-GRIP_MULT   = 1.80     # Traction_Road -> usable longitudinal mu multiplier (launch cap; PROVISIONAL, not fleet-fit)
+GRIP_MULT   = 2.10     # Traction_Road -> usable longitudinal mu multiplier (launch traction cap)
 TIRE_LOAD   = 0.950    # loaded rolling radius as a fraction of the unloaded geometric radius
+CG_FRAC     = 0.46     # CG height as a fraction of body Height (launch weight transfer: h_cg = CG_FRAC*Height)
 LAUNCH_RPM_FRAC = 1.0  # launch clamps engine to the peak-torque rpm until the real rpm passes it
 
 
@@ -94,6 +94,11 @@ def load_car(ordinal):
              if ("GearRatio%d" % i) in tr and tr["GearRatio%d" % i] not in (None, -1.0)]
     shift_t = tr["GearShiftTime"]
 
+    # body geometry (metres) -> wheelbase + height for the launch weight-transfer term
+    cb = q1(gx, "SELECT Wheelbase, Height FROM Data_CarBody WHERE Id=?", (car["stock_carbody_id"],))
+    wheelbase = (cb and cb["Wheelbase"]) or 2.6
+    height = (cb and cb["Height"]) or 1.3
+
     mass = dc["CurbWeight"] * 100.0          # kg/100 -> kg
     return {
         "name": car["display_name"], "ordinal": ordinal, "drivetype": car["drivetype"],
@@ -103,7 +108,7 @@ def load_car(ordinal):
         "gears": gears, "final_drive": fd, "shift_t": shift_t,
         "drag": dc["BodyAeroLongitudinalDrag"], "game_drag_scale": dc["GameDragScale"],
         "df_front": dc["BodyAeroForwardDownforceFront"], "df_rear": dc["BodyAeroForwardDownforceRear"],
-        "traction": dc["Traction_Road"],
+        "traction": dc["Traction_Road"], "wheelbase": wheelbase, "height": height,
         # rear tire geometry -> rolling radius (unloaded); the loaded radius is ~2% less, folded into the fit
         "tire_w": dc["RearTireWidthMM"], "tire_aspect": dc["RearTireAspect"], "wheel_dia_in": dc["RearWheelDiameterIN"],
         # the game's OWN physics outputs = our oracle
@@ -177,13 +182,13 @@ def simulate(car, r_tire=None, dt=0.001, tmax=60.0, drag_unit=None, drive_eff=No
     r = r_tire if r_tire else rolling_radius_geometric(car)
     awd = (car["drivetype"] or "").upper() == "AWD"
     rwd = (car["drivetype"] or "").upper() == "RWD"
-    # normal load fraction on the driven axle for the traction cap
-    if awd:
-        drive_frac = 1.0
-    elif rwd:
-        drive_frac = 1.0 - car["weight_dist"]
-    else:
-        drive_frac = car["weight_dist"]
+    # LAUNCH WEIGHT TRANSFER: under acceleration a, load m*a*h/L shifts to the rear. It LOADS the driven axle
+    # on RWD (amplifies grip -> the closed-form 1/(1-mu*h/L)), UNLOADS it on FWD (1/(1+mu*h/L)), and on AWD the
+    # transfer only redistributes between two driven axles so the total tractive load is ~unchanged. This is the
+    # physics the static model was missing -- it is why RWD cars were under-launching.
+    wd_front = car["weight_dist"]
+    h_cg = CG_FRAC * car["height"]
+    L_wb = car["wheelbase"] or 2.6
     peak_torque_rpm = max(range(len(curve)), key=lambda i: curve[i]) * 100
 
     def rpm_of(v, g):
@@ -209,11 +214,19 @@ def simulate(car, r_tire=None, dt=0.001, tmax=60.0, drag_unit=None, drive_eff=No
     steady = 0
     next_sample = 0.0
     while t < tmax:
-        # downforce (N) scales with v^2 like drag; adds vertical load for the traction cap
-        df = (car["df_front"] + car["df_rear"]) * car["game_drag_scale"] * drag_unit * v * v
-        n_axle = (m * G + df) * drive_frac
+        # downforce (N) scales with v^2 like drag; ~0 at launch, adds axle load at speed
+        dff = car["df_front"] * car["game_drag_scale"] * drag_unit * v * v
+        dfr = car["df_rear"] * car["game_drag_scale"] * drag_unit * v * v
         mu = car["traction"] * grip_mult
-        f_traction = mu * n_axle
+        xfer = mu * h_cg / L_wb                              # weight-transfer amplification factor
+        if awd:
+            f_traction = mu * (m * G + dff + dfr)            # both axles drive; transfer only redistributes
+        elif rwd:
+            n_base = m * G * (1.0 - wd_front) + dfr          # static rear + rear downforce
+            f_traction = mu * n_base / max(0.25, 1.0 - xfer)  # rear LOADS under accel -> amplify
+        else:                                                # FWD
+            n_base = m * G * wd_front + dff
+            f_traction = mu * n_base / (1.0 + xfer)          # front UNLOADS under accel -> reduce
 
         if shifting > 0:
             f_drive = 0.0

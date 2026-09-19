@@ -106,6 +106,24 @@ svg{display:block;max-width:100%}
    min-height keeps the map from collapsing when the (scrollable) turn list below is long. */
 .cmap{position:relative;flex:1 1 auto;min-height:210px;display:flex}
 .cmap>svg{flex:1 1 auto;min-height:0;width:100%;border-radius:6px}
+/* MAP ZOOM REVEALS GRANULARITY (Jett 2026-09-18): the maps zoom by shrinking the SVG viewBox, which scales the
+   stroke WIDTH along with the geometry — so overlapping lap traces, the road and the turn phases never separate,
+   zoom just enlarges the tangle. non-scaling-stroke pins every LINE to a constant SCREEN width, so zooming
+   spreads the geometry while the lines stay thin and the individual routes pull apart and become distinguishable.
+   Scoped to polylines, so turn markers (circles + labels) keep scaling and stay clickable/legible. */
+.cmap svg polyline,#leftBody svg[data-x0] polyline{vector-effect:non-scaling-stroke}
+/* MINI LAP INFO PANEL (Jett 2026-09-18): rides at the top of #rightHd, across from the course pill in #leftHd —
+   the selected lap's identity, time, gap to best, and honesty flags. Sibling of the course info pill. */
+.lapinfo{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:2px 2px 7px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.lapinfo.empty{opacity:.65;border-bottom-color:transparent}
+.lapinfo .li-id{display:inline-flex;align-items:center;gap:6px}
+.lapinfo .li-car{color:var(--txt);font-size:12px}
+.lapinfo .li-t{font-size:16px;font-weight:800;color:var(--txt);letter-spacing:.5px}
+.lapinfo .li-t.best{color:var(--acc)}
+.lapinfo .li-d{font-size:12px;font-weight:700}
+.lapinfo .li-d.ahead{color:var(--acc)} .lapinfo .li-d.behind{color:var(--bad)}
+.lapinfo .li-flags{font-size:11px} .lapinfo.dirty .li-flags{color:var(--warn)}
+.lapinfo .li-hov{color:var(--acc2);font-size:10.5px;letter-spacing:.3px} .lapinfo.hov{outline:1px dashed color-mix(in srgb,var(--acc2) 55%,transparent);outline-offset:2px;border-radius:3px}
 /* the turn list under the map may scroll (Jett: info panes break the no-scroll rule) so the map keeps its space */
 .pane>.body.map>.grp{flex:0 1 auto;min-height:104px;display:flex;flex-direction:column;overflow:hidden}
 .pane>.body.map>.grp .tt-wrap{overflow-y:auto;flex:1 1 auto;min-height:0}
@@ -143,6 +161,15 @@ svg{display:block;max-width:100%}
 .cleg-sec i.lg-dot{width:8px;height:8px;border-radius:50%;background:var(--acc2);box-shadow:0 0 0 1px #0b0e12}
 .cleg-sec i.lg-dot.sel{background:#fff}
 .cleg-sec i.lg-car{width:9px;height:10px;border-radius:0;background:#fff;clip-path:polygon(50% 0,100% 100%,50% 72%,0 100%)}
+.cleg-sec i.lg-hit-b{width:9px;height:9px;border-radius:50%;background:transparent;box-shadow:inset 0 0 0 2px #e3b341}   /* 🔧 bottoming: amber ring */
+.cleg-sec i.lg-hit-w{width:9px;height:9px;border-radius:0;background:#e5414e;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}   /* 💥 barrier: red diamond */
+/* modeled acceleration chart (Builds view) */
+.accel-figs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:10px}
+.accel-cell{background:var(--bg);border-radius:5px;padding:7px 9px;min-width:0}
+.accel-k{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--dim);margin-bottom:2px}
+.accel-fig b{font:600 15px var(--mono,ui-monospace,monospace)}
+.accel-fig .why{display:block;font-size:10px;margin-top:1px}
+@media (max-width:720px){.accel-figs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .cmap.live-on .leg-idle,.cmap.live-last .leg-idle{display:none}
 /* THE PEDAL PAINT's key (panel.js pedalSwatches): coast · throttle ramp · brake ramp · both pedals */
 .ped-sw{display:inline-flex;align-items:center;gap:0;white-space:nowrap;font-size:10.5px;color:var(--mut);margin-right:8px}
@@ -757,6 +784,15 @@ button.lchip.lhi{box-shadow:inset 0 0 0 1.5px var(--lc,var(--acc2));background:c
 
 /* header: [art 300] [identity 1fr] [actions 340], 196 px tall, always */
 .hdr{display:grid;grid-template-columns:300px minmax(0,1fr) 340px;grid-template-rows:176px;gap:0 14px;height:196px;padding:10px 12px;overflow:hidden;align-items:stretch}
+/* IDENTIFIED → COLLAPSE TO THE MINI BAR (Jett 2026-09-18): when the build is known/editable the full identity
+   pane is redundant with row A, so ease the header down to just that row and hand the course view the room. The
+   max-height animates the fold; the tune row, gate strip, livery tile and reload button fade out. Kept expanded
+   (no .collapsed) while unknown/unsettled, where the steps matter. Respects reduced-motion below. */
+#hdr{transition:max-height .38s ease,height .38s ease}
+#hdr.collapsed{max-height:44px;height:44px;min-height:0;grid-template-rows:28px}
+#hdr .htitle,#hdr .hgate,#hdr .hlivery,#hdr #btnRefresh{transition:opacity .2s ease}
+#hdr.collapsed .htitle,#hdr.collapsed .hgate,#hdr.collapsed .hlivery,#hdr.collapsed #btnRefresh{opacity:0;pointer-events:none}
+@media (prefers-reduced-motion:reduce){#hdr,#hdr .htitle,#hdr .hgate,#hdr .hlivery,#hdr #btnRefresh{transition:none}}
 .hcar{display:contents}
 .hart{width:300px;height:176px;display:flex;flex-direction:column;align-items:center;gap:2px;overflow:hidden}
 .hart .art{width:300px;height:158px}

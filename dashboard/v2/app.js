@@ -164,6 +164,69 @@ async function viewBuilds(host) {
   list();
 }
 
+// modeled WOT acceleration (scripts/sim, precomputed to api/accel.json), keyed by car ordinal.
+let ACCEL = null;
+async function accelData() {
+  if (ACCEL === null) { try { ACCEL = await get("accel.json"); } catch (e) { ACCEL = { cars: {} }; } }
+  return ACCEL;
+}
+// a per-car acceleration / top-speed chart: speed vs time, gear-shift markers, the key figures vs the game's own.
+function accelChartHTML(rec) {
+  const tr = rec.trace || []; if (tr.length < 3) return null;
+  const isTune = rec.final_drive != null;                 // a per-tune record carries its gearing/aero
+  const refLbl = (rec.ref && rec.ref.src === "stock") ? "stock" : "game";
+  const W = 660, H = 230, padL = 40, padB = 26, padT = 12, padR = 14;
+  const tmax = Math.ceil(tr[tr.length - 1][0] / 2) * 2, vmax = Math.ceil((rec.top_mph || 200) / 20) * 20;
+  const px = (t) => padL + (t / (tmax || 1)) * (W - padL - padR);
+  const py = (v) => (H - padB) - (v / (vmax || 1)) * (H - padB - padT);
+  // speed guides at 60 / 100 / 150 / 200 mph and their times
+  const guides = [60, 100, 150, 200].filter((s) => s <= vmax).map((s) =>
+    `<line x1="${padL}" y1="${py(s).toFixed(1)}" x2="${W - padR}" y2="${py(s).toFixed(1)}" stroke="var(--line2)" stroke-dasharray="2 3" opacity=".6"/>
+     <text x="4" y="${(py(s) + 3).toFixed(1)}" font-size="9" fill="var(--dim)">${s}</text>`).join("");
+  // time ticks
+  const step = tmax <= 10 ? 2 : tmax <= 24 ? 4 : 6;
+  let tick = "";
+  for (let t = step; t <= tmax; t += step) tick += `<text x="${px(t).toFixed(1)}" y="${H - 8}" text-anchor="middle" font-size="9" fill="var(--dim)">${t}s</text>`;
+  // the curve
+  const pts = tr.map(([t, v]) => px(t).toFixed(1) + "," + py(v).toFixed(1)).join(" ");
+  // gear-shift markers (where the gear increments)
+  let shifts = "";
+  for (let i = 1; i < tr.length; i++) if (tr[i][2] !== tr[i - 1][2]) {
+    const t = tr[i][0], v = tr[i][1];
+    shifts += `<g><circle cx="${px(t).toFixed(1)}" cy="${py(v).toFixed(1)}" r="2.6" fill="var(--bg)" stroke="var(--acc2)" stroke-width="1.4"/>
+      <text x="${px(t).toFixed(1)}" y="${(py(v) - 6).toFixed(1)}" text-anchor="middle" font-size="8" fill="var(--acc2)">${tr[i][2]}</text></g>`;
+  }
+  // 0-60 / 0-100 markers on the curve
+  const mark = (t, s, lbl) => (t == null) ? "" :
+    `<line x1="${px(t).toFixed(1)}" y1="${py(s).toFixed(1)}" x2="${px(t).toFixed(1)}" y2="${H - padB}" stroke="var(--acc)" stroke-dasharray="2 2" opacity=".7"/>
+     <circle cx="${px(t).toFixed(1)}" cy="${py(s).toFixed(1)}" r="3" fill="var(--acc)"/>
+     <text x="${px(t).toFixed(1)}" y="${py(s).toFixed(1) - 8}" text-anchor="middle" font-size="9" font-weight="700" fill="var(--acc)">${lbl}</text>`;
+  const svg = `<svg viewBox="0 0 ${W} ${H}" class="accel-svg" style="width:100%;height:auto;background:var(--bg);border-radius:5px">
+    ${guides}${tick}
+    <polyline fill="none" stroke="var(--acc)" stroke-width="2.2" stroke-linejoin="round" points="${pts}"/>
+    ${shifts}${mark(rec.t60, 60, "0-60")}${rec.top_mph >= 100 ? mark(rec.t100, 100, "0-100") : ""}
+    <text x="${W - padR}" y="${(py(rec.top_mph) - 4).toFixed(1)}" text-anchor="end" font-size="9" fill="var(--dim)">top ${rec.top_mph} mph</text>
+  </svg>`;
+  const cmp = (sim, ref, u, lo) => `<div class="accel-fig"><b>${sim == null ? "—" : sim}${u}</b>`
+    + (ref != null ? `<span class="why">${refLbl} ${ref}${u}${sim != null ? ` · ${lo ? (sim <= ref ? "" : "+") : (sim >= ref ? "+" : "")}${((sim - ref)).toFixed(u === "s" ? 1 : 0)}` : ""}</span>` : "") + `</div>`;
+  const figs = `<div class="accel-figs">
+    <div class="accel-cell"><span class="accel-k">0-60 mph</span>${cmp(rec.t60, rec.ref && rec.ref.t60, "s", true)}</div>
+    <div class="accel-cell"><span class="accel-k">0-100 mph</span>${cmp(rec.t100, rec.ref && rec.ref.t100, "s", true)}</div>
+    <div class="accel-cell"><span class="accel-k">¼ mile</span>${cmp(rec.tqmile, rec.ref && rec.ref.tqmile, "s", true)}</div>
+    <div class="accel-cell"><span class="accel-k">¼ trap</span>${cmp(rec.trap_mph, rec.ref && rec.ref.trap_mph, "", false)}</div>
+    <div class="accel-cell"><span class="accel-k">top speed</span>${cmp(rec.top_mph, rec.ref && rec.ref.top_mph, "", false)}</div></div>`;
+  const fdChip = isTune
+    ? `<span class="chip" title="final drive from this tune vs stock">FD ${rec.final_drive}${rec.stock_fd && Math.abs(rec.final_drive - rec.stock_fd) > 0.02 ? ` <span class="dim">· stock ${rec.stock_fd}</span>` : ""}</span>`
+      + (rec.df_kgf ? `<span class="chip" title="total downforce from this tune">${n0(rec.df_kgf)} kgf aero</span>` : "")
+    : `<span class="chip w">stock config</span>`;
+  const cap = isTune
+    ? `This tune's gearing, mass and aero are applied; dashes compare to <b>stock</b>. The engine torque curve is still stock (engine upgrades are next), so a built engine reads low on power.`
+    : `Simulated from the game's own physics values (torque curve, gearing, mass, drag, tire). Validated against the game's built-in figures: ~6% on top speed, ~16% on 0-60.`;
+  return `<div class="panel accel"><div class="chips" style="margin-bottom:6px"><b>Modeled acceleration</b>
+    <span class="chip">WOT 0→top</span>${fdChip}</div>
+    ${svg}${figs}
+    <div class="why" style="margin-top:6px">${cap}</div></div>`;
+}
 async function showBuild(hw) {
   const host = $("#detail");
   host.innerHTML = `<div class="panel why">loading…</div>`;
@@ -175,6 +238,11 @@ async function showBuild(hw) {
     ${t0.kg ? `<span class="chip">${n0(t0.kg)} kg · ${n0(t0.kg * KG_LB)} lb</span>` : ""}
     ${t0.locked ? '<span class="chip w">downloaded, locked</span>' : '<span class="chip">own save</span>'}
     <span class="chip mono">${esc(hw.slice(0, 8))}</span></div></div>`));
+
+  // modeled acceleration: this tune's gearing/aero if we have it, else the car's stock curve
+  try { const ac = await accelData();
+    const rec = (ac.tunes && t0.container && ac.tunes[t0.container]) || (ac.cars && ac.cars[String(b.ordinal)]);
+    if (rec) { const h = accelChartHTML(rec); if (h) host.append(el(h)); } } catch (e) { /* chart is optional */ }
 
   // parts, grouped by the menu area you would walk in the shop
   const byArea = {};
@@ -379,6 +447,24 @@ function courseMap(c, opts) {
         stroke="#0b0e12" stroke-width="3" stroke-linejoin="round" fill="${on ? "#fff" : "#e8edf3"}"
         opacity="${dim ? 0.45 : 1}">${esc(turnLabel(t))}</text></g>`;
   }).join("");
+  // BOTTOMING / BARRIER MARKERS (Jett 2026-09-18): 🔧 where the car bottomed out, 💥 where it hit a barrier /
+  // terrain — clustered located spots from build_web (course.hits), sized by how often it happens across the
+  // course's sessions. Display only (a barrier scrape slows the car, it never voids the lap). Drawn under the
+  // turn numbers so a turn label always reads on top.
+  // Each marker is drawn at the ORIGIN inside a translate() group, so cmapScaleMarks() can hold it at a constant
+  // SCREEN size on a course-map zoom with `translate(cx,cy) scale(k)` — exactly as the turn markers are held.
+  // Drawing the shape in world px directly (as before) let the viewBox zoom balloon it. data-cx/-cy cache the base.
+  const HITCOL = { bottoming: "#e3b341", wall: "#e5414e" };
+  const hitMarks = (c.hits || []).map((h) => {
+    const cx0 = px(h.x), cy0 = py(h.z), wall = h.kind === "wall", col = HITCOL[h.kind] || "#e3b341";
+    const r = h.n >= 8 ? 5.5 : h.n >= 3 ? 4.5 : 3.5;
+    const nsess = h.sess ? ` · ${h.sess} session${h.sess === 1 ? "" : "s"}` : "";
+    const label = (wall ? "barrier / terrain contact" : "bottoming") + ` ×${h.n}${h.hard ? " · " + h.hard + " hard" : ""}${nsess}`;
+    const shape = wall
+      ? `<path d="M 0 ${(-r).toFixed(1)} L ${r.toFixed(1)} 0 L 0 ${r.toFixed(1)} L ${(-r).toFixed(1)} 0 Z" fill="${col}" stroke="#0b0e12" stroke-width="1"/>`
+      : `<circle r="${r}" fill="none" stroke="${col}" stroke-width="2"/><circle r="1.4" fill="${col}"/>`;
+    return `<g class="chit" data-cx="${cx0.toFixed(1)}" data-cy="${cy0.toFixed(1)}" transform="translate(${cx0.toFixed(1)},${cy0.toFixed(1)})">${shape}<title>${esc(label)}</title></g>`;
+  }).join("");
   const phaseKey = (selT && selT.seg) ? SO.filter((n) => selT.seg[n]).map((n) =>
     `<span><i style="background:${SC[n]}"></i>${esc(SL[n] || n)}</span>`).join("") : "";
   // VIEW MODES (Jett 2026-09-11): the floating legend switches how the map is coloured. `laptime`
@@ -423,13 +509,13 @@ function courseMap(c, opts) {
   const legOpen = !!opts.legOpen;
   // LAYER TOGGLES on the legend bar (redesign): show/hide each layer independently of the colour view.
   const lyBtn = (k, lbl, extra) => `<button class="cleg-ly ${LY[k] ? "on" : "off"}" data-maplayer="${k}" title="${LY[k] ? "hide" : "show"} the ${lbl} layer">${lbl}${extra != null && extra !== "" ? `<b>${extra}</b>` : ""}<i>${LY[k] ? "on" : "off"}</i></button>`;
-  const layerRow = `<span class="cleg-layers">${lyBtn("centre", "centre")}${lyBtn(showPhases ? "phases" : "laps", showPhases ? "phases" : "laps", showPhases ? "" : pathRows.length)}${selT ? lyBtn("phases", "phases", esc(turnLabel(selT))) : ""}</span>`;
+  const layerRow = `<span class="cleg-layers">${lyBtn("centre", "centre")}${lyBtn(showPhases ? "phases" : "laps", showPhases ? "phases" : "laps", showPhases ? "" : pathRows.length)}${selT ? lyBtn("phases", "phases", esc(turnLabel(selT))) : ""}${(c.hits || []).length ? lyBtn("hits", "hits", (c.hits || []).length) : ""}</span>`;
   return el(`<div class="cmap">
     <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="background:var(--bg)" data-live-map data-x0="${x0}" data-z0="${z0}" data-s="${s}" data-h="${H}" data-w="${W}" data-pad="${pad}">
       ${LY.centre ? line(theirs, "#3d4a5a", 9, 0.55) : ""}
       <g class="cmap-hist">${(showPhases ? LY.phases : LY.laps) ? laps : ""}</g>
       ${LY.centre ? line(theirs, "#8fa0b3", 2.2, showPhases ? 0.5 : 0.92) : ""}
-      ${LY.phases ? phaseOv : ""}<g id="liveLap" pointer-events="none"></g>${turns}<g id="traceMark"></g>
+      ${LY.phases ? phaseOv : ""}<g id="liveLap" pointer-events="none"></g>${LY.hits !== false ? `<g class="cmap-hits">${hitMarks}</g>` : ""}${turns}<g id="traceMark"></g>
     </svg>
     <div class="cmap-legend${legOpen ? " open" : ""}">
       <div class="cleg-bar">
@@ -443,6 +529,7 @@ function courseMap(c, opts) {
         <div class="cleg-sec"${showPedals ? ' style="display:none"' : ""}><em>${showPhases ? "phases" : "laps"}</em>${showPhases ? allPhaseKey : gradKey}${!showPhases && foreIx >= 0 ? `<span><i class="lg-thick" style="background:${gcol(pathRows[foreIx].id)}"></i>thick = the lap the trace foregrounds</span>` : ""}</div>
         ${!showPhases && phaseKey ? `<div class="cleg-sec"><em>${esc(turnLabel(selT))}</em>${phaseKey}</div>` : ""}
         <div class="cleg-sec"><em>road</em><span><i class="lg-road"></i>the game's centre-line</span><span><i class="lg-dot"></i>turn · click to analyse</span>${selT ? `<span><i class="lg-dot sel"></i>selected</span>` : ""}<span><i class="lg-car"></i>you (hollow = held)</span></div>
+        ${(c.hits || []).length ? `<div class="cleg-sec"><em>hits</em><span title="where the car bottoms out — suspension at full compression; raise ride height or stiffen springs"><i class="lg-hit-b"></i>bottoming</span><span title="where the car hit a barrier or terrain — slows the car, never voids the lap"><i class="lg-hit-w"></i>barrier</span><span class="why">located spots · bigger = more often</span></div>` : ""}
         ${typeof TRACE_MODE !== "undefined" ? `<div class="cleg-sec"><em>trail</em><span class="leg-trail" title="what the live trail's colour means — the same choice as the speed trace's paint">${[["grip", "what the tyres did"], ["speed", "how fast, on this course's own scale"], ["pedals", "throttle and brake, by how hard"]].map(([m, tip]) => `<button class="mini ${TRACE_MODE === m ? "on" : ""}" data-trailpaint="${m}" title="${tip}">${m}</button>`).join("")}</span>`
           + (typeof pedalSwatches === "function" ? `<span class="leg-ped">${pedalSwatches()}</span>` : "")
           + (typeof GRAD !== "undefined" && typeof courseSpeedRange === "function" && courseSpeedRange(c) ? `<span class="leg-spd"><em>${Math.round(courseSpeedRange(c).lo)}</em><i class="grad" style="background:linear-gradient(90deg,${GRAD.join(",")})"></i><em>${Math.round(courseSpeedRange(c).hi)} mph</em></span>` : "")

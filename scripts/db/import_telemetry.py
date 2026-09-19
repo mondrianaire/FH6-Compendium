@@ -117,7 +117,7 @@ def run(cx, verbose=False, data_dir=None):
                           t.get("type") or t.get("kind"), t.get("n") or t.get("n_obs")))
 
     # ---- sessions ----------------------------------------------------------
-    srows, scrows, erows = [], [], []
+    srows, scrows, erows, hitrows = [], [], [], []
     for path in sorted(glob.glob(os.path.join(data_dir, "sessions", "*.json"))):
         if path.endswith(".tags.json"):
             continue
@@ -153,6 +153,19 @@ def run(cx, verbose=False, data_dir=None):
                           None if solo is None else (1 if solo else 0), e.get("laps"),
                           e.get("distance_m"), e.get("duration_s"), st[0], st[1], en[0], en[1],
                           e.get("route_key"), e.get("start_is_line")))
+        # WHERE the car bottomed out / hit a barrier (analyze_session's detectors) — world positions the map
+        # clusters into 🔧 / 💥 markers. A wall/barrier hit slows the car but never voids the lap. Skip a hit
+        # with no position; hard is 0/1.
+        for e in (s.get("bottoming") or []):
+            if e.get("x") is None:
+                continue
+            hitrows.append((sid, "bottoming", e.get("x"), e.get("z"), e.get("mph"),
+                            1 if e.get("hard") else 0, e.get("wheel"), None))
+        for e in (s.get("wall") or []):
+            if e.get("x") is None:
+                continue
+            hitrows.append((sid, "wall", e.get("x"), e.get("z"), e.get("mph"),
+                            1 if e.get("hard") else 0, None, e.get("drop")))
 
     # ---- laps: the history store first, then any saved trace it lacks ------
     lrows, prows, mrows = [], [], []
@@ -350,7 +363,7 @@ def run(cx, verbose=False, data_dir=None):
         # wiped: DELETE FROM course and INSERT OR REPLACE both fire ON DELETE CASCADE immediately --
         # defer_foreign_keys defers the checks, not the actions -- which is how course_route sat at 0 rows
         # from 2026-09-03 to 2026-09-05. Only courses that vanished from disk are deleted (intended cascade).
-        for tbl in ("corner_obs", "lap_marker", "lap_point", "lap", "course_turn", "session_event", "session_car", "session"):
+        for tbl in ("corner_obs", "lap_marker", "lap_point", "lap", "course_turn", "session_event", "session_car", "session_hit", "session"):
             cx.execute("DELETE FROM %s" % tbl)
         keys = [r[0] for r in crows]
         cx.execute("CREATE TEMP TABLE IF NOT EXISTS _keep(route_key TEXT PRIMARY KEY)")
@@ -368,6 +381,9 @@ def run(cx, verbose=False, data_dir=None):
         counts["session"] = fh6db.upsert_many(cx, "session", [
             "session_id", "started_utc", "duration_s", "frames", "rate_pps", "source",
             "file_path", "imported_at", "summary"], srows)
+        cx.executemany("INSERT INTO session_hit(session_id, kind, x, z, mph, hard, wheel, drop_mph) "
+                       "VALUES(?,?,?,?,?,?,?,?)", hitrows)   # after session (FK parent); table wiped above
+        counts["session_hit"] = len(hitrows)
         counts["session_car"] = fh6db.upsert_many(cx, "session_car", [
             "session_id", "cid", "ordinal", "build_id", "hw_hash", "name", "class", "pi",
             "drivetrain", "cyl", "live_s"], scrows)

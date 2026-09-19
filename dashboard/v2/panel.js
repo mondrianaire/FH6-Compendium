@@ -677,6 +677,14 @@ let TRACE_KEY = null;
 let TRACE_PICK = null;
 let TRACE_FIT = 0;
 let TRACE_CLS_HI = null;   // click a PI-class swatch in the speed-trace legend to spotlight that class's laps
+// SPEED-TRACE X-AXIS ZOOM (part 3, docs/plan-lap-inspection.md): an x0..x1 window ALONG the lap (metres in
+// course mode, seconds in free roam) that maps to the chart's drawing width. X only — the speed axis never
+// rescales, so two views of one lap agree (unlike a viewBox zoom, which would squash Y and the T-tick labels).
+// `manual` holds the window through a live repaint (mirrors CMAPVIEW.manual); `key` scopes it to one course/run
+// so switching course resets to fit. Wheel zooms around the cursor, drag pans, the "fit" button resets.
+let TRACE_XVIEW = { key: null, x0: 0, x1: 0, manual: false };
+let TRACE_RENDER = null;   // the last trace render object {head,foot,svg,...} — re-called on a window change so a zoom/pan skips the filter/legend recompute
+let _traceRAF = 0;
 // THE 5-PHASE TURN LANGUAGE (Jett 2026-09-10) — the WHERE axis of a corner, coloured the same on
 // the map overlay and in the turn-detail card. Matches the offline analyzer's turn-phases render
 // (gen_segments.py): braking and straight/crest are the connectors, turn-in→mid→exit the corner.
@@ -977,6 +985,7 @@ function paintTrace() {
   if (key === TRACE_KEY && el.firstChild) return;
   TRACE_KEY = key;
   const r = course ? courseTrace(COURSE) : liveRun();
+  TRACE_RENDER = r;   // kept so a zoom/pan can re-run just r.svg() into the trace body (traceRewindow) without a full recompute
   // shell first, so the chart can be drawn at the pixels the shell leaves it
   // A REGION EARNS ITS HEIGHT. With nothing to draw the trace is a 34px strip, not 240px of
   // empty chart; the pixels go to the panes, which is where the data is.
@@ -990,9 +999,42 @@ function paintTrace() {
 }
 window.addEventListener("resize", () => { TRACE_KEY = null; paintTrace(); });
 
-function chart(W, H, padL, padB, smax, vmax) {
-  return { px: (x) => padL + (x / (smax || 1)) * (W - padL - 8), py: (v) => (H - padB) - (v / (vmax || 1)) * (H - padB - 10) };
+function chart(W, H, padL, padB, smax, vmax, x0, x1) {
+  // px maps the X WINDOW [a..b] to the drawing width; default [0..smax] reproduces the un-zoomed transform
+  // exactly, so every existing caller is unaffected. py (speed) never takes the window — the vertical scale is
+  // fixed so a zoom reads the same shape, only wider (part 3, docs/plan-lap-inspection.md).
+  const IW = W - padL - 8, a = x0 || 0, b = (x1 != null ? x1 : (smax || 1)), span = (b - a) || 1;
+  return { px: (x) => padL + ((x - a) / span) * IW, py: (v) => (H - padB) - (v / (vmax || 1)) * (H - padB - 10) };
 }
+// resolve the X window for a render: the manual zoom if it is set for THIS course/run, else fit (full span).
+// Switching course/run (key change) drops the manual window back to fit. Clamped so a stale window can't invert.
+function traceXView(key, smax) {
+  const v = TRACE_XVIEW;
+  if (v.manual && v.key === key) {
+    const x0 = Math.max(0, Math.min(v.x0, smax - smax * 0.01));
+    const x1 = Math.max(x0 + smax * 0.01, Math.min(v.x1, smax));
+    return [x0, x1];
+  }
+  if (v.key !== key) TRACE_XVIEW = { key, x0: 0, x1: smax, manual: false };
+  return [0, smax];
+}
+// a window change (wheel/drag) re-runs only the last render's svg into the trace body — no filter/legend/scope
+// recompute — throttled to one repaint per animation frame so a wheel spin or a drag stays smooth.
+function traceRewindow() {
+  if (_traceRAF || typeof requestAnimationFrame !== "function") { if (!_traceRAF) traceRewindowNow(); return; }
+  _traceRAF = requestAnimationFrame(() => { _traceRAF = 0; traceRewindowNow(); });
+}
+function traceRewindowNow() {
+  const el = $("#trace"); if (!el || !TRACE_RENDER || !TRACE_RENDER.svg) return;
+  const host = el.querySelector(".tbody"); if (!host) return;
+  const W = Math.max(300, host.clientWidth), H = Math.max(80, host.clientHeight);
+  host.innerHTML = TRACE_RENDER.svg(W, H);
+  wireTrace(el);
+  syncTraceFit();   // the "fit" chip lives in the head (not rebuilt here) — reflect the zoom state onto it
+}
+// the "fit" chip is rendered once in the head; a wheel/pan changes the window without a full head rebuild, so
+// its shown/active state is synced here whenever the window moves (mirrors the map's mapfit affordance).
+function syncTraceFit() { const b = document.querySelector("#trace [data-tfit]"); if (b) { const on = TRACE_XVIEW.manual; b.hidden = !on; b.classList.toggle("on", on); } }
 // Split a trace wherever consecutive points don't sit next to each other in arc, so the line never
 // draws a straight streak across the gap: a BACKWARD step (< -30 m) is the start/finish seam a re-anchored
 // loop wraps at; a big FORWARD step (> 60 m) is a coverage gap (a section the lap didn't record). Normal
@@ -1068,7 +1110,7 @@ function modeControls() {
   return `<span class="segctl"><span class="why">paint</span>${[["grip", "grip", "what the tyres did — the axle that let go, and where"], ["speed", "speed", "how fast, coloured across the lap's own range"], ["pedals", "pedals", "what your feet did — throttle in greens, brake in reds, by how hard"]].map(([k, l, tip]) =>
     `<button class="mini ${TRACE_MODE === k ? "on" : ""}" data-tmode="${k}" title="${tip}">${l}</button>`).join("")}
     <button class="mini ${TRACE_ALL ? "on" : ""}" data-tall title="paint every run, not only the foregrounded lap">every run</button>
-    <button class="mini ${RACING_ONLY ? "on" : ""}" data-racing title="show only competitive laps — hide cruise/drift runs far off the class pace, rewound laps, and over/under-covered laps. Off = every lap on record.">racing only</button></span>`;
+    <button class="mini ${RACING_ONLY ? "on" : ""}" data-racing title="show only competitive laps — hide cruise/drift runs far off the class pace, rewound laps, and over/under-covered laps. Off = every lap on record.">racing only</button><button class="mini${TRACE_XVIEW.manual ? " on" : ""}" data-tfit${TRACE_XVIEW.manual ? "" : " hidden"} title="zoomed along the lap — wheel to zoom X, drag to pan; click (or double-click the trace) to fit the whole lap again">⤢ fit</button></span>`;
 }
 
 // THE COURSE-MODE FILTER BAR (Jett 2026-09-11). The historical-data filters (show-preset + the
@@ -1252,6 +1294,7 @@ function courseTrace(c) {
   // list by position, and an unsorted list crowned whichever lap the JSON happened to list first.
   stage2.sort((a, b) => (a.t || 9e9) - (b.t || 9e9));
   const match = stage2.filter((t) => !sel.hidden.has(String(t.id)));
+  TRACE_LAPS = match.map((t) => ({ id: String(t.id), pts: t.pts }));   // published for wireTrace's hover-to-select hit-test (part 2)
   const onRec = (c.laps || []).length;
   const head = `<b>Speed trace</b><span class="why">${esc(c.name || c.key)} · ${onRec} lap${onRec === 1 ? "" : "s"} on record · showing ${match.length} of ${all.length}${onRec > all.length ? (RACING_ONLY ? " · racing only" : " (traces capped)") : ""}${MODE.game === "event" ? " · timed event" : ""}${TRACE_MODE === "pedals" ? ` · pedals recorded on ${stage2.filter((t) => t.pts.some((q) => q[6] != null)).length} of ${stage2.length} laps` : ""} · ticks share the turn list's T numbers</span>
     <span class="tspacer"></span><span class="tread why">hover: reads the point and marks the map</span>${modeControls()}`;
@@ -1307,7 +1350,8 @@ function courseTrace(c) {
   const svg = (W, H) => {
     if (!match.length) return `<div class="why tempty">every matching lap is hidden — click a chip to show it</div>`;
     const smax = L, vmax = Math.max(...match.flatMap((t) => t.pts.map((q) => q[1]))) * 1.06 || 1;
-    const ch = chart(W, H, 28, 16, smax, vmax);
+    const [vx0, vx1] = traceXView(c.key, smax);
+    const ch = chart(W, H, 28, 16, smax, vmax, vx0, vx1);
     // default (non-"every run") context lines paint by the build's PI class, best emphasised by weight/opacity.
     // A class spotlight (TRACE_CLS_HI) lifts that class's laps and fades the rest -- highlight, not filter.
     // a lit set comes from EITHER the class spotlight (TRACE_CLS_HI) OR a per-lap highlight (sel.hi, the 3-state
@@ -1355,7 +1399,7 @@ function courseTrace(c) {
       <polyline fill="none" stroke="var(--acc2)" stroke-width="6.5" stroke-linejoin="round" stroke-linecap="round" opacity="${liveNow ? ".22" : ".1"}" points="${live.map((q) => ch.px(q[0]).toFixed(1) + "," + ch.py(q[1]).toFixed(1)).join(" ")}"/>
       ${paintedLine(live, ch, 3.2, TRACE_MODE, piColor(CUR && CUR.cls), courseSpeedRange(c))}
       ${youMarkSvg(ch.px(lp[0]), ch.py(lp[1]), liveNow)}</g>` : "";
-    return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts))}">${axisSvg(ch, vmax)}${band}${ticks}${lines}${imp}${liveSvg}${cursorSvg(H)}</svg>`;
+    return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-vx0="${vx0.toFixed(2)}" data-vx1="${vx1.toFixed(2)}" data-xkey="${esc(c.key)}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(pts))}">${axisSvg(ch, vmax)}${band}${ticks}${lines}${imp}${liveSvg}${cursorSvg(H)}</svg>`;
   };
   return { head, foot, svg, hasData: match.length > 0 };
 }
@@ -1377,16 +1421,20 @@ function liveRun() {
     const hasT = pts[0][6] != null, t0 = hasT ? pts[0][6] : 0;
     const P = pts.map((q) => [hasT ? (q[6] - t0) / 1000 : q[0], q[1], q[2], q[3], q[4], null, q[7] ?? null, q[8] ?? null]);   // LIVE.run keeps pedals at [7]/[8]
     const smax = P[P.length - 1][0] || 1, vmax = Math.max(60, ...P.map((q) => q[1])) * 1.06;
-    const ch = chart(W, H, 28, 16, smax, vmax);
+    const [vx0, vx1] = traceXView("run", smax);
+    const ch = chart(W, H, 28, 16, smax, vmax, vx0, vx1);
     // split at a pause: a menu dwell holds the run but leaves a >1.5 s gap in the timestamps, and drawing
     // straight across it would be a flat line over dead time.
     const runs = []; let run = [P[0]];
     for (let i = 1; i < P.length; i++) { if (hasT && P[i][0] - P[i - 1][0] > 1.5) { runs.push(run); run = []; } run.push(P[i]); }
     runs.push(run);
     const body = runs.filter((r) => r.length > 1).map((r) => paintedLine(r, ch, 2.2, TRACE_MODE, piColor(CUR && CUR.cls))).join("");
-    const step = smax <= 20 ? 5 : smax <= 60 ? 10 : smax <= 150 ? 30 : 60;   // second ticks scaled to the window
-    const ticks = hasT ? [...Array(Math.floor(smax / step)).keys()].map((i) => (i + 1) * step).map((s) => `<line x1="${ch.px(s).toFixed(1)}" y1="6" x2="${ch.px(s).toFixed(1)}" y2="${H - 16}" stroke="var(--line)" opacity=".6"/><text x="${ch.px(s).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${s}s</text>`).join("") : "";
-    return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(P))}">${axisSvg(ch, vmax)}${ticks}${body}${cursorSvg(H)}</svg>`;
+    // ticks scale to the VISIBLE span (not the whole run), so a zoom re-spaces them finer instead of leaving one tick
+    const vspan = vx1 - vx0;
+    const step = vspan <= 20 ? 5 : vspan <= 60 ? 10 : vspan <= 150 ? 30 : 60;   // second ticks scaled to the window
+    const tk = []; for (let s = Math.ceil(vx0 / step) * step; s <= vx1 + 1e-6; s += step) if (s > 0) tk.push(s);
+    const ticks = hasT ? tk.map((s) => `<line x1="${ch.px(s).toFixed(1)}" y1="6" x2="${ch.px(s).toFixed(1)}" y2="${H - 16}" stroke="var(--line)" opacity=".6"/><text x="${ch.px(s).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="8" fill="var(--dim)">${s}s</text>`).join("") : "";
+    return `<svg class="tsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-smax="${smax}" data-vmax="${vmax}" data-vx0="${vx0.toFixed(2)}" data-vx1="${vx1.toFixed(2)}" data-xkey="run" data-padl="28" data-padb="16" data-w="${W}" data-h="${H}" data-pts="${esc(JSON.stringify(P))}">${axisSvg(ch, vmax)}${ticks}${body}${cursorSvg(H)}</svg>`;
   };
   // points are not a trace: a parked car accrues samples at one spot. The band is only worth
   // 240px when there is real distance under the line.
@@ -1430,24 +1478,78 @@ function wireTrace(el) {
   el.querySelectorAll("[data-clshi]").forEach((b) => b.onclick = () => { const k = b.dataset.clshi; TRACE_CLS_HI = (TRACE_CLS_HI === k) ? null : k; TRACE_KEY = null; paintTrace(); });
   const ta = el.querySelector("[data-tall]"); if (ta) ta.onclick = () => { TRACE_ALL = !TRACE_ALL; VIEW.global.traceAll = TRACE_ALL; viewSave(); try { localStorage.setItem("fh6PaintAll", TRACE_ALL ? "1" : "0"); } catch (e) {} TRACE_KEY = null; paintTrace(); };
   const rc = el.querySelector("[data-racing]"); if (rc) rc.onclick = () => { RACING_ONLY = !RACING_ONLY; VIEW.global.racingOnly = RACING_ONLY; viewSave(); try { localStorage.setItem("fh6RacingOnly", RACING_ONLY ? "1" : "0"); } catch (e) {} TRACE_KEY = null; LEFT_KEY = null; paintTrace(); paintLeft(); if (MODE.suggest === "course" && COURSE) paintRight(); };
+  const ft = el.querySelector("[data-tfit]"); if (ft) ft.onclick = () => traceZoomFit();
   const sv = el.querySelector("svg.tsvg[data-pts]"); if (!sv) return;
   let P = []; try { P = JSON.parse(sv.dataset.pts || "[]"); } catch (e) { P = []; }
   if (!P.length) return;
   const ds = sv.dataset, smax = +ds.smax, vmax = +ds.vmax, padL = +ds.padl, padB = +ds.padb, W = +ds.w, H = +ds.h;
+  // the active X window (part 3): arc/seconds → screen X honours the zoom, so hover, the cursor and the
+  // nearest-lap hit-test all land on the SAME pixels the lines are drawn at. Falls back to the full span.
+  const vx0 = ds.vx0 != null ? +ds.vx0 : 0, vx1 = ds.vx1 != null ? +ds.vx1 : smax, vspan = (vx1 - vx0) || 1, IW = W - padL - 8;
+  const pxOf = (x) => padL + ((x - vx0) / vspan) * IW;               // arc → viewBox X
+  const arcAt = (vx) => vx0 + ((vx - padL) / IW) * vspan;            // viewBox X → arc
   const cur = sv.querySelector(".cur"), read = el.querySelector(".tread");
+  const key = ds.xkey || ((MODE.suggest === "course" && COURSE) ? COURSE.key : "run");   // scopes the manual window — read from the render so the "trace follows you" (live-run-while-latched) case stays consistent
+  // the LIVE window is TRACE_XVIEW (the source of truth), not the closure's vx0/vx1 — those go stale between the
+  // rAF-throttled rewindows, so reading them would make rapid wheel/drag events not compound. Falls back to the
+  // rendered window before the first manual change.
+  const winNow = () => (TRACE_XVIEW.manual && TRACE_XVIEW.key === key) ? [Math.max(0, TRACE_XVIEW.x0), Math.min(smax, TRACE_XVIEW.x1)] : [vx0, vx1];
   sv.onmousemove = (ev) => {
-    const r = sv.getBoundingClientRect(); const vx = ((ev.clientX - r.left) / r.width) * W;
-    const sAt = ((vx - padL) / (W - padL - 8)) * smax;
+    const r = sv.getBoundingClientRect();
+    if (ZDRAG) {   // panning: shift the window opposite the drag by the INCREMENT since the last event (the anchor
+      const vx = ((ev.clientX - r.left) / r.width) * W, [a0, b0] = winNow(), cspan = (b0 - a0) || 1;   // advances so a mid-drag rewindow can't double-apply
+      const dArc = -((vx - ZDRAG.vx) / IW) * cspan; ZDRAG.vx = vx;
+      if (Math.abs(ev.clientX - ZDRAG.cx0) > 3) ZDRAG.moved = true;
+      let a = a0 + dArc, b = b0 + dArc;
+      if (a < 0) { b -= a; a = 0; } if (b > smax) { a -= (b - smax); b = smax; } a = Math.max(0, a);
+      TRACE_XVIEW = { key, x0: a, x1: b, manual: true }; traceRewindow(); return;
+    }
+    const vx = ((ev.clientX - r.left) / r.width) * W;
+    const sAt = arcAt(vx);
     let bi = 0, bd = Infinity; for (let i = 0; i < P.length; i++) { const d = Math.abs(P[i][0] - sAt); if (d < bd) { bd = d; bi = i; } }
     const q = P[bi]; const col = gripInk(q[2] | 0);
-    const px = padL + (q[0] / smax) * (W - padL - 8), py = (H - padB) - (q[1] / vmax) * (H - padB - 10);
+    const px = pxOf(q[0]), py = (H - padB) - (q[1] / vmax) * (H - padB - 10);
     cur.style.display = ""; const ln = cur.querySelector("line"); ln.setAttribute("x1", px); ln.setAttribute("x2", px);
     const c = cur.querySelector("circle"); c.setAttribute("cx", px); c.setAttribute("cy", py); c.setAttribute("fill", col);
     if (read) read.innerHTML = `<b>${Math.round(q[1])} mph</b> at ${Math.round(q[0])} m · <span style="color:${col}" title="${esc(gripOf(q[2] | 0).tip)}">${gripOf(q[2] | 0).word}</span>${q.length > 7 && (q[6] != null || q[7] != null) ? ` · throttle <b>${q[6] ?? 0}%</b> · brake <b>${q[7] ?? 0}%</b>` : ""}`;
     if (q.length > 4) markMapAt(q[3], q[4], col);
+    // HOVER-TO-SELECT A LAP (part 2, docs/plan-lap-inspection.md): find the lap whose line runs nearest the cursor
+    // at this arc and preview it in the mini lap panel; a click pins it. Course mode only (where the panel exists).
+    if (MODE.suggest === "course" && COURSE && TRACE_LAPS.length) {
+      const cx = ev.clientX - r.left, cy = ev.clientY - r.top, sx = r.width / W, sy = r.height / H;
+      let bid = null, bd2 = Infinity;
+      for (const lap of TRACE_LAPS) { const pp = lap.pts; if (!pp || !pp.length) continue;
+        let li = 0, la = Infinity; for (let i = 0; i < pp.length; i++) { const d = Math.abs(pp[i][0] - sAt); if (d < la) { la = d; li = i; } }
+        const gx = pxOf(pp[li][0]) * sx, gy = ((H - padB) - (pp[li][1] / vmax) * (H - padB - 10)) * sy;
+        const dd = (gx - cx) ** 2 + (gy - cy) ** 2; if (dd < bd2) { bd2 = dd; bid = lap.id; } }
+      const near = (bid && bd2 < 26 * 26) ? bid : null;
+      if (near !== HOVER_LAP) { HOVER_LAP = near; refreshLapInfo(); }
+    }
   };
-  sv.onmouseleave = () => { cur.style.display = "none"; if (read) read.textContent = "hover the trace — it marks that spot on the map"; clearMapMark(); };
+  sv.onmouseleave = () => { cur.style.display = "none"; if (read) read.textContent = "hover the trace — it marks that spot on the map"; clearMapMark(); if (HOVER_LAP) { HOVER_LAP = null; refreshLapInfo(); } };
+  sv.onclick = () => { if (ZDRAG && ZDRAG.moved) return; if (HOVER_LAP && String(HOVER_LAP) !== String(SINGLE_LAP)) selectSingleLap(HOVER_LAP); };   // a click PINS the hovered lap; a pan-drag never pins
+  // WHEEL = ZOOM THE X WINDOW around the cursor (part 3). Y (speed) is fixed, so the shape reads the same, only
+  // wider. Zooming past the full span, or out to it, resets to fit. A minimum window keeps ~50x as the ceiling.
+  sv.onwheel = (ev) => {
+    ev.preventDefault();
+    const r = sv.getBoundingClientRect(), vx = ((ev.clientX - r.left) / r.width) * W, [a0, b0] = winNow(), cspan = (b0 - a0) || 1;
+    const f = (vx - padL) / IW, xc = a0 + f * cspan;   // the arc under the cursor, held in place across the zoom
+    let span = cspan * (ev.deltaY > 0 ? 1.18 : 1 / 1.18);
+    const minSpan = Math.max(smax * 0.02, 8);
+    if (span >= smax) { traceZoomFit(); return; }
+    span = Math.max(minSpan, span);
+    let a = xc - f * span, b = a + span;
+    if (a < 0) { b -= a; a = 0; } if (b > smax) { a -= (b - smax); b = smax; } a = Math.max(0, a);
+    TRACE_XVIEW = { key, x0: a, x1: b, manual: true }; traceRewindow();
+  };
+  sv.onmousedown = (ev) => { if (ev.button !== 0) return; const r = sv.getBoundingClientRect(); ZDRAG = { vx: ((ev.clientX - r.left) / r.width) * W, cx0: ev.clientX, moved: false }; };
+  sv.ondblclick = () => traceZoomFit();
 }
+// end a pan wherever the mouse is released (the window may have been rebuilt mid-drag, so listen on the document)
+if (typeof document !== "undefined" && !window._traceZoomWired) { window._traceZoomWired = true;
+  document.addEventListener("mouseup", () => { if (ZDRAG) setTimeout(() => { ZDRAG = null; }, 0); }); }   // defer so onclick can still read ZDRAG.moved
+let ZDRAG = null;
+function traceZoomFit() { TRACE_XVIEW = { key: TRACE_XVIEW.key, x0: 0, x1: 0, manual: false }; TRACE_KEY = null; paintTrace(); }
 
 /* --------------------------------------------------------------- dock */
 // The live dock — the v1 Lab's bottom strip, ported: value tiles from the frame, and the time
@@ -1970,6 +2072,12 @@ function paintHeader() {
   const h = $("#hdr"); if (!h) return;
   const st = buildStatus();
   const q = matchQuality(CUR && CUR.match);
+  // COLLAPSE WHEN IDENTIFIED (Jett 2026-09-18): once the build is KNOWN — downloaded/locked OR cloned/editable —
+  // the full identity pane is redundant with its own mini bar (row A / the idbar), so collapse to that one row and
+  // give the course view the room. Animated via CSS max-height so it eases rather than jumps. It stays EXPANDED
+  // while the identity is unknown/unsettled/waiting — that is exactly when its steps and guidance matter.
+  const s3 = (typeof stateOf === "function") ? stateOf(st, q).state : null;
+  h.classList.toggle("collapsed", s3 === "known" || s3 === "editable");
   const key = JSON.stringify([CUR && CUR.cid, CUR && CUR.disk && CUR.disk.ts, st.key, st.label, q.level,
     MATCH && MATCH.build && MATCH.build.c, BASELINE && BASELINE.container, CUR && CUR.pinned,
     RR.busy, RB.state === "running" || RB.pending, !!frozenOf(), !!(MATCH && MATCH.sheet),
@@ -2452,7 +2560,7 @@ let MAP_LEG_OPEN = (() => { try { return localStorage.getItem("fh6MapLeg") === "
 // VIEW (MAP_VIEW) — centre = the road / centre-line reference, laps = the lap bundle, phases = the selected
 // turn's 5-phase overlay. The live-lap layer is drawn whenever a lap is live. Persisted; toggled from the
 // legend. courseMap (app.js) reads this global (panel.js loads first).
-let MAP_LAYERS = (() => { const d = { centre: true, laps: true, phases: true };
+let MAP_LAYERS = (() => { const d = { centre: true, laps: true, phases: true, hits: true };   // hits = 🔧 bottoming / 💥 barrier markers
   try { return Object.assign(d, JSON.parse(localStorage.getItem("fh6MapLayers") || "{}")); } catch (e) { return d; } })();
 function courseInfoPill(r, state) {
   const nm = r.name || ("Route " + (r.id != null ? r.id : "?"));
@@ -3029,7 +3137,34 @@ function presentScale(svg, vw, sc) {
 // turn marker still fires pickTurn. Pan/zoom moves only the viewBox window — the dataset projection the live
 // dot / trail read is untouched, so nothing desyncs.
 const CMAPVIEW = { svg: null, manual: false, vb: null, drag: null, wired: null, W: 0, H: 0 };
-function cmapApply() { const m = CMAPVIEW; if (m.svg && m.vb) m.svg.setAttribute("viewBox", `${m.vb.x.toFixed(1)} ${m.vb.y.toFixed(1)} ${m.vb.w.toFixed(1)} ${m.vb.h.toFixed(1)}`); }
+function cmapApply() { const m = CMAPVIEW; if (m.svg && m.vb) m.svg.setAttribute("viewBox", `${m.vb.x.toFixed(1)} ${m.vb.y.toFixed(1)} ${m.vb.w.toFixed(1)} ${m.vb.h.toFixed(1)}`); cmapScaleMarks(); }
+// TURN MARKERS HOLD A CONSTANT SCREEN SIZE ON ZOOM (Jett 2026-09-18): the circles + number labels are drawn in
+// user space, so the viewBox zoom blew them into giant blobs that hid the very traces you zoomed in to read.
+// Counter-scale each marker's radius and the label's font-size by the zoom factor (vb.w / W) so they keep their
+// fit-view size and the (now non-scaling-stroke) traces show through. Base sizes are cached per node in data-*
+// so repeated zooms compound from the base, not the last scaled value; a re-render restores the base and re-caches.
+function cmapScaleMarks() {
+  const m = CMAPVIEW; if (!m.svg) return;
+  const k = (m.vb && m.W) ? (m.vb.w / m.W) : 1;
+  m.svg.querySelectorAll(".cturn circle").forEach((c) => {
+    if (c.dataset.r0 == null) c.dataset.r0 = c.getAttribute("r");
+    c.setAttribute("r", (+c.dataset.r0 * k).toFixed(2));
+    if (c.dataset.sw0 == null) c.dataset.sw0 = c.getAttribute("stroke-width") || "1";
+    c.setAttribute("stroke-width", (+c.dataset.sw0 * k).toFixed(2));
+  });
+  m.svg.querySelectorAll(".cturn text").forEach((t) => {
+    if (t.dataset.f0 == null) t.dataset.f0 = parseFloat(t.getAttribute("font-size"));
+    t.setAttribute("font-size", (+t.dataset.f0 * k).toFixed(2));
+    if (t.dataset.sw0 == null) t.dataset.sw0 = t.getAttribute("stroke-width") || "3";
+    t.setAttribute("stroke-width", (+t.dataset.sw0 * k).toFixed(2));   // keep the dark halo proportional to the shrunk glyph
+  });
+  // 🔧 / 💥 hit markers hold their screen size too: each is an origin-drawn shape in a translate() group, so
+  // scaling it by k around its cached centre (data-cx/-cy) exactly cancels the viewBox zoom (app.js hitMarks).
+  m.svg.querySelectorAll(".cmap-hits .chit").forEach((g) => {
+    const cx0 = g.dataset.cx, cy0 = g.dataset.cy; if (cx0 == null || cy0 == null) return;
+    g.setAttribute("transform", `translate(${cx0},${cy0}) scale(${k.toFixed(4)})`);
+  });
+}
 function cmapFitSync() {
   const m = CMAPVIEW, host = m.svg && m.svg.parentNode; if (!host) return;
   let btn = host.querySelector(":scope > .mapfit");
@@ -3527,6 +3662,31 @@ function rightContext() {
   return "corners";
 }
 function rightTabStore() { return (MODE.suggest === "course" && COURSE) ? vcourse(COURSE.key).rightTab : vg("rightTab", {}); }
+// THE MINI LAP INFO PANEL (Jett 2026-09-18): the lap-side mirror of the course info pill (#leftHd). Where that
+// says "what is this COURSE", this says "what is THIS ONE LAP" — the selected lap's build identity, its time and
+// gap to the course best, and its honesty flags (the SAME cleanLap vocabulary as the LAPS list). Selection is the
+// one shared SINGLE_LAP, so a LAPS-row click, a trace hover and this panel all point at the same lap. It rides in
+// #rightHd, directly across from the course pill. Empty (a prompt) until a lap is picked. See docs/plan-lap-inspection.md.
+function lapInfoHTML() {
+  if (!(MODE.suggest === "course" && COURSE)) return "";
+  const hovering = !!HOVER_LAP;                 // HOVER previews the lap under the cursor; a click pins it as SINGLE_LAP
+  const id = hovering ? String(HOVER_LAP) : (SINGLE_LAP ? String(SINGLE_LAP) : null);
+  const laps = COURSE.laps || [];
+  const l = id ? laps.find((x) => String(x.id) === id) : null;
+  if (!l) return `<div class="lapinfo empty"><span class="why">hover a trace or pick a lap to inspect it</span></div>`;
+  const ct = laps.filter(cleanLap).map((x) => x.t).filter((t) => t);
+  const best = ct.length ? Math.min(...ct) : null;
+  const delta = (best != null && l.t != null) ? (l.t - best) : null;
+  const clean = cleanLap(l);
+  const flags = [l.void ? "contact" : "", l.partial ? "partial" : "", l.rewinds ? l.rewinds + " rewind" + (l.rewinds === 1 ? "" : "s") : "", l.official ? "game-timed" : ""].filter(Boolean).join(" · ");
+  return `<div class="lapinfo${clean ? "" : " dirty"}${hovering ? " hov" : ""}" title="the lap picked on the map / trace / laps list">
+    <span class="li-id">${l.class && l.class !== "?" ? piBadge(l.class, l.pi) : ""}<span class="li-car mono" title="${esc(carName(l.cid) || "")}">${esc(carShort(l.cid) || carName(l.cid) || "")}</span></span>
+    <span class="li-t mono${l.t === best ? " best" : ""}">${l.t != null ? lapTime(l.t) : "—"}</span>
+    ${(delta != null && clean) ? `<span class="li-d mono ${delta <= 0 ? "ahead" : "behind"}">${delta === 0 ? "best" : (delta > 0 ? "+" : "") + delta.toFixed(2)}</span>` : ""}
+    <span class="li-flags why">${clean ? "clean" : "⚠ " + (flags || "not clean")}</span>
+    ${hovering ? `<span class="li-hov why">hover · click to pin</span>` : ""}
+  </div>`;
+}
 function paintRight() {
   const hd = $("#rightHd"), body = $("#rightBody"); if (!body) return;
   if (!liveKnown() && !LIVE.frame) {      // before the first frame the context is not known; do not latch it
@@ -3546,7 +3706,7 @@ function paintRight() {
                 concl: "this course's turns · what to change", build: "what the save gives, what a drive still has to provide",
                 browser: "every known course · pick one to locate it on the map",
                 services: "the three processes the lab runs · start, stop or restart each one" }[cur];
-  hd.innerHTML = `<span class="tabs2">${tabs.map((t) => `<button class="${cur === t ? "on" : ""}" data-rt="${t}">${RT_LABEL[t]}</button>`).join("")}</span><span class="why">${esc(why)}</span>`;
+  hd.innerHTML = `${lapInfoHTML()}<span class="tabs2">${tabs.map((t) => `<button class="${cur === t ? "on" : ""}" data-rt="${t}">${RT_LABEL[t]}</button>`).join("")}</span><span class="why">${esc(why)}</span>`;
   hd.querySelectorAll("[data-rt]").forEach((b) => b.onclick = () => { RIGHT_TAB = b.dataset.rt; rightTabStore()[ctx] = RIGHT_TAB; viewSave(); paintRight(); });
   // THE COURSE BROWSER IS STATIC (Jett 2026-09-18): its tiles depend only on the browse controls, never on a live
   // frame — yet paintRight runs every ~2 s and rebuilt #rightBody, which destroyed the hover highlight ("only stays
@@ -3675,7 +3835,6 @@ function lapHTML() {
   // the live lateral-g state readout while you're loaded on the corner. From the live frame, not a detection.
   const _f = LIVE.frame || {}, inCorner = !!(_f.on && Math.abs(_f.lat || 0) > 0.4);
   const inChip = inCorner ? `<span class="lap-incorner">● in a corner — ${_f.lat > 0 ? "right" : "left"} ${Math.abs(_f.lat).toFixed(2)} g</span>` : "";
-  const head = `<div class="gh">Current lap${curLap != null ? " · lap " + curLap : ""} ${live ? `<span class="lap-liveflag"><i></i>live</span>` : ""}${inChip}<span class="why">· ${taken.length} of ${courseTurns.length} turn${courseTurns.length === 1 ? "" : "s"} taken · rated on minimum speed against ${scopeTok(ls)} · every course turn listed</span></div>`;
   // NO early return on an empty lap: the spine below lists all course turns as "awaiting", so the whole course
   // shows the moment you load in — and fast turns you drive without tripping the detector show as "driven".
   let lastSeq = null, worstRow = null, gripHits = 0, rankable = 0, first = 0, thinFirst = 0, unranked = 0;
@@ -3712,18 +3871,24 @@ function lapHTML() {
   // keyed to the MAP (nearest apex) instead of to the detector, so nothing driven silently disappears.
   const bySeq = {}; passes.forEach((q) => { bySeq[q.t.seq] = q; });
   const shownLap = lapShown(), livePts = (shownLap && shownLap.pts) || [];
-  const passedOnLap = (t) => { if (t.x == null) return false;
-    for (let i = 0; i < livePts.length; i += 2) { const q = livePts[i]; if (!q || q[3] == null) continue; if ((q[3] - t.x) ** 2 + (q[4] - t.z) ** 2 < 1600) return true; } return false; };
-  const drivenMin = (t) => { const seg = t.seg || {}, phs = SEG_ORDER.filter((n) => seg[n] && seg[n].length >= 2);
-    if (!phs.length || livePts.length < 3) return null;
-    const a = seg[phs[0]][0], lastSeg = seg[phs[phs.length - 1]], b = lastSeg[lastSeg.length - 1], sl = turnSlice(livePts, a, b);
-    if (!sl) return null; const vs = sl.map((q) => q[1]).filter((v) => v != null); return vs.length ? Math.round(Math.min(...vs)) : null; };
+  // STATION-CROSSING IS THE AUTHORITY FOR "DRIVEN" (Jett 2026-09-18): see lapCrossedStation(). A fast, gentle or
+  // very short turn is driven flat-out under the 0.35 g trigger, yet the arc-along-course proves the car passed it.
+  const arcSpan = lapArcSpan(livePts);
+  const passedOnLap = (t) => lapCrossedStation(arcSpan, livePts, t);
+  const drivenMin = (t) => lapTurnMin(livePts, t);
+  // a DRIVEN turn is rated on the SAME quantity a taken turn is — its minimum speed through the turn against this
+  // lap set's history — so a fast turn you drove clean earns a real rank, not a "detector didn't fire" footnote.
+  const turnHist = (t) => { const h = {}; SEG_ORDER.forEach((seg) => ((t.phaseObs && t.phaseObs[seg]) || []).forEach((r) => {
+    if (!ls.set.has(String(r[0])) || r[2] == null) return; if (h[r[0]] == null || r[2] < h[r[0]]) h[r[0]] = r[2]; })); return Object.values(h); };
   let nDriven = 0, nAwait = 0;
   const spine = courseTurns.slice().sort((a, b) => a.seq - b.seq).map((t) => {
     const q = bySeq[t.seq]; if (q) return { t, state: "taken", q };
-    if (passedOnLap(t)) { nDriven++; return { t, state: "driven", min: drivenMin(t) }; }
+    if (passedOnLap(t)) { nDriven++; const min = drivenMin(t); return { t, state: "driven", min, v: min != null ? rankVerdict(turnHist(t), min, ls) : null }; }
     nAwait++; return { t, state: "await" };
   });
+  // the count leads with what the DATA says was driven (station-crossing), then how many of those a live corner rated
+  const nPassed = taken.length + nDriven;
+  const head = `<div class="gh">Current lap${curLap != null ? " · lap " + curLap : ""} ${live ? `<span class="lap-liveflag"><i></i>live</span>` : ""}${inChip}<span class="why">· ${nPassed} of ${courseTurns.length} turn${courseTurns.length === 1 ? "" : "s"} driven${nDriven && taken.length ? ` · ${taken.length} rated on a live corner` : ""} · rated on minimum speed against ${scopeTok(ls)} · every course turn listed</span></div>`;
   // order: driving order by default; rank/delta pull rated turns to the front, then driven, then awaiting
   const rk = (q) => (q.v.kind === "best" || q.v.kind === "ranked") ? (q.v.rank - 1) / Math.max(1, q.v.of - 1) : 2;
   let ordered = spine;
@@ -3747,11 +3912,23 @@ function lapHTML() {
       <span class="lap-spd mono"${q.peak}>${Math.round(q.c.mph_in)}<i>→</i><b>${Math.round(q.apex)}</b><i>→</i>${Math.round(q.c.mph_out)}<em> mph</em></span>
       <span class="lap-rank mono lap-v-${q.v.kind}${q.v.thin ? " thin" : ""}" style="color:${q.tone}"><b>${q.v.text}${q.v.d != null && !q.v.isBest ? ` · ${mphD(q.v.d)}` : ""}</b><em>${esc(q.v.basis)}</em></span>
       ${q.gr.cell}${cornerDetail(q.c)}</div>`;
-  const covRow = (e) => `<div class="lap-row lap-${e.state}" data-turn="${e.t.seq}" title="${e.state === "driven" ? "driven under the detector — open its analysis" : "not taken yet this lap — open its analysis"}">
+  // A DRIVEN row is now a rated pass: min speed + its rank against the pool, the same verdict a taken row shows.
+  // It carries no per-phase grip (no live corner fired), so the grip cell is left empty — speed is measured, grip
+  // is not claimed ([[fh6-grip-loss-is-priced-not-flagged]]). An AWAITING row is the turn not yet reached this lap.
+  const covRow = (e) => {
+    if (e.state === "driven") {
+      const v = e.v, tone = v && v.isBest && !v.thin ? "var(--acc)" : (v && v.d != null && v.d <= -4) ? "var(--bad)" : "var(--mut)";
+      return `<div class="lap-row lap-driven" data-turn="${e.t.seq}" title="driven — the car's line crossed this turn's station; rated on the trace's minimum speed (no live corner fired under the 0.35 g trigger)">
+        <span class="lap-turn">${esc(turnLabel(e.t))}<em>${esc(cap1(e.t.kind || ""))}</em></span>
+        <span class="lap-spd mono">${e.min != null ? `min <b>${e.min}</b><em> mph</em>` : "<em>—</em>"}</span>
+        <span class="lap-rank mono lap-v-${v ? v.kind : "nolap"}${v && v.thin ? " thin" : ""}" style="color:${tone}"><b>${v ? v.text : "driven"}${v && v.d != null && !v.isBest ? ` · ${mphD(v.d)}` : ""}</b><em>${v ? esc(v.basis) : "position"}</em></span>
+        <span></span></div>`;
+    }
+    return `<div class="lap-row lap-await" data-turn="${e.t.seq}" title="not taken yet this lap — open its analysis">
       <span class="lap-turn">${esc(turnLabel(e.t))}<em>${esc(cap1(e.t.kind || ""))}</em></span>
-      <span class="lap-spd mono">${e.state === "driven" && e.min != null ? `min <b>${e.min}</b><em> mph</em>` : "<em>—</em>"}</span>
-      <span class="lap-rank mono"><b class="lap-cov lap-cov-${e.state}">${e.state === "driven" ? "driven" : "not yet"}</b><em>${e.state === "driven" ? "under the 0.35 g trigger" : "awaiting this lap"}</em></span>
-      <span></span></div>`;
+      <span class="lap-spd mono"><em>—</em></span>
+      <span class="lap-rank mono"><b class="lap-cov lap-cov-await">not yet</b><em>awaiting this lap</em></span>
+      <span></span></div>`; };
   const rows = ordered.map((e) => e.state === "taken" ? takenRow(e.q) : covRow(e)).join("");
   const sortH = (k, lbl) => `<button class="${LAP_SORT === k ? "on" : ""}" data-lapsort="${k}" title="sort by ${lbl}">${lbl}${LAP_SORT === k ? " ▾" : " ⇅"}</button>`;
   // the summary counts only turns that COULD be ranked: an only-lap or level pool is excluded, never a win
@@ -3759,7 +3936,7 @@ function lapHTML() {
     ? `<b>${nDriven}</b> turn${nDriven === 1 ? "" : "s"} driven so far · ${nAwait} to come — each turn rates the moment you complete it`
     : rankable ? `<b style="color:${first ? "var(--acc)" : "var(--ink)"}">${first + thinFirst} of ${rankable}</b> rankable turn${rankable === 1 ? "" : "s"} come first${thinFirst ? ` <span class="why">(${thinFirst === first + thinFirst ? "all" : thinFirst} on a pool under 5 laps — a weak claim)</span>` : ""}`
     : `nothing can be ranked in ${scopeTok(ls)} — ${unranked} turn${unranked === 1 ? "" : "s"} with no other lap, a lap compared with itself`;
-  const sum = `<div class="lap-sum">${firstTxt}${worstRow ? ` · most to find: <b style="color:var(--warn)">${esc(turnLabel(worstRow.t))}</b> ${mphD(worstRow.d)} against the pool's best` : ""}<span class="why">${passes.length ? `${gripHits} of ${taken.length} turns lost grip` : ""}${nDriven ? (passes.length ? " · " : "") + nDriven + " driven under the detector" : ""}${nAwait ? " · " + nAwait + " to come" : ""}</span></div>`;
+  const sum = `<div class="lap-sum">${firstTxt}${worstRow ? ` · most to find: <b style="color:var(--warn)">${esc(turnLabel(worstRow.t))}</b> ${mphD(worstRow.d)} against the pool's best` : ""}<span class="why">${passes.length ? `${gripHits} of ${taken.length} turns lost grip` : ""}${passes.length && nDriven ? " · " + nDriven + " driven flat-out (no corner fired)" : ""}${passes.length && nAwait ? " · " + nAwait + " to come" : ""}</span></div>`;
   return `<div class="lapview">${head}${abandoned}${win ? lapWindowHTML(win, passes, ls) : ""}`
     + `<div class="lap-hd">${sortH("drive", "turn")}<span>in→min→out</span>${sortH("rank", "rank of pool")}${sortH("delta", "against the pool's best")}</div>`
     + `<div class="lap-rows">${rows}</div>${sum}</div>`;
@@ -3796,6 +3973,21 @@ function turnSlice(pts, a, b) {
   const sl = pts.slice(i0, i1 + 1), s0 = sl[0][0], L = (sl[sl.length - 1][0] - s0) || 1;
   return sl.map((q) => [(q[0] - s0) / L, q[1], q[2] | 0, q[3], q[4], null, q[6] ?? null, q[7] ?? null]);   // [fraction through the turn, mph, grip, x, z, -, thr, brk]
 }
+// PHYSICAL TURN-PASSING (Jett 2026-09-18): a turn is DRIVEN when the lap's line crossed its course station t.s —
+// the same stationing the map ticks and trace use — not when the 0.35 g / 0.8 s corner detector fired. This is
+// the "definitive physical + course-relative" test; the g-detector is the RATING layer on top. Shared by the
+// current-lap tab and the session matrix so both agree on what "taken" means. [[fh6-turn-source-ref-route-turn]]
+function lapArcSpan(pts) { let lo = Infinity, hi = -Infinity; for (let i = 0; i < pts.length; i++) { const a = pts[i] && pts[i][0]; if (a == null) continue; if (a < lo) lo = a; if (a > hi) hi = a; } return [lo, hi]; }
+function lapCrossedStation(span, pts, t) {
+  if (!pts || pts.length < 3) return false;
+  if (t.s != null && span[1] >= t.s && span[0] <= t.s) return true;   // the lap covered this turn's station — definitive; no apex radius to miss a wide racing line
+  if (t.x == null) return false;                                      // fallback for a lap/turn without stationing: apex proximity (40 m)
+  for (let i = 0; i < pts.length; i += 2) { const q = pts[i]; if (!q || q[3] == null) continue; if ((q[3] - t.x) ** 2 + (q[4] - t.z) ** 2 < 1600) return true; }
+  return false; }
+function lapTurnMin(pts, t) { const seg = t.seg || {}, phs = SEG_ORDER.filter((n) => seg[n] && seg[n].length >= 2);
+  if (!phs.length || !pts || pts.length < 3) return null;
+  const a = seg[phs[0]][0], lastSeg = seg[phs[phs.length - 1]], b = lastSeg[lastSeg.length - 1], sl = turnSlice(pts, a, b);
+  if (!sl) return null; const vs = sl.map((q) => q[1]).filter((v) => v != null); return vs.length ? Math.round(Math.min(...vs)) : null; }
 function lapWindowHTML(p, passes, ls) {
   const t = p.t, i = passes.indexOf(p), prev = passes[i - 1], next = passes[i + 1];
   const nTurns = (COURSE.turns || []).length, dirW = t.dir === "L" ? "left" : t.dir === "R" ? "right" : "";
@@ -4666,6 +4858,17 @@ function matrixHTML() {
     const { t } = turnAtMatrix(c.apex, lastSeq); if (!t) return;
     lastSeq = t.seq; seen[t.seq] = (seen[t.seq] || 0) + 1;
   });
+  // PHYSICAL PASSES THE DETECTOR MISSED — adopted from the matrix table this ledger replaced. The current
+  // lap's line proves which turns were driven even where no 0.35 g corner fired, so a turn taken gently
+  // still shows a pass instead of reading as untouched. ONLY the live/last lap of THIS session: lapShown()
+  // would fall back to a browsed pick from another session and mis-attribute its passes to this one.
+  const liveLp = (typeof liveLapFor === "function") ? liveLapFor(COURSE) : null;
+  const shownPts = (liveLp && liveLp.pts) || [];
+  const shownSpan = lapArcSpan(shownPts);
+  (COURSE.turns || []).forEach((t) => {
+    if (!seen[t.seq] && lapCrossedStation(shownSpan, shownPts, t)) seen[t.seq] = 1;
+  });
+
   return turnLedgerHTML(ls, sel, seen) ||
     `<div class="why">no corner observations on this course yet — drive it once and the ledger fills in</div>`;
 }
@@ -4806,6 +5009,52 @@ function servicesHTML() {
 // in a class section. Picking a class in the filter bar -- or clicking a class here -- FOCUSES it: the
 // other classes collapse to a one-line summary and the chosen one expands to its build table.
 const CLASS_ORDER = ["D", "C", "B", "A", "S1", "S2", "R", "X"];
+// GEARING FOR THIS COURSE (2026-09-18). A ladder is not right or wrong in the abstract -- it is right
+// or wrong FOR A COURSE, which is why this lives in the course lane and not on the build sheet. The
+// same 10-speed that is correct down a long Rivals road carries a gear it never engages around a
+// 1 km loop, and only the course lane can see that.
+//
+// The verdict is NOT decided here. build_web runs confidence.py over v_diag_by_course and ships
+// `verdict` / `lo` / `hi` / `needs_laps` / `why` with every row, so this function only renders what
+// the analysis already allowed. A row that did not clear the gate must never be drawn as a fix:
+// "watching" and "needs more laps" print the count and say so in as many words.
+function courseGearingHTML() {
+  if (!DIAG || !DIAG.by_course || !COURSE) return "";
+  const conts = new Set(atomicTwins().map((b) => b.c));
+  let rows = DIAG.by_course.filter((r) => r.route_key === COURSE.key && /^Gearing/.test(r.symptom));
+  const mine = rows.filter((r) => conts.has(r.container));
+  const scoped = mine.length > 0;
+  rows = (scoped ? mine : rows).sort((a, b) => (b.lo || 0) - (a.lo || 0));
+  if (!rows.length) {
+    return `<div class="grp"><div class="gh">Gearing for this course <span class="why">· does the ladder fit the lap</span></div>
+      <div class="why" style="padding:4px 6px">no gearing verdict on this course yet — it needs a scanned session (<code>deterministic</code> stage) with laps on this route</div></div>`;
+  }
+  const badge = (v) => v === "report" ? `<span class="chip b">recommended</span>`
+    : v === "watching" ? `<span class="chip w">watching</span>`
+    : v === "not_recurrent" ? `<span class="chip on">ruled out</span>`
+    : `<span class="chip w">need more laps</span>`;
+  const body = rows.map((r) => {
+    // n_laps null = the denominator is unknown (the laps named no tune). Print the occurrences
+    // and say the rate is unknown; never render "x of null".
+    const claim = r.n_laps == null
+      ? `${r.occurrences} occurrence${r.occurrences === 1 ? "" : "s"}, laps here not countable`
+      : r.verdict === "report"
+      ? `on at least ${Math.round((r.lo || 0) * 100)}% of laps (${r.laps_affected} of ${r.n_laps})`
+      : `${r.laps_affected} of ${r.n_laps} laps so far`;
+    // Only a cleared verdict is allowed to read as an instruction.
+    const right = r.verdict === "report"
+      ? `<span class="chip b">${esc(r.primary_fix || "")}</span>`
+      : `<span class="chip w">${r.needs_laps ? `${r.needs_laps} more lap${r.needs_laps === 1 ? "" : "s"}` : "not a recommendation"}</span>`;
+    return `<div class="frow">
+      <div class="fl"><b>${esc(r.symptom.replace(/^Gearing /, "Gearing "))}</b>
+        <span class="why">${badge(r.verdict)} · ${esc(claim)}</span>
+        <span class="why">${esc(r.why || "")}</span>
+        ${r.verdict === "report" && r.verify_test ? `<span class="why">verify: ${esc(r.verify_test)}</span>` : ""}</div>
+      <div class="fr">${right}</div></div>`;
+  }).join("");
+  return `<div class="grp"><div class="gh">Gearing for this course
+    <span class="why">· does the ladder fit the lap · ${scoped ? "this build" : "every build driven here"} · read from laps already driven, never a top-speed pull</span></div>${body}</div>`;
+}
 function courseStatsHTML() {
   // GENERAL STATISTICS, PER CAR (redesign step 4): scoped to the active lap set, this answers "which car,
   // and how does practice trade for pace" — a most-driven and a quickest headline, a laps×best scatter (one
@@ -4834,7 +5083,8 @@ function courseStatsHTML() {
   const sbal = clog.length ? `<div class="grp"><div class="gh">Session corner balance <span class="why">· ${clog.length} detected corner${clog.length === 1 ? "" : "s"} this session · front / rear grip loss · this session, not the scope</span></div>
     <div class="balbar">${bord.map((k) => `<span style="flex:${bt[k]} 0 0;background:${DGRIP[k].col}" title="${DGRIP[k].word}: ${bt[k]}"></span>`).join("")}</div>
     <div class="ballegend">${bord.map((k) => `<span><i style="background:${DGRIP[k].col}"></i>${DGRIP[k].word} · ${bt[k]} (${Math.round(bt[k] / clog.length * 100)}%)</span>`).join("")}</div></div>` : "";
-  if (!laps.length) return totals + sbal + `<div class="why" style="padding:4px 6px">${allLaps.length ? `no lap in ${scopeTok(ls)} — ${allLaps.length} on the course; widen the filter to see them` : "no laps recorded on this course yet"}</div>`;
+  const gearing = courseGearingHTML();
+  if (!laps.length) return totals + gearing + sbal + `<div class="why" style="padding:4px 6px">${allLaps.length ? `no lap in ${scopeTok(ls)} — ${allLaps.length} on the course; widen the filter to see them` : "no laps recorded on this course yet"}</div>`;
   // per-CAR aggregation (by ordinal) within scope
   const byCar = {};
   laps.forEach((l) => { const o = ordOf(l.cid);
@@ -4871,11 +5121,14 @@ function courseStatsHTML() {
     <td class="mono dim" style="text-align:right">${c.med != null ? lapTime(c.med) : "—"}</td></tr>`).join("");
   const table = `<div class="grp"><div class="gh">by car <span class="why">· ${cars.length} car${cars.length === 1 ? "" : "s"} in ${scopeTok(ls)} · fastest first</span></div>
     <table class="cstat-tbl"><thead><tr><th>car</th><th>laps</th><th>best</th><th>median</th></tr></thead><tbody>${rows}</tbody></table></div>`;
-  return totals + sbal + headline + scatter + table;
+  return totals + gearing + sbal + headline + scatter + table;
 }
 
 // ============ SESSION LAPS + SINGLE-LAP ANALYSIS (course v2, 2026-09-16) ============
 let SINGLE_LAP = null;   // lap id selected in the Single-lap tab
+let HOVER_LAP = null;    // lap under the cursor on the speed trace — transient; the mini panel previews it, a click pins it as SINGLE_LAP (part 2, docs/plan-lap-inspection.md)
+let TRACE_LAPS = [];     // the laps currently drawn on the course trace [{id, pts}] — the source for the hover nearest-line hit-test
+function refreshLapInfo() { const el = document.querySelector("#rightHd .lapinfo"); if (el) el.outerHTML = lapInfoHTML() || ""; }   // light in-place re-render of just the mini panel (no full paintRight) as the hover moves
 let DELTA_REF = (() => { try { return localStorage.getItem("fh6DeltaRef") || "sbest"; } catch (e) { return "sbest"; } })();   // sbest | obest | median
 const lapOrd = (cid) => String(cid || "").split("|")[0] || "?";
 // CLEAN = COMPARABLE. void / partial / rewound were always excluded; the COVERAGE FLOOR (2026-09-18) is the

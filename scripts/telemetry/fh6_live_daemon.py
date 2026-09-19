@@ -761,7 +761,7 @@ def ingest(p, t_mono):
             else:
                 fr = max(max(abs(r["slip"]["FL"][2]), abs(r["slip"]["FR"][2])) for r in on)
                 rr = max(max(abs(r["slip"]["RL"][2]), abs(r["slip"]["RR"][2])) for r in on)
-                imp = any(abs(r["lat"]) > 3.0 or r["smash"] > 0 for r in on)
+                imp = any(r["smash"] > 0 for r in on)   # true contact only; kerb/terrain jolts (|lat|>3) are not impacts (matches analyze_session grip_code, 2026-09-18)
                 st = "impact" if imp else ("both" if fr > 1 and rr > 1 else "front" if fr > 1 else "rear" if rr > 1 else "calm")
                 e = {"t": s_prev, "state": st, "car": on[-1]["cid"], "mph": round(sum(r["mph"] for r in on) / len(on)), "f": round(fr, 2), "r": round(rr, 2), "g": round(max(abs(r["lat"]) for r in on), 2)}
             with ST.lock: ST.strip.append(e)
@@ -856,7 +856,14 @@ def ingest(p, t_mono):
             _cost = getattr(ST, "_last_analysis_secs", 0.0) or 0.0
             try: _sz = os.path.getsize(ST.csv_path) if not ST.replay else 0
             except Exception: _sz = 0
-            if (_cost and _cost <= 8.0) or (not _cost and _sz < 150e6):
+            # LAP-BOUNDARY IMPORT (Jett 2026-09-18): the size/cost gate below keeps a big capture's analysis off the
+            # game's frame pacing while you're driving — but a lap that JUST finished with the car now stopped is the
+            # results screen, a genuine pause. Firing there is frame-safe regardless of capture size, and it is what
+            # makes a Rivals lap reach the dashboard right after you set it instead of waiting for session-close
+            # (on==0, which never happens while you sit on the winner screen). run_analysis(final=True) both writes
+            # laps.db AND pings the telemetry rebuild, so the lap surfaces on the next reload out of the menu.
+            _just_lapped = getattr(ST, "_beat_lap_t", 0) and (t_mono - ST._beat_lap_t) < 12
+            if _just_lapped or (_cost and _cost <= 8.0) or (not _cost and _sz < 150e6):
                 ST._stop_imported = True; ST.live_since_analysis = 0; ST.drive_since_periodic = 0.0
                 threading.Thread(target=run_analysis, args=(t_mono, True), daemon=True).start()
     elif (c.get("mph") or 0) > 5:

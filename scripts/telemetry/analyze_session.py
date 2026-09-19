@@ -1478,7 +1478,10 @@ def main():
     sess["cars"] = sorted(cars.values(), key=lambda c: -c["live_frames"]); sess["segments"] = segments
 
     # ---- impacts / zero windows ----
-    impacts = sorted({round(r["t"], 1) for r in live if abs(r["lat_g"]) > 3.0 or r["SmashableVelDiff"] > 0})
+    # TRUE CONTACT ONLY (Jett 2026-09-18): a smashable-object hit. The old |lat_g|>3 arm caught kerb / rumble /
+    # terrain JOLTS (97.5% of grip-4, peak 9.35 g), not collisions; barrier/terrain speed-loss is the `wall`
+    # detector below (folded into grip-4 there), and bottoming is its own layer. [[fh6-grip-loss-is-priced-not-flagged]]
+    impacts = sorted({round(r["t"], 1) for r in live if r["SmashableVelDiff"] > 0})
     sess["impacts"] = impacts[:200]
     zw = []; cur = None
     for r in rows:
@@ -1497,7 +1500,7 @@ def main():
         if len(on) < len(rs) / 2: strip.append({"t": s, "state": "off"}); continue
         fr = max(max(abs(r["CombinedSlipFL"]), abs(r["CombinedSlipFR"])) for r in on)
         rr = max(max(abs(r["CombinedSlipRL"]), abs(r["CombinedSlipRR"])) for r in on)
-        imp = any(abs(r["lat_g"]) > 3.0 or r["SmashableVelDiff"] > 0 for r in on)
+        imp = any(r["SmashableVelDiff"] > 0 for r in on)   # true contact only; kerb/terrain jolts (|lat_g|>3) are not impacts
         st = "impact" if imp else ("both" if fr > 1 and rr > 1 else "front" if fr > 1 else "rear" if rr > 1 else "calm")
         strip.append({"t": s, "state": st, "car": cid(on[-1]), "mph": round(statistics.median([r["speed_mph"] for r in on])), "f": round(fr, 2), "r": round(rr, 2), "g": round(max(abs(r["lat_g"]) for r in on), 2)})
     sess["strip"] = strip
@@ -1649,6 +1652,9 @@ def main():
         wall.append({"t": round(r["t"], 1), "car": cid(r), "mph": round(r["speed_mph"]), "drop": round(-d1, 1),
                      "x": round(r["PosX"]), "z": round(r["PosZ"]), "hard": d1 <= WALL_HARD})
     sess["wall"] = wall[:200]
+    # barrier/terrain contact frames (the `wall` detector's speed-loss hits) count as TRUE CONTACT for grip 4,
+    # alongside smashable hits — so a guardrail scrape that slows the car reads as a real hit, not a bare jolt.
+    _wall_ts = {e["t"] for e in wall}
     pulses = []; i = 0
     while i < n - 50:
         r = live[i]
@@ -2323,9 +2329,13 @@ def main():
         # GRIP STATE — the same alphabet the live strip uses (fh6_live_daemon ~line 254), so one vocabulary
         # describes a moment whether it is read live, in the strip, on the map or along a saved trace.
         # 0 calm · 1 front (understeer) · 2 rear (oversteer) · 3 both (drift/overdriven) · 4 impact
+        # grip 4 = TRUE CONTACT ONLY (Jett 2026-09-18): a smashable-object hit, OR a `wall` barrier/terrain frame
+        # (its own speed-loss detector). The old |lat_g|>3 arm was measured at 97.5% of grip-4 and was kerb / rumble
+        # / terrain JOLTS (peak 9.35 g — no car corners at 9 g), NOT collisions and almost never bottoming (~1%); it
+        # drew a starburst STRING on the map. A jolt frame now falls through to its real slip-based grip state.
         def grip_code(r):
             try:
-                if abs(r.get("lat_g") or 0) > 3.0 or (r.get("SmashableVelDiff") or 0) > 0: return 4
+                if (r.get("SmashableVelDiff") or 0) > 0 or (r.get("t") is not None and round(r["t"], 1) in _wall_ts): return 4
                 fr = max(abs(r["CombinedSlipFL"]), abs(r["CombinedSlipFR"]))
                 rr = max(abs(r["CombinedSlipRL"]), abs(r["CombinedSlipRR"]))
                 return 3 if (fr > 1 and rr > 1) else 1 if fr > 1 else 2 if rr > 1 else 0

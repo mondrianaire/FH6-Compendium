@@ -588,6 +588,20 @@ CREATE TABLE IF NOT EXISTS session_event (
   PRIMARY KEY (session_id, i)
 ) WITHOUT ROWID;
 
+-- WHERE the car bottomed out or hit a barrier, per session, with world positions (analyze_session's
+-- `bottoming` / `wall` detectors). Display data: build_web attributes each hit to a course by proximity to
+-- its driven line and clusters them into a few located map markers (🔧 bottoming / 💥 barrier). NOT a lap
+-- validity signal — a barrier scrape slows the car but never voids the lap. Added 2026-09-18.
+CREATE TABLE IF NOT EXISTS session_hit (
+  session_id  TEXT NOT NULL REFERENCES session(session_id) ON DELETE CASCADE,
+  kind        TEXT NOT NULL,            -- 'bottoming' (suspension at full compression) | 'wall' (barrier/terrain one-frame speed loss)
+  x           REAL, z REAL,             -- world position of the hit
+  mph         INTEGER,
+  hard        INTEGER,                  -- 1 = past the HARD gate (deep bottom / large speed loss)
+  wheel       TEXT,                     -- bottoming: FL/FR/RL/RR; NULL for wall
+  drop_mph    REAL                      -- wall: one-frame speed lost; NULL for bottoming
+);
+
 CREATE TABLE IF NOT EXISTS course (
   route_key    TEXT PRIMARY KEY,         -- '-1700_-4450' — the start-cell key
   name         TEXT,                     -- RESOLVED by stage route_names (declared wins; else the derived event's name); see COURSE NAMES below. Never written from a JSON file except as a placeholder by telemetry.
@@ -1219,6 +1233,25 @@ LEFT JOIN course_route cr ON cr.route_key = d.route_key
 LEFT JOIN ref_route_turn g ON g.route_id = cr.route_id AND g.turn_id = d.turn_id
 WHERE d.turn_id IS NOT NULL
 GROUP BY d.route_key, d.turn_id, d.symptom;
+
+-- What goes wrong on ONE COURSE for one build, including the faults that belong to no turn.
+-- v_diag_by_turn cannot carry these: it filters turn_id IS NOT NULL, so a whole-lap fault such as
+-- "top gear never used on this course" is invisible to it by construction. Gearing is exactly that
+-- kind of fault -- it is a property of the lap against the ladder, not of any one corner -- and the
+-- course lane is where it has to be answered, because the same ladder can be right for one course
+-- and wrong for the next.
+CREATE VIEW IF NOT EXISTS v_diag_by_course AS
+SELECT d.route_key, c.name AS course, d.container, d.hw_hash, d.symptom, s.phase,
+       s.primary_fix, s.secondary_fix, s.verify_test,
+       COUNT(*) AS occurrences,
+       COUNT(DISTINCT d.lap_id) AS laps_affected,
+       ROUND(AVG(d.severity), 3) AS mean_severity,
+       ROUND(MAX(d.severity), 3) AS peak_severity
+FROM diag_event d
+JOIN ref_symptom s ON s.symptom = d.symptom
+LEFT JOIN course c ON c.route_key = d.route_key
+WHERE d.route_key IS NOT NULL
+GROUP BY d.route_key, d.container, d.symptom;
 
 -- What a given setup keeps doing wrong, wherever it happens.
 CREATE VIEW IF NOT EXISTS v_diag_by_setup AS

@@ -108,22 +108,126 @@ done when every one of its tables or entries is either imported or has a row her
 Field-level catalogue of these tables (full column lists, row counts, and what every coded value means):
 **`docs/handoff-data-structures.md`** — the written companion to the *FH6 Lab Database ERD* Eraser file.
 
+## 0b. SOURCE REGISTRY — machine-checked
+
+Every NON-BINARY source, carrying the same four tags the `.bt` templates use, so one vocabulary covers
+the whole inventory. `python scripts/tools/check_db_docs.py sources` parses this block and verifies that
+every `SOURCE-LOCATION` resolves on disk. `SOURCE-LOCATION-OPTIONAL` may legitimately be absent —
+git-ignored, per-worktree, or living in a different worktree — and is reported rather than failed.
+
+The BINARY sources are not repeated here: they declare the same tags inside their own templates in
+**`docs/formats/`**, verified by `scripts/tools/check_bt_template.py paths`.
+
+```
+SOURCE-NAME: central database
+SOURCE-CATEGORY: lab store -- SQLite, GENERATED, git-ignored, per-worktree
+SOURCE-LOCATION-OPTIONAL: data/fh6.db
+SOURCE-READ: never hand-edit. Rebuild with scripts/db/rebuild.py, NEVER a standalone import stage --
+SOURCE-READ: standalone skips course_match/route_names and courses lose their names.
+SOURCE-READER: scripts/db/fh6db.py
+
+SOURCE-NAME: lap trace store
+SOURCE-CATEGORY: lab store -- SQLite, GENERATED, git-ignored, per-worktree
+SOURCE-LOCATION-OPTIONAL: data/laps.db
+SOURCE-READ: one table, lap_traces. Written by the analyzer, read by the dashboard build.
+SOURCE-READER: scripts/db/import_telemetry.py
+
+SOURCE-NAME: raw telemetry captures
+SOURCE-CATEGORY: lab store -- gzipped CSV, GENERATED, git-ignored, per-worktree
+SOURCE-LOCATION-OPTIONAL: captures/*.csv.gz
+SOURCE-READ: one row per UDP frame, one file per session -- the decoded form of the 324-byte Data Out
+SOURCE-READ: packet (docs/formats/fh6_dataout_packet.bt). The channels NOT persisted to lap_point --
+SOURCE-READ: per-wheel slip, velocity components, yaw rate, handbrake -- exist ONLY here.
+SOURCE-READER: scripts/telemetry/backfill_laps.py (replay), scripts/telemetry/analyze_session.py
+
+SOURCE-NAME: committed knowledge and config stores
+SOURCE-CATEGORY: lab store -- JSON, hand-written or curated, TRACKED in git
+SOURCE-LOCATION: data/*.json
+SOURCE-READ: plain JSON. Every store is listed with its purpose in section 2; adding one without a row
+SOURCE-READ: there is exactly what the two-way `stores` check catches.
+SOURCE-READER: various -- each store names its consumer in section 2
+
+SOURCE-NAME: course models
+SOURCE-CATEGORY: lab store -- JSON, accumulated per course, partly tracked
+SOURCE-LOCATION: data/courses/*.json
+SOURCE-READ: one file per course, keyed route:<id> or <x>_<z>. Filenames are SANITISED -- a colon is
+SOURCE-READ: illegal on Windows, and writer and reader must share the sanitiser or courses go unnamed.
+SOURCE-READ: Judge a new sample against the accumulated model, never the model against one sample.
+SOURCE-READER: scripts/telemetry/analyze_session.py, scripts/db/import_telemetry.py
+
+SOURCE-NAME: session summaries
+SOURCE-CATEGORY: lab store -- JSON, one per capture, partly tracked
+SOURCE-LOCATION: data/sessions/*.json
+SOURCE-READ: the analyzer's output for one capture -- laps, events, markers, per-lap trace indices.
+SOURCE-READER: scripts/telemetry/analyze_session.py
+
+SOURCE-NAME: build sheets
+SOURCE-CATEGORY: lab store -- JSON, TRACKED in git
+SOURCE-LOCATION: data/builds/*
+SOURCE-READER: scripts/db/build_web.py
+
+SOURCE-NAME: extracted game strings
+SOURCE-CATEGORY: lab store -- extracted from EN.zip, TRACKED in git
+SOURCE-LOCATION: data/game-strings/*
+SOURCE-READ: the decoded form of the .str tables (docs/formats/fh6_stringtable_str.bt). Refresh after a
+SOURCE-READ: title update -- see docs/game-data-refresh.md.
+SOURCE-READER: scripts/db/strparse.py
+
+SOURCE-NAME: dashboard API bundle
+SOURCE-CATEGORY: generated view layer -- JSON, git-ignored, PER-WORKTREE
+SOURCE-LOCATION-OPTIONAL: dashboard/v2/api/*.json
+SOURCE-READ: exists only where build_web.py has run, and a DB change stays invisible to the page until
+SOURCE-READ: it does. It is NOT a rebuild.py stage. The bare repo root has an EMPTY api/ -- the
+SOURCE-READ: dashboard there hangs on "reading the database..."; never use it for the live view.
+SOURCE-READER: scripts/db/build_web.py
+
+SOURCE-NAME: decrypted game database
+SOURCE-CATEGORY: game install -- DECRYPTED COPY, outside the repo
+SOURCE-LOCATION: C:/Users/mondr/Downloads/forza raw data files/FH6_Database.sqlite
+SOURCE-READ: the plaintext of gamedbRC.slt, 205 tables. Produced by decrypting a COPY, with
+SOURCE-READ: scripts/tools/fh6_local_decrypt or ForzaCryptoTool. NEVER run the .exe/.msi files that
+SOURCE-READ: sit in that same folder.
+SOURCE-READER: scripts/db/import_gamedb.py
+
+SOURCE-NAME: race start triggers
+SOURCE-CATEGORY: game install -- PLAINTEXT XML (not binary; deliberately has no .bt)
+SOURCE-LOCATION: C:/XboxGames/Forza Horizon 6/Content/media/tracks/brio/triggerzones/tz_race_activations/race_triggers.tz
+SOURCE-READ: UTF-8 with a BOM; opens in any text editor. 36 start spheres keyed by route id. They
+SOURCE-READ: CORROBORATE geometry and must never be used to NAME a course, and the sphere is offset
+SOURCE-READ: from the start/finish line.
+SOURCE-READER: scripts/telemetry/fh6_anchors.py -> scripts/db/import_anchors.py
+
+SOURCE-NAME: drift video corpus
+SOURCE-CATEGORY: lab store -- video, LIVES IN A DIFFERENT WORKTREE
+SOURCE-LOCATION-OPTIONAL: data/drift-runs/*
+SOURCE-READ: present only in the video-drift worktree, not here. Never claim a drift mechanic from a
+SOURCE-READ: single video, and sample by SOURCE FRAME INDEX, never ffmpeg's fps filter.
+SOURCE-READER: see the drift research notes in docs/
+
+SOURCE-NAME: live daemon endpoints
+SOURCE-CATEGORY: live service -- NO FILE ON DISK
+SOURCE-LOCATION-OPTIONAL: (none -- HTTP and SSE on port 8765 while the lab runs)
+SOURCE-READ: the live frame uses SHORT names (thr, brk, lat, yaw ...), not the packet's field names.
+SOURCE-READ: In-menu frames carry nothing usable -- trust the menu-exit disk rescan instead.
+SOURCE-READER: scripts/telemetry/fh6_live_daemon.py
+```
+
 ## 1. The central database — `data/fh6.db` (107 MB)
 
 | table | rows | what it is |
 |---|---|---|
-| `corner_obs` | 17560 | per-corner history per lap — one row per lap × turn, across 1,475 laps. (It was empty until `course_match`+`corners` were rerun past the 2026-09-05 schema change; rebuild.py's I6 check guards that.) |
+| `corner_obs` | 17685 | per-corner history per lap — one row per lap × turn, across 1,475 laps. (It was empty until `course_match`+`corners` were rerun past the 2026-09-05 schema change; rebuild.py's I6 check guards that.) |
 | `course` | 127 | columns: route_key, name, is_rivals, event_id, length_m, turn_count… |
 | `course_event` | 84 | every course × candidate-event pairing `route_names` weighed — tier (game/map/length/declared) plus its evidence columns, `chosen`=1 on the winner. Filled by stage `route_names`. |
 | `course_route` | 125 | columns: route_key, route_id, match_kind, mean_dev_m, p95_dev_m, covered… + `anchor_route_id`, `anchor_events`, `anchor_agree` (2026-09-05) — the sphere most of the course's events started in and whether it is the geometry's route. match_kind gained `anchored` (route_id stays NULL, identity in `anchor_route_id` only): a sphere holding a strict majority of the course's events, shape unverified, never reaches corners, the centre-line overlay or naming. Recomputed wholesale by stage `course_match`; one row per course with ≥12 geometry points. |
-| `course_turn` | 2405 | the course's own turns (the namespace the map and the trace use). |
-| `diag_event` | 38335 | every detected failure incident, placed on a turn. |
-| `hw_package` | 667 | columns: hw_hash, ordinal, label, pi, class, engine_id… |
-| `hw_package_part` | 33350 | columns: hw_hash, slot_index, slot, part_id, name |
-| `import_run` | 11818 | columns: run_id, kind, source, started_utc, finished_utc, n_rows… |
-| `lap` | 1544 | columns: lap_id, route_key, session_id, cid, container, hw_hash… + (schema 5, 2026-09-06) `lap_dist_m` (odometer over the game-timed lap), `rewinds`, `pauses`, `pause_s`, `stitched` (the lap's opening came from the previous capture file). A lap is what the GAME timed (CurrentLap start → LapNumber+1 / LastLap published); rows a rewind revoked are not in it. See `lap_marker`. + `official` (schema 8: the GAME published this lap time — 433 laps. An official lap counts even with a rewind in it; an unofficial one must clear the 0.97 coverage floor and carry no rewinds before it can be crowned). |
+| `course_turn` | 2409 | the course's own turns (the namespace the map and the trace use). |
+| `diag_event` | 49067 | every detected failure incident, placed on a turn. |
+| `hw_package` | 671 | columns: hw_hash, ordinal, label, pi, class, engine_id… |
+| `hw_package_part` | 33550 | columns: hw_hash, slot_index, slot, part_id, name |
+| `import_run` | 12204 | columns: run_id, kind, source, started_utc, finished_utc, n_rows… |
+| `lap` | 1574 | columns: lap_id, route_key, session_id, cid, container, hw_hash… + (schema 5, 2026-09-06) `lap_dist_m` (odometer over the game-timed lap), `rewinds`, `pauses`, `pause_s`, `stitched` (the lap's opening came from the previous capture file). A lap is what the GAME timed (CurrentLap start → LapNumber+1 / LastLap published); rows a rewind revoked are not in it. See `lap_marker`. + `official` (schema 8: the GAME published this lap time — 433 laps. An official lap counts even with a rewind in it; an unofficial one must clear the 0.97 coverage floor and carry no rewinds before it can be crowned). |
 | `lap_marker` | — | (schema 5) every gap in a lap's final line, placed on the lap: `kind` rewind (`dur_s` = seconds of driving undone, `over_line` when the start/finish was re-crossed and the game re-timed the lap), pause (menu; game clock frozen), gap (telemetry dropout, clock ran), jump (respawn/teleport; lap intact, trace not continuous); `t` from lap start, `race_s`, `dist_m`, `detail` JSON (silence_s, pos_gap_m, on_line, race_rebase_s…). Written by `import_telemetry.py` from the session JSON's lap rows. |
-| `lap_point` | 511998 | every lap's trace: arc, mph, grip state, x/z AND elev_m, + `dist_m` (schema 5: the odometer at the point, so a lap's points can be placed against the game's own distance, not just the resampled arc), + `thr` / `brk` (schema 6, 2026-09-11: throttle and brake 0-100 % from the capture's Accel / Brake, for the pedal paint; NULL on laps analysed before schema 6 until their capture is replayed with backfill_laps.py) + `lat_g` (schema 7) + `r_m` (schema 9, 2026-09-18: the DRIVEN radius `v/ω` from the capture's yaw rate — never the road's fitted `ref_route_turn.radius_m`; 192,995 points, and the same replay also stores `x`/`z` to one decimal instead of whole metres). |
+| `lap_point` | 515322 | every lap's trace: arc, mph, grip state, x/z AND elev_m, + `dist_m` (schema 5: the odometer at the point, so a lap's points can be placed against the game's own distance, not just the resampled arc), + `thr` / `brk` (schema 6, 2026-09-11: throttle and brake 0-100 % from the capture's Accel / Brake, for the pedal paint; NULL on laps analysed before schema 6 until their capture is replayed with backfill_laps.py) + `lat_g` (schema 7) + `r_m` (schema 9, 2026-09-18: the DRIVEN radius `v/ω` from the capture's yaw rate — never the road's fitted `ref_route_turn.radius_m`; 192,995 points, and the same replay also stores `x`/`z` to one decimal instead of whole metres). |
 | `obs_evidence` | 129 | columns: obs_id, subject, claim, confidence, source, observed_utc… |
 | `obs_menu` | 92 | observed shop tiles (92 rows) — menu positions proven in game. |
 | `obs_pi` | 223 | observed PI deltas per part (65 rows) — the empirical per-part PI store. |
@@ -152,6 +256,7 @@ Field-level catalogue of these tables (full column lists, row counts, and what e
 | `ref_route` | 170 | columns: route_id, name, length_m, n_points, is_loop, bbox_x0… `is_race` = 1 on the 36 routes the game ships a race-activation sphere for (stage `anchors`). |
 | `route_anchor` | 36 | the game's race-activation spheres from `race_triggers.tz`: route_id + world position + 100 m radius — the ONLY populated route-id field in the shipped data. A session event that starts inside one began where that route's race begins. Corroborates and tie-breaks `course_route`; never names. Stage `anchors`. |
 | `session_event` | 495+ | every analyzer event (race / timed run / reference-loop pass) per session with mode, laps, distance, its START and END position and `start_is_line` (1 = a detected lap-boundary crossing, 0 = only where the capture window opened, NULL = older session file) — what `course_match` tests against `route_anchor`. Stage `telemetry`. |
+| `session_hit` | — | where the car bottomed out (`kind='bottoming'`, suspension at full compression) or hit a barrier/terrain (`kind='wall'`, one-frame speed loss) per session, with world `x`/`z`, `mph`, `hard`, `wheel` (bottoming) and `drop_mph` (wall). From `analyze_session`'s `bottoming`/`wall` detectors. `build_web` attributes each hit to a course by proximity to its driven line and clusters them into 🔧/💥 map markers (`course/<key>.json` → `hits`). Display only — a barrier scrape slows the car but NEVER voids the lap. Stage `telemetry`. |
 | `ref_route_point` | 275737 | columns: route_id, i, x, y, z |
 | `ref_route_surface` | 275737 | columns: route_id, i, road_class, road_type, road_profile, offroad… |
 | `ref_route_turn` | 3878 | the MAP's turns with width_m and bank_deg (a DIFFERENT id namespace from course_turn — never join by id). |
@@ -159,19 +264,19 @@ Field-level catalogue of these tables (full column lists, row counts, and what e
 | `ref_slot` | 50 | THE MENU MAP: menu_area, menu_area_order, menu_order, in_upgrade_shop, category, key_column — the game's own upgrade tree. |
 | `ref_string` | 59268 | the game's string tables (58,722 rows) — the ID → name layer. |
 | `ref_string_table` | 290 | columns: table_name, name_hash, n_entries, has_csv |
-| `ref_symptom` | 11 | the failure catalogue: primary/secondary/tertiary fix, verify_test, detector. |
+| `ref_symptom` | 17 | the failure catalogue: primary/secondary/tertiary fix, verify_test, detector. |
 | `ref_torque_curve` | 1752 | a dyno per camshaft part (1,706) and electric motor (19): peak torque/power precomputed, samples every 100 rpm. Explode it with `v_torque_point` (rpm, Nm, lb-ft, hp). |
 | `ref_track` | 58 | columns: track_id, name, media_name, length_m, is_reverse, is_real_world… |
 | `ref_wheel` | 1259 | every rim with mass and mass_level (rims are a weight class). |
 | `ref_wheel_category` | 5 | columns: category_id, name, display_order |
 | `schema_meta` | 2 | columns: key, value |
-| `session` | 474 | columns: session_id, started_utc, duration_s, frames, rate_pps, source… |
-| `session_car` | 1480 | columns: session_id, cid, ordinal, build_id, hw_hash, name… |
-| `setup` | 686 | columns: setup_hash, hw_hash, ordinal, label, n_containers, first_seen_utc |
-| `tune_container` | 758 | columns: container, ordinal, saved_utc, tune_name, locked, source… |
-| `tune_gear` | 5240 | EVERY SAVE'S GEAR LADDER, exact from the save file — final drive + per-gear ratios. This is why identity rarely needs a pull. |
-| `tune_part` | 37900 | columns: container, slot_index, slot, part_id, name, level… |
-| `tune_slider` | 22740 | columns: container, slider, norm, value, unit, min_value… |
+| `session` | 645 | columns: session_id, started_utc, duration_s, frames, rate_pps, source… |
+| `session_car` | 1488 | columns: session_id, cid, ordinal, build_id, hw_hash, name… |
+| `setup` | 691 | columns: setup_hash, hw_hash, ordinal, label, n_containers, first_seen_utc |
+| `tune_container` | 763 | columns: container, ordinal, saved_utc, tune_name, locked, source… |
+| `tune_gear` | 5287 | EVERY SAVE'S GEAR LADDER, exact from the save file — final drive + per-gear ratios. This is why identity rarely needs a pull. |
+| `tune_part` | 38150 | columns: container, slot_index, slot, part_id, name, level… |
+| `tune_slider` | 22890 | columns: container, slider, norm, value, unit, min_value… |
 
 Views: `v_build_sheet`, `v_course_best`, `v_diag_by_setup`, `v_diag_by_turn`, `v_rim_equivalent`, `v_tune_sheet`.
 
@@ -190,7 +295,10 @@ Views: `v_build_sheet`, `v_course_best`, `v_diag_by_setup`, `v_diag_by_turn`, `v
 | `drivetrain-ladder-nsxr.json` | 2kB | proven Differential and Driveline grids and their slider rewrites. |
 | `eliminator-tips.json` | 32kB |  |
 | `engine-swaps.json` | 72kB | engine swap catalogue. |
+| `field-catalog.json` | 485kB | the FIELD CATALOGUE as data: 2,007 rows of `{store, field, domain, storage_type, enum_source, join_target}`. The source for the `ref_field` / `ref_field_gate` / `ref_field_reliability` tables (stage `field_catalog`) — knowledge about the schema, stored IN the schema. |
 | `formulas.json` | 19kB | the derived formulas (spring rates, PI, display). |
+| `sweep-plan.json` | 16kB | an A/B slider-sweep plan — car, `route_key`, course and `hw_hash` pinned, so a change can be ATTRIBUTED to one slider. Added by the A/B groundwork at `0427312`. |
+| `rivals-routes-dirt.json` | 14kB | the dirt-discipline Rivals routes, with `schema_version`, `created`, `discipline`, `source` and `note` alongside `routes`. Companion to `docs/rivals-routes-capture.md`. |
 | `game-assets.json` | 4kB |  |
 | `game-strings/` | 433kB | 23 files decoded from `EN.zip` by `scripts/telemetry/fh6_strings.py` (2026-09-01); `RivalsEventData.json` alone carries 604 IDS_Name + 604 IDS_Description guids resolving to 88 distinct route names. |
 | `global-slider-ranges.json` | 3kB | the solved slider ranges. |
@@ -264,6 +372,10 @@ service (8001) adds `POST /rebuild`, `GET /status` and `GET /watch` (code + data
 
 How and when each of these is refreshed after a game update (decryption, extraction, utilities, frequency):
 **`docs/game-data-refresh.md`**.
+
+Byte-level layout of every BINARY one of them (the tune blob, the Data Out packet, the CryptoContainer,
+`.owt`, `.nav`, `.str`, BXML, `.swatchbin`) as runnable 010 Editor templates: **`docs/formats/`** —
+8 templates, each verified against the real corpus by `scripts/tools/check_bt_template.py`.
 
 | source | what it is |
 |---|---|

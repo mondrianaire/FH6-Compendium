@@ -37,7 +37,15 @@ sys.path.insert(0, HERE)
 
 import fh6db                                            # noqa: E402
 import export_options                                   # noqa: E402
+import import_diagnosis as _diag                        # noqa: E402  (the deterministic symptom set)
 sys.path.insert(0, os.path.join(ROOT, "scripts", "telemetry"))
+import confidence as _conf                              # noqa: E402
+
+#: symptoms whose detector reads a physical state rather than estimating a tendency, so one
+#: occurrence is the occurrence. Taken from import_diagnosis rather than restated, so adding a
+#: detector there cannot leave the dashboard grading it as a tendency.
+_DET_SYMPTOMS = set(_diag.DET_FAULT_SYMPTOM.values()) | {
+    "Bottoming out (suspension on the stop)"}
 import fh6_tune_decode as _tune                         # noqa: E402  — parts_hash, to attach each build's DRIVEN class
 
 OUT = os.path.join(ROOT, "dashboard", "v2", "api")
@@ -711,10 +719,45 @@ def main(argv=None):
                         print(f"  {key}: {len(_bad_laps)} lap(s) are not on route {_decl_rid} "
                               f"(only {_share:.0%} of the path is) -- unbound")
 
+        # BOTTOMING / BARRIER MARKERS (Jett 2026-09-18): where the car bottomed out (🔧) or hit a barrier (💥),
+        # from the per-session hit detectors, attributed to THIS course by proximity to its driven line and
+        # CLUSTERED (25 m) so the map shows a few located markers with a frequency, not a per-frame string.
+        # Display only — a barrier scrape slows the car but never voids the lap. n = events in the cluster,
+        # hard = how many past the deep gate, laps = distinct sessions that hit here.
+        hits = []
+        _sess_ids = sorted({l["sid"] for l in laps if l.get("sid")})
+        if _sess_ids and traces:
+            _GRID = 20.0                                              # coarse on-course grid of the driven line, O(1) membership
+            _on_cells = set()
+            for _tr in traces.values():
+                for _p in _tr:
+                    if len(_p) > 4 and _p[3] is not None:
+                        _on_cells.add((int(round(_p[3] / _GRID)), int(round(_p[4] / _GRID))))
+            def _on_course(hx, hz):
+                _cx0, _cz0 = int(round(hx / _GRID)), int(round(hz / _GRID))
+                return any((_cx0 + _dx, _cz0 + _dz) in _on_cells for _dx in (-1, 0, 1) for _dz in (-1, 0, 1))
+            _qm = ",".join("?" * len(_sess_ids))
+            _raw = cx.execute("SELECT session_id, kind, x, z, hard FROM session_hit WHERE session_id IN (%s)" % _qm,
+                              tuple(_sess_ids)).fetchall()
+            _CL = 25.0
+            _clus = {}
+            for _r in _raw:
+                _hx, _hz = _r["x"], _r["z"]
+                if _hx is None or _hz is None or not _on_course(_hx, _hz):
+                    continue
+                _ck = (_r["kind"], int(round(_hx / _CL)), int(round(_hz / _CL)))
+                _cc = _clus.get(_ck)
+                if _cc is None:
+                    _clus[_ck] = _cc = {"kind": _r["kind"], "sx": 0.0, "sz": 0.0, "n": 0, "hard": 0, "sess": set()}
+                _cc["sx"] += _hx; _cc["sz"] += _hz; _cc["n"] += 1
+                _cc["hard"] += 1 if _r["hard"] else 0; _cc["sess"].add(_r["session_id"])
+            hits = sorted(({"kind": _c2["kind"], "x": round(_c2["sx"] / _c2["n"], 1), "z": round(_c2["sz"] / _c2["n"], 1),
+                            "n": _c2["n"], "hard": _c2["hard"], "sess": len(_c2["sess"])} for _c2 in _clus.values()),
+                          key=lambda h: -h["n"])[:80]
         total += write(os.path.join(out, "course", re.sub(r"[^A-Za-z0-9_-]", "_", key) + ".json"),
                        {"key": key, "name": c["name"], "len": _disp_len, "rivals": c["rivals"],
                         "path": geo.get("path") or [], "turns": turns, "laps": laps,
-                        "traces": traces, "route": route, "naming": naming,
+                        "traces": traces, "route": route, "naming": naming, "hits": hits,
                         "n_turns_catalogued": n_cat, "classGrip": class_grip,
                         # when this history was built, so the course view can stamp the comparison it feeds
                         # ("history built 10:44") instead of leaving freshness to the status bar (handoff §3)
@@ -830,9 +873,51 @@ def main(argv=None):
     total += write(os.path.join(out, "world.json"), world)
 
     # ---- diagnosis rollups: what goes wrong, where, for whom ----------------------------
+    # COURSE-LEVEL faults carry the confidence verdict with them, decided HERE rather than in the
+    # browser. The gate is arithmetic that decides what the dashboard is allowed to claim, and a
+    # second implementation in JS would drift from the Python one -- at which point the dashboard
+    # would be recommending a tuning change the analysis had already refused. One implementation,
+    # exported as a verdict the renderer only has to display.
+    by_course = rows(cx, "SELECT * FROM v_diag_by_course")
+    lap_n = {(r["route_key"], r["container"]): r["n"] for r in cx.execute(
+        """SELECT route_key, container, COUNT(*) n FROM lap
+           WHERE coalesce(void,0)=0 AND route_key IS NOT NULL AND container IS NOT NULL
+           GROUP BY 1, 2""")}
+    for r in by_course:
+        # n is every lap this build drove on this course -- the passes that COULD have shown the
+        # fault -- never the count that did. Falling back to laps_affected would make every fault
+        # "100% of laps" the moment the denominator went missing.
+        known = lap_n.get((r["route_key"], r["container"]))
+        cls = "deterministic" if r["symptom"] in _DET_SYMPTOMS else "statistical"
+        if known is None:
+            # NO DENOMINATOR, SO NO RATE. 320 of 1,975 course rows carry a NULL container -- laps
+            # that named no tune -- and for those the number of laps that COULD have shown the fault
+            # is not knowable. Falling back to laps_affected would set n = k and manufacture "100%
+            # of laps, at least 89% confident" out of thin air, which is precisely the false
+            # certainty this whole layer exists to prevent. The occurrences are still reported; the
+            # rate is not.
+            r["n_laps"] = None
+            r["denom_suspect"] = 1
+            r["evidence_class"] = cls
+            r["verdict"], r["lo"], r["hi"], r["needs_laps"] = "insufficient", 0.0, 1.0, None
+            r["why"] = ("%d occurrence(s), but the laps this build drove here cannot be counted "
+                        "(the laps name no tune), so no rate can be claimed" % r["occurrences"])
+            continue
+        # The denominator must never be smaller than the numerator. It can be: diag_event.container
+        # comes from the analyzer's ctx(), which files every event under the FIRST lap's container
+        # for that car in the session, so a container can be credited with laps it did not drive
+        # (25 rows). Flagged rather than quietly maxed, so the mis-attribution stays visible.
+        r["denom_suspect"] = 1 if r["laps_affected"] > known else 0
+        n = max(known, r["laps_affected"])
+        a = _conf.assess(r["laps_affected"], n, evidence_class=cls,
+                         severity=r.get("peak_severity"))
+        r["n_laps"] = n
+        for k in ("verdict", "lo", "hi", "needs_laps", "why", "evidence_class"):
+            r[k] = a[k]
     diag = {
         "by_setup": rows(cx, "SELECT * FROM v_diag_by_setup"),
         "by_turn": rows(cx, "SELECT * FROM v_diag_by_turn"),
+        "by_course": by_course,
         "symptoms": rows(cx, "SELECT symptom, phase, primary_fix, secondary_fix, tertiary_fix, detector, source FROM ref_symptom"),
     }
     total += write(os.path.join(out, "diag.json"), diag)

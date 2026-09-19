@@ -313,13 +313,15 @@ function runSample(f, now) {
   if (LIVE.run.length > 900) { LIVE.run.splice(0, LIVE.run.length - 900); const b = LIVE.run[0][5]; LIVE.run.forEach((q) => { q[0] = q[5] - b; }); }
   if (now - (LIVE.runPaint || 0) > 500) { LIVE.runPaint = now; paintTrace(); }
 }
-// the 5-state grip code the analyzer uses: impact if |lat| > 3 g or smash, both if front > 1 and rear > 1,
-// front, rear, calm -- front/rear = the axle's max |CombinedSlip|.
+// the 5-state grip code the analyzer uses: impact = TRUE CONTACT ONLY (a smashable hit), both if front > 1 and
+// rear > 1, front, rear, calm -- front/rear = the axle's max |CombinedSlip|. The old |lat| > 3 g arm was dropped
+// (2026-09-18): it fired on kerb/rumble/terrain JOLTS, not collisions, and littered the trace with impact marks;
+// a live barrier hit still surfaces as a 💥 wall marker via detectLiveEvents, matching the analyzer.
 function gripCode(f) {
   const sl = f.slip || {};
   const fr = Math.max(Math.abs((sl.FL || [0, 0, 0])[2]), Math.abs((sl.FR || [0, 0, 0])[2]));
   const rr = Math.max(Math.abs((sl.RL || [0, 0, 0])[2]), Math.abs((sl.RR || [0, 0, 0])[2]));
-  return (Math.abs(f.lat) > 3 || f.smash > 0) ? 4 : (fr > 1 && rr > 1) ? 3 : fr > 1 ? 1 : rr > 1 ? 2 : 0;
+  return (f.smash > 0) ? 4 : (fr > 1 && rr > 1) ? 3 : fr > 1 ? 1 : rr > 1 ? 2 : 0;
 }
 // a pedal on the frame (Accel / Brake, 0-255) as 0-100 % -- the same unit the recorded traces carry (schema 6)
 const pedPct = (v) => (v == null ? null : Math.round((+v || 0) / 2.55));

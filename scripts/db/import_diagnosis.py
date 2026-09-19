@@ -83,6 +83,15 @@ def seed_symptoms(cx):
                      r.get("verify_test"), DET.get(s),
                      "data/tuning-test-battery.json symptom_matrix (v1 tuning tab)"))
     known = {r[0] for r in rows}
+    # The deterministic detectors (scripts/telemetry/deterministic.py). None of these are in the v1
+    # matrix, because v1 had no access to gear, rpm or wheel speed -- lap_point never carried them.
+    # They read a physical state rather than estimate a tendency, which is what lets confidence.py
+    # report them at n=1; see its DETERMINISTIC class.
+    for sym, ph, p1, p2, p3, vt, det in DETERMINISTIC_SYMPTOMS:
+        if sym not in known:
+            rows.append((sym, ph, p1, p2, p3, vt, det,
+                         "this project's own detector; scripts/telemetry/deterministic.py"))
+            known.add(sym)
     # Bottoming is not in the v1 matrix and is the single easiest thing to fix, so it gets its
     # own row rather than being folded into "bouncy over rough surface".
     if "Bottoming out (suspension on the stop)" not in known:
@@ -96,6 +105,52 @@ def seed_symptoms(cx):
         "detector", "source"], rows)
     return len(rows)
 
+
+#: (symptom, phase, primary, secondary, tertiary, verify_test, detector) for the deterministic set.
+#: The fault keys emitted by deterministic.py map onto these through DET_FAULT_SYMPTOM below.
+DETERMINISTIC_SYMPTOMS = [
+    ("Gearing too tall for the course (top gear never used)", "straight",
+     "final drive shorter (raise the ratio)", "close the top ratios up",
+     "accept it as a cruising gear this course does not need",
+     "top gear engaged before the fastest point of the lap",
+     "the build's top gear never engaged on a whole lap"),
+    ("Gearing too tall for the course (top gear under-revved)", "straight",
+     "final drive shorter (raise the ratio)", "close the top ratios up",
+     "accept it as a cruising gear this course does not need",
+     "top gear reaching the power band at the fastest point",
+     "peak rpm in top gear under 90% of the car's observed redline"),
+    ("Gearing too short for the course (limiter-bound in top gear)", "straight",
+     "final drive longer (lower the ratio)", "lengthen the top ratio only",
+     "taller final drive plus more downforce if it now spins",
+     "top gear still pulling at the fastest point, off the limiter",
+     "half a second or more at 98% of redline in top gear"),
+    ("Brake lock at full pedal (front)", "braking",
+     "brake pressure down a step", "brake balance rearward", "softer front bump",
+     "full-pedal stop with the fronts still turning",
+     "front wheel speed under 70% of road speed at full pedal, or under 85% held 0.25 s"),
+    ("Brake lock at full pedal (rear)", "braking",
+     "brake pressure down a step", "brake balance forward", "softer rear bump",
+     "full-pedal stop with the rears still turning",
+     "rear wheel speed under 70% of road speed at full pedal, or under 85% held 0.25 s"),
+    ("Brake lock at full pedal (all four)", "braking",
+     "brake pressure down a step", "softer bump both ends", "tyre compound up",
+     "full-pedal stop with every wheel still turning",
+     "every wheel under 70% of road speed at full pedal, or under 85% held 0.25 s"),
+]
+
+#: deterministic.py fault key -> ref_symptom. Bottoming is DELIBERATELY ABSENT: it already reaches
+#: diag_event through the analyzer's own `bottoming` list above, on the same 0.98 gate, so importing
+#: it a second time from the sidecar would double every bottoming count in the rollups. The sidecar
+#: still carries it, and scripts/telemetry/deterministic.py reports it, as a cross-check on the path
+#: that does the writing.
+DET_FAULT_SYMPTOM = {
+    "gear-never-reached": "Gearing too tall for the course (top gear never used)",
+    "gear-under-revved": "Gearing too tall for the course (top gear under-revved)",
+    "gear-limiter-bound": "Gearing too short for the course (limiter-bound in top gear)",
+    "brake-lock-front": "Brake lock at full pedal (front)",
+    "brake-lock-rear": "Brake lock at full pedal (rear)",
+    "brake-lock-all-four": "Brake lock at full pedal (all four)",
+}
 
 UNDER_ENTRY = "Understeer on entry (won't turn in)"
 UNDER_MID = "Understeer mid-corner (steady push)"
@@ -294,12 +349,63 @@ def run(cx, verbose=False):
             ev.append((WANDER, sid, cid, lap_id, cont, hw, rk, None, "straight", p0.get("t"),
                        mph, round(min(1.0, y / 90.0), 3), "yaw peak %.1f deg/s" % y, "pulse"))
 
+    # ---- the deterministic detectors, from their per-session sidecars ---------
+    # Written by `python scripts/telemetry/deterministic.py --scan`, which reads the raw captures.
+    # Read from a sidecar rather than re-read 25 GB of CSV here, because this stage runs on every
+    # session close and a full rescan would put half an hour into a cascade that is meant to be
+    # seconds. A missing sidecar is not an error -- it means that session has not been scanned yet,
+    # and the events simply are not there until it is.
+    n_det, n_det_files = 0, 0
+    for path in sorted(glob.glob(os.path.join(DATA, "sessions", "*.det.json"))):
+        d = jload(path)
+        if not d:
+            continue
+        n_det_files += 1
+        sid = d.get("session") or os.path.basename(path).split(".")[0]
+        for f in (d.get("findings") or []):
+            sym = DET_FAULT_SYMPTOM.get(f.get("fault"))
+            if not sym or sym not in have:
+                continue                        # bottoming lands here: written by the analyzer path above
+            rk = f.get("route_key")
+            tid = None
+            # Placed in SPACE against the turn apexes, the same way the grip symptoms are -- the
+            # sidecar carries the incident's own x/z, so there is no need to bracket it into a
+            # corner by time first. Gearing carries no position: it is a whole-lap fault and keeps
+            # a NULL turn, exactly as "wanders at top speed" does.
+            if f.get("x") is not None and rk:
+                # A BRAKING fault sits BEFORE the apex by design, so the apex window that suits a
+                # grip symptom is the wrong shape for it. Measured on Edamame: of 66 lock incidents,
+                # 36 fell outside the window, but their median distance to the nearest apex was 22 m
+                # against windows of 18-27 m, and the maximum was 50 m -- they are the braking zones
+                # of the very turns they belong to. So braking faults get a doubled window, capped at
+                # HALF the distance to the second-nearest apex, which makes it impossible for the
+                # widening to reach into the next turn however tightly the course is wound.
+                braking = "lock" in (f.get("fault") or "")
+                ds = sorted(((f["x"] - tt["apex_x"]) ** 2 + (f["z"] - tt["apex_z"]) ** 2, tt)
+                            for tt in (turns_by_route.get(rk) or []))
+                if ds:
+                    d0, t0 = ds[0]
+                    lim2 = t0["_w2"]
+                    if braking:
+                        cap = (0.5 * math.sqrt(ds[1][0])) ** 2 if len(ds) > 1 else 4.0 * lim2
+                        lim2 = min(4.0 * lim2, cap)
+                    tid = t0["turn_id"] if d0 <= lim2 else None
+            m = f.get("measure") or {}
+            ev.append((sym, sid, f.get("cid"), f.get("lap_id"), f.get("container"), f.get("hw_hash"),
+                       rk, tid, "braking" if "lock" in (f.get("fault") or "") else "straight",
+                       f.get("t"), m.get("entry_mph") or m.get("mph"),
+                       round(min(1.0, max(0.0, f.get("severity") or 0.0)), 3),
+                       f.get("detail"), "deterministic"))
+            n_det += 1
+    if verbose:
+        print("  deterministic sidecars: %d file(s), %d event(s)" % (n_det_files, n_det))
+
     with cx:
         cx.execute("DELETE FROM diag_event")
         n = fh6db.upsert_many(cx, "diag_event", [
             "symptom", "session_id", "cid", "lap_id", "container", "hw_hash", "route_key",
             "turn_id", "phase", "t", "mph", "severity", "detail", "source"], ev, chunk=5000)
-    return {"ref_symptom": n_sym, "diag_event": n}
+    return {"ref_symptom": n_sym, "diag_event": n, "deterministic": n_det}
 
 
 def main(argv=None):

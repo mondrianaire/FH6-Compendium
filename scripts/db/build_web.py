@@ -319,6 +319,48 @@ def main(argv=None):
                                         "aMax": round(_pctl(_bv, 0.90), 3), "p10": round(_pctl(_bv, 0.10), 3), "n": len(_bv)})
         class_grip[_cls] = _entry
 
+    # ================================================================================================
+    # A DECLARED NAME IS NOT A VERIFIED ROAD (2026-09-18). A course keyed route:<id> takes that route's
+    # NAME from the declaration -- an event id in routes.json -- which is the strongest naming evidence
+    # there is. Its GEOMETRY is a separate fact, and the two were never checked against each other, so:
+    #
+    #   route:4501  Horizon Festival Drag Strip   drawn with a tail hundreds of metres off the strip
+    #                                             (laps median 19 m from the road, p90 435 m)
+    #   route:1201  Temple Cross Country          drawn as a different road entirely -- all three laps
+    #                                             sit 134 m off route 1201 and 3.7 m off Festival Sprint
+    #
+    # Both are the same omission: nothing compared the driven geometry with the centre-line the name
+    # came from. The name stays (it is declared, and it is right); what is drawn has to earn its place.
+    _ROUTE_LINE_CACHE = {}
+
+    def _route_line(rid):
+        if rid not in _ROUTE_LINE_CACHE:
+            _ROUTE_LINE_CACHE[rid] = [(r["x"], r["z"]) for r in cx.execute(
+                "SELECT x, z FROM ref_route_point WHERE route_id=? ORDER BY i", (rid,))]
+        return _ROUTE_LINE_CACHE[rid]
+
+    def _grid_of(line, cell=120.0):
+        g = {}
+        for x, z in line:
+            g.setdefault((int(x // cell), int(z // cell)), []).append((x, z))
+        return g, cell
+
+    def _dist_to(gc, x, z):
+        g, cell = gc
+        gx, gy = int(x // cell), int(z // cell)
+        best = None
+        for rings in (1, 2, 3):
+            cand = [q for i in range(gx - rings, gx + rings + 1)
+                    for j in range(gy - rings, gy + rings + 1) for q in g.get((i, j), ())]
+            if cand:
+                best = min((x - a) ** 2 + (z - b) ** 2 for a, b in cand)
+                if best <= ((rings - 0.5) * cell) ** 2:
+                    break
+        return math.sqrt(best) if best is not None else 9999.0
+
+    OFF_ROUTE_M = 60.0        # a point this far from the declared centre-line is not on that road
+    ON_SHARE_MIN = 0.50       # below this the BINDING is wrong, not just untidy -- flag, never silently trim
+
     n_course = 0
     for c in courses:
         key = c["key"]
@@ -616,6 +658,59 @@ def main(argv=None):
                     _disp_len = _arcs[len(_arcs) // 2]         # median arc for a learned course with no catalogued route
         except Exception:
             pass
+        # ---- DECLARED-ROUTE GEOMETRY CHECK (see the note above the course loop) -------------------
+        _decl_rid = None
+        if str(key).startswith("route:"):
+            try:
+                _decl_rid = int(str(key).split(":", 1)[1])
+            except ValueError:
+                _decl_rid = None
+        naming["geometry"] = None
+        if _decl_rid:
+            _line = _route_line(_decl_rid)
+            if len(_line) >= 8:
+                _gc = _grid_of(_line)
+                _path = geo.get("path") or []
+                _on = [q for q in _path if _dist_to(_gc, q[0], q[1]) <= OFF_ROUTE_M]
+                _share = (len(_on) / len(_path)) if _path else 0.0
+                # every lap judged on its own median distance from the road its course is named after
+                _bad_laps, _lap_dev = [], {}
+                for _l in laps:
+                    _t = traces.get(_l["id"])
+                    if not _t:
+                        continue
+                    _sm = _t[:: max(1, len(_t) // 40)]
+                    _ds = sorted(_dist_to(_gc, q[3], q[4]) for q in _sm if q[3] is not None)
+                    if not _ds:
+                        continue
+                    _med = _ds[len(_ds) // 2]
+                    _lap_dev[_l["id"]] = round(_med, 1)
+                    if _med > OFF_ROUTE_M:
+                        _bad_laps.append(_l["id"])
+                naming["geometry"] = {"declared_route": _decl_rid, "on_route_share": round(_share, 3),
+                                      "off_route_laps": _bad_laps, "lap_dev_m": _lap_dev}
+                if _share >= ON_SHARE_MIN and len(_on) != len(_path):
+                    # MOSTLY on the road with an excursion: trim what is off it. This is the drag strip.
+                    geo = dict(geo, path=_on)
+                    naming["geometry"]["trimmed_points"] = len(_path) - len(_on)
+                    print(f"  {key}: trimmed {len(_path) - len(_on)} of {len(_path)} path points off route {_decl_rid}")
+                elif _share < ON_SHARE_MIN:
+                    # NOT that road at all. Do not quietly redraw it and do not quietly delete it: say so,
+                    # and drop the laps that are demonstrably somewhere else so the course stops asserting
+                    # lap times for a road they were not set on. This is Temple Cross Country.
+                    naming["geometry"]["verdict"] = "binding-mismatch"
+                    # and do not keep DRAWING it. The path is real driven geometry, but it is not this
+                    # course's road, and a map that quietly shows the wrong road is the whole complaint.
+                    # The laps themselves are untouched in the database; only this course stops claiming them.
+                    naming["geometry"]["dropped_path_points"] = len(_path)
+                    geo = dict(geo, path=[])
+                    if _bad_laps:
+                        _keep = {l["id"] for l in laps} - set(_bad_laps)
+                        laps = [l for l in laps if l["id"] in _keep]
+                        traces = {k2: v for k2, v in traces.items() if k2 in _keep}
+                        print(f"  {key}: {len(_bad_laps)} lap(s) are not on route {_decl_rid} "
+                              f"(only {_share:.0%} of the path is) -- unbound")
+
         total += write(os.path.join(out, "course", re.sub(r"[^A-Za-z0-9_-]", "_", key) + ".json"),
                        {"key": key, "name": c["name"], "len": _disp_len, "rivals": c["rivals"],
                         "path": geo.get("path") or [], "turns": turns, "laps": laps,

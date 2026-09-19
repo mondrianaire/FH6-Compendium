@@ -109,9 +109,14 @@ def main():
             # That is the fault worth catching, so it is reported rather than quietly skipped.
             key = str(d.get("key") or "")
             if key.startswith("route:"):
+                # build_web's own declared-route check, when the export carries it, is NEWER than the
+                # route matcher's mean_dev_m -- the path may since have been trimmed to the road. Prefer it,
+                # or this keeps calling a repaired course "wrong road" off a stale number.
+                gm = ((d.get("naming") or {}).get("geometry")) or {}
                 unmatched.append({"key": key, "name": d.get("name") or "", "match": r.get("match_kind"),
                                   "mean_dev_m": r.get("mean_dev_m"), "p95_dev_m": r.get("p95_dev_m"),
-                                  "covered": r.get("covered"), "laps": len(d.get("laps") or [])})
+                                  "covered": r.get("covered"), "laps": len(d.get("laps") or []),
+                                  "on_share": gm.get("on_route_share"), "trimmed": gm.get("trimmed_points")})
             else:
                 skipped["no route"] += 1
             continue
@@ -156,8 +161,14 @@ def main():
         print("")
         print(f"{'key':<14} {'match':>6} {'mean dev':>9} {'p95 dev':>8} {'cover':>6} {'laps':>5}  name")
         for u in sorted(unmatched, key=lambda x: -(x["mean_dev_m"] or 0)):
-            verdict = ("WRONG ROAD" if (u["mean_dev_m"] or 0) > 100
-                       else "fragment -- on the road, too little of it to confirm")
+            if u.get("on_share") is not None:
+                verdict = (f"repaired -- {u['on_share']:.0%} of the path is on the road"
+                           + (f", {u['trimmed']} points trimmed" if u.get("trimmed") else "")
+                           if u["on_share"] >= 0.5 else
+                           f"BINDING MISMATCH -- only {u['on_share']:.0%} of the path is on that road")
+            else:
+                verdict = ("WRONG ROAD" if (u["mean_dev_m"] or 0) > 100
+                           else "fragment -- on the road, too little of it to confirm")
             print(f"{u['key']:<14} {str(u['match']):>6} {round(u['mean_dev_m'] or 0):9} "
                   f"{round(u['p95_dev_m'] or 0):8} {u['covered']:6} {u['laps']:5}  {u['name'][:30]}  <- {verdict}")
 

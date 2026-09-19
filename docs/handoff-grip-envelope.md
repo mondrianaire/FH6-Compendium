@@ -1,11 +1,11 @@
-# Handoff — the grip envelope: where it stands, and the one decision it is waiting on
+# Handoff — the grip envelope: where it stands
 
-*2026-09-18. Companion to [`plan-grip-envelope.md`](plan-grip-envelope.md), which holds the design and the two
+*2026-09-18, §5 decided 2026-09-19. Companion to [`plan-grip-envelope.md`](plan-grip-envelope.md), which holds the design and the two
 audits. This is the state of play: what is built, what was measured, what failed, and what a future agent must
 not redo.*
 
 **The question:** for a corner of radius r, on this surface, in this car — how fast before the front or the rear
-lets go? **Status: Stage A built and populated. Stage B blocked on a judgement call (§5).**
+lets go? **Status: Stage A built and populated. Stage B UNBLOCKED — §5 decided 2026-09-19.**
 
 ## 1. Built and shipped
 
@@ -55,6 +55,9 @@ by gate 1b, below, which tests at the level the envelope reports at.
 | 80–120 m | 819 | 269 | 2.161 | 2.088 | +0.073 | PASS |
 | 120–200 m | 298 | 137 | 1.910 | 2.012 | −0.102 | PASS |
 
+**50–80 m fails this gate and ships anyway, flagged** — §5. The FAIL above is the honest reading of the
+estimator, not a reason the band is absent: it is published with its measured bias attached as data.
+
 Outside 15–200 m the estimator degrades as expected and those bands are out of scope: 200–400 m reads −0.182,
 and 400 m+ reads **−0.270** (implied 0.276 g against 0.546 g recorded) because at near-straight radii the yaw
 rate is dominated by steering corrections rather than cornering.
@@ -80,18 +83,32 @@ explains the whole sign pattern: too high at cornering radii, too low at 400 m+.
 **The real fix, when someone wants it:** the captures carry `VelX`/`VelZ`, so body slip β is computable and
 `R = v/(ω − dβ/dt)` removes the bias at source. That is an analyzer change plus a replay, not a patch.
 
-## 5. THE OPEN DECISION — Stage B is blocked on this
+## 5. DECIDED — publish 50–80 m with the bias flagged
 
-Scope is 15–200 m (Jett, 2026-09-18). Within it, 50–80 m is the most-driven corner size in the set and carries a
-known +0.21 g optimistic bias. Two options were put up; **neither has been chosen**:
+Scope is 15–200 m (Jett, 2026-09-18). **Jett, 2026-09-19: publish the 50–80 m band, carrying its measured
+bias.** Coverage stays complete and the optimism is stated rather than hidden. Stage B is unblocked.
 
-1. **Publish 50–80 m flagged** — carry the measured bias in the doc and the UI ("+0.21 g optimistic, body-slip"),
-   keeping coverage complete and honest.
-2. **Mark 50–80 m unpublishable** until the slip correction lands — cleanest numbers, but a hole exactly where
-   most cornering happens.
+The band is the most-driven corner size in the set and reads roughly **+0.21 g optimistic** (§4). Two
+things follow, and getting either wrong re-opens the problem:
 
-Do not resolve this silently by shipping the band unmarked. It reads optimistically fast, and it is the band
-users will ask about most.
+**The flag is a COLUMN, not a UI string.** `grip_envelope` carries the per-band bias as data —
+`bias_g` (signed, in g) plus a short `bias_note` naming the cause. The schema's own rule is that every
+value a consumer needs is a column written once at ingest, not a computation performed on every read; a
+caveat that lives only in a template is one refactor away from being dropped, and this is precisely the
+caveat that must not be. The UI renders what the column says. It never invents a caveat and never omits
+one.
+
+**The number is MEASURED at build time, never a literal.** +0.212 g was measured on one corpus under one
+sample filter, and the §4 table shows it moving with the filter (+0.212 → +0.236 → +0.257 as steadiness
+tightens). Stage B computes `bias_g` per band from the same samples it builds the envelope from —
+median implied `v²/r` minus median recorded `|lat_g|` — so the flag tracks the data instead of freezing a
+snapshot of it. Bands whose bias is small still get the column; it simply reads near zero.
+
+Wording ships as measured, e.g. *"+0.21 g optimistic — body slip makes `r = v/ω` read tight"*. Not
+"approximate", not "±" — the bias has a sign and a cause, and both are known.
+
+This does not retire the real fix. A slip-corrected radius (§4) removes the bias at source and would drive
+`bias_g` toward zero on its own; until then the column is how the envelope stays honest.
 
 ## 6. What a future agent must know
 
@@ -110,8 +127,9 @@ users will ask about most.
 
 ## 7. If you resume this
 
-1. Take the §5 decision.
-2. Build Stage B inside `import_corners.py` over 15–200 m; gates 3–9 in the plan.
+1. ~~Take the §5 decision.~~ Done 2026-09-19: publish 50–80 m flagged.
+2. Build Stage B inside `import_corners.py` over 15–200 m; gates 3–9 in the plan. It must emit `bias_g`
+   and `bias_note` per band, computed from its own samples — see §5.
 3. Stage C (UI) only after the numbers hold.
 4. Optional, and the thing that would make 50–80 m trustworthy: body-slip-corrected radius (§4), which needs a
    replay — `backfill_laps.py --sessions` makes a targeted one ~24 min instead of 90.

@@ -231,6 +231,9 @@ def split_multilap(pts, close_m=35.0, min_lap_m=250.0):
             break
         cuts.pop()
     return cuts
+# The fastest average speed any FH6 car sustains over a whole pass. A lap window (a short drag run) or a stored
+# lap time (a rewind-corrupted clock) that implies more is a measurement artifact, not a lap -- used to gate both.
+SHORT_LAP_VMAX = 150.0    # m/s (~540 km/h)
 INTS = ("IsRaceOn","Gear","Accel","Brake","Clutch","HandBrake","Steer","CarOrdinal","CarPI","CarClass","DrivetrainType","NumCylinders","CarGroup","LapNumber","RacePosition","Trailing323","NormDrivingLine","NormAIBrakeDiff")
 
 def cid(r): return f'{r["CarOrdinal"]}|{r["DrivetrainType"]}|{r["NumCylinders"]}|{r["CarPI"]}'
@@ -2308,7 +2311,22 @@ def main():
         # short. Keep a window when it is the SOLE window of its event (a whole pass); apply the 15 s floor only
         # to split fragments, where a real stub can appear. Before this, every ~6 s drag run was discarded and a
         # 50-run Irokawa Space Center session stored 4 laps (the only windows long enough to clear the floor).
-        lw_full = [w for w in lap_windows if w["t1"] - w["t0"] >= 15 or w.get("sole")]
+        #
+        # ...but "sole and short" alone admits a REWIND-COLLAPSED long lap: when a Colossus lap's paused/rewound
+        # frames drop out, its one window spans ~13 s of surviving rows yet still traces ~10.9 km — 838 m/s, which
+        # no car does. So a short sole window only qualifies when its implied average speed is physically possible
+        # (<= SHORT_LAP_VMAX) over a plausibly short course; a whole-pass drag run (a few hundred m at ~60-120 m/s)
+        # passes, the collapsed mega-lap does not and falls back to the 15 s floor (which drops it).
+        def _short_pass_ok(w):
+            dur = w["t1"] - w["t0"]
+            if dur >= 15:
+                return True
+            if not w.get("sole") or dur <= 0.5:
+                return False
+            _wp = [(r["PosX"], r["PosZ"]) for r in loop_rows if w["t0"] <= r["t"] <= w["t1"]]
+            arc = sum(math.hypot(_wp[i][0] - _wp[i - 1][0], _wp[i][1] - _wp[i - 1][1]) for i in range(1, len(_wp)))
+            return arc <= 3000 and arc / dur <= SHORT_LAP_VMAX
+        lw_full = [w for w in lap_windows if w["t1"] - w["t0"] >= 15 or _short_pass_ok(w)]
         lap_windows = lw_full or lap_windows
         # LapNumber does not increment in free roam or on unregistered routes, so a multi-lap run arrives as ONE
         # window. Cut it where the car returned to where the window started — the road's own finish line.
@@ -2461,7 +2479,7 @@ def main():
         # only 2 of them whole), and a 500 m fragment as the reference lap is how the turn map lost turns. A P2P
         # drag run is the exception: one event = one whole ~6 s pass ("sole"), a complete lap that never splits, so
         # it is a candidate despite the short duration (the arc-consensus filter below still drops true fragments).
-        _cand_laps = [w for w in lap_windows if (w["t1"] - w["t0"]) >= 15 or w.get("sole")]
+        _cand_laps = [w for w in lap_windows if (w["t1"] - w["t0"]) >= 15 or _short_pass_ok(w)]
         def _arc_of_win(w):
             _p = resample(lap_pts(w)); return sum(pc[-1][2] for pc in _p) if _p else 0
         _cand_arcs = {id(w): _arc_of_win(w) for w in _cand_laps}
@@ -2890,6 +2908,13 @@ def main():
                 _solo = 1 if (_ev.get("solo") and not _sess_saw_rivals) else 0
                 _imp = _impacts(pts_w)
                 _lap_s, _lap_official = _game_lap_s(w)
+                # A time that implies an IMPOSSIBLE average speed over the lap's own path is a corrupted clock, not
+                # a time. A rewind-heavy lap can leave _game_lap_s reading 13 s for a 10.9 km Colossus lap (838 m/s)
+                # -- a pre-existing race-clock corruption independent of window length. Strike the time (keep the
+                # trace) rather than publish it, exactly as the lap canon treats a whole lap with no trustworthy
+                # official time: an untimed lap, struck from the leaderboard, its grip line still on the map.
+                if _lap_s and arc_w and arc_w / _lap_s > SHORT_LAP_VMAX:
+                    _lap_s, _lap_official = None, False
                 _th = _tune_hash_for(cid_, w)
                 # A LAP BELONGS TO THE COURSE WHOSE LINE IT CROSSED — not to whichever course this loop is on.
                 # This wrote the outer `key`, so every window a car drove was filed under EVERY course that car

@@ -2297,12 +2297,18 @@ def main():
             # is already handled below by split_multilap, which cuts on the road returning to itself and keeps the
             # time with the driving. (What sent me looking was a Colossus trace I believed was missing; it was in
             # the store the whole time, under -3750_300 from session 213928, 23.42 mi. Nothing needed fixing here.)
-            k_ = 0; t_start = ev["t0"]; cur_lap = rows_ev[0]["LapNumber"] if rows_ev else None
+            k_ = 0; t_start = ev["t0"]; cur_lap = rows_ev[0]["LapNumber"] if rows_ev else None; _w0 = len(lap_windows)
             for r in rows_ev:
                 if r["LapNumber"] != cur_lap:
                     k_ += 1; lap_windows.append({"ev": ei, "lap": k_, "t0": round(t_start, 1), "t1": round(r["t"], 1)}); t_start = r["t"]; cur_lap = r["LapNumber"]
             k_ += 1; lap_windows.append({"ev": ei, "lap": k_, "t0": round(t_start, 1), "t1": ev["t1"]})
-        lw_full = [w for w in lap_windows if w["t1"] - w["t0"] >= 15]   # the stub after a finish line is not a lap
+            for _w in lap_windows[_w0:]: _w["sole"] = (len(lap_windows) - _w0 == 1)   # this window IS the whole event
+        # A sub-15 s window is normally the stub left AFTER a finish-line crossing — but a point-to-point run
+        # (a drag strip: one event = one full ~6 s launch that never splits) is a complete lap despite being
+        # short. Keep a window when it is the SOLE window of its event (a whole pass); apply the 15 s floor only
+        # to split fragments, where a real stub can appear. Before this, every ~6 s drag run was discarded and a
+        # 50-run Irokawa Space Center session stored 4 laps (the only windows long enough to clear the floor).
+        lw_full = [w for w in lap_windows if w["t1"] - w["t0"] >= 15 or w.get("sole")]
         lap_windows = lw_full or lap_windows
         # LapNumber does not increment in free roam or on unregistered routes, so a multi-lap run arrives as ONE
         # window. Cut it where the car returned to where the window started — the road's own finish line.
@@ -2318,6 +2324,13 @@ def main():
         _split.sort(key=lambda x: x["t0"])
         for _i, _w in enumerate(_split, 1): _w["lap"] = _i
         lap_windows = _split or lap_windows
+        # Recompute "sole" against the FINAL window set: a window is a whole pass (never a split-off stub) iff it is
+        # the only window of its event AFTER split_multilap. A P2P drag run stays sole (one event, one window, no
+        # cut); a looped free-roam event that split into laps is no longer sole. This flag lets the short-lap gates
+        # below keep a ~6 s drag lap while still dropping the sub-15 s fragment left after a finish-line crossing.
+        _evc = defaultdict(int)
+        for w in lap_windows: _evc[w["ev"]] += 1
+        for w in lap_windows: w["sole"] = (_evc[w["ev"]] == 1)
         total_laps = len(lap_windows)
         def lap_of(t):
             for li, w in enumerate(lap_windows):
@@ -2445,8 +2458,10 @@ def main():
         # per lap, orphan (one-lap-only) turns 4 vs 11.
         geo = None; lat_acc = None
         # a "lap" for GEOMETRY must be a lap: the 15 s rule admits aborted stubs (Edamame stored 48 lap paths,
-        # only 2 of them whole), and a 500 m fragment as the reference lap is how the turn map lost turns.
-        _cand_laps = [w for w in lap_windows if (w["t1"] - w["t0"]) >= 15]
+        # only 2 of them whole), and a 500 m fragment as the reference lap is how the turn map lost turns. A P2P
+        # drag run is the exception: one event = one whole ~6 s pass ("sole"), a complete lap that never splits, so
+        # it is a candidate despite the short duration (the arc-consensus filter below still drops true fragments).
+        _cand_laps = [w for w in lap_windows if (w["t1"] - w["t0"]) >= 15 or w.get("sole")]
         def _arc_of_win(w):
             _p = resample(lap_pts(w)); return sum(pc[-1][2] for pc in _p) if _p else 0
         _cand_arcs = {id(w): _arc_of_win(w) for w in _cand_laps}

@@ -108,19 +108,18 @@ these are worth knowing:
 | symptom | what happened |
 |---|---|
 | top speed around 30 mph | circle far too small — 13 m radius instead of 45 |
-| measured ceiling way below what the car shows while racing | sliding friction, not grip |
-| the curve is **flat** rather than rising to a peak | the tyres were past the limit the whole time |
-| no samples below `CombinedSlip` 1.0 | never approached the limit from underneath, so there is no peak to find |
+| measured ceiling well below what the car shows while racing | sliding friction, not grip |
+| `slip F/R` both above ~1.3 | drifting: the tyres were past their peak the whole time |
+| `slip F/R` both below ~0.85 | never actually reached the limit |
 
-A good run's curve **rises, peaks around `CombinedSlip` 1.0–1.1, and falls away after** — like this, from
-ordinary racing frames:
+**The number to watch in the output is `slip F/R`.** The limiting axle — the higher of the two — should sit
+at **0.9 to 1.2**. That is the tyre at its peak. Above it the tyre is sliding and the reading comes out LOW;
+below it you never found the limit and it also comes out low. A run outside that band gets a `!`.
 
-```
-CombinedSlip  0.5  0.6  0.7  0.8  0.9  1.0  [1.1]  1.2  1.3  1.4
-   |lat_g|   1.67 1.99 2.40 2.73 2.87 3.04 [3.08] 2.85 2.74 2.69
-```
+Practically: creep up until the car just starts to wash wide, then **back off three to five mph** and hold
+there. The fastest speed at which it still *tracks* the circle is the measurement — not the speed at which
+it starts sliding.
 
-If the printed peak sits at slip 1.5 or higher, it was a drift and the number is meaningless.
 
 ---
 

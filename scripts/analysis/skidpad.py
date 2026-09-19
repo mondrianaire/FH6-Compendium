@@ -183,6 +183,34 @@ def curve(samples, slip_key):
             "curve": [[k, round(a, 3), n] for k, a, n in pts]}
 
 
+def plateau(run):
+    """THE READING FROM A GOOD SKIDPAD -- which is a single operating point, not a swept curve.
+
+    curve() was built for SCAVENGED racing frames, which wander through slip and so draw the whole tyre
+    curve; its peak is then the ceiling. A properly driven circle does the opposite: it parks at one slip
+    value and stays there. The first real run (2026-09-18, Exocet, 63 m radius at 83 mph, radius steady to
+    5%) put 769 of 769 frames into three slip bins, so curve() wanted five bins and returned nothing --
+    the better the run, the more certainly it was rejected. That is backwards.
+
+    So for a run, the ceiling is simply the lateral g it SUSTAINED, and the slip of the limiting axle says
+    whether that number is trustworthy: near 1.0 the tyre is at its peak, well above and it is scrubbing
+    (which reads low), well below and the limit was never reached (which also reads low).
+    """
+    lat = sorted(x["lat"] for x in run)
+    sf = st.median([x["sf"] for x in run])
+    sr = st.median([x["sr"] for x in run])
+    slip = max(sf, sr)
+    a = lat[int(0.75 * (len(lat) - 1))]          # sustained, not peak: robust to the entry and exit
+    if slip > 1.25:
+        status = f"past the peak (limiting slip {slip:.2f}) -- scrubbing, so this reads LOW"
+    elif slip < 0.85:
+        status = f"never reached the limit (limiting slip {slip:.2f}) -- this reads LOW"
+    else:
+        status = None
+    return {"a": round(a, 3), "slip_front": round(sf, 2), "slip_rear": round(sr, 2),
+            "limiting": "front" if sf >= sr else "rear", "slip": round(slip, 2), "status": status}
+
+
 def main():
     ap = argparse.ArgumentParser(description="skidpad grip-ceiling reader (read-only)")
     ap.add_argument("captures", nargs="+", help="capture CSV or CSV.GZ paths, or globs")
@@ -204,9 +232,8 @@ def main():
                    "dir": f0["dir"], "s": round(run[-1]["t"] - run[0]["t"], 1),
                    "radius_m": round(st.median([x["r"] for x in run]), 1),
                    "mph": round(st.median([x["spd"] for x in run]), 1),
-                   "front": curve(run, "sf"), "rear": curve(run, "sr")}
-            if rec["front"] or rec["rear"]:
-                found.append((rec, run))
+                   "front": curve(run, "sf"), "rear": curve(run, "sr"), "plateau": plateau(run)}
+            found.append((rec, run))
 
     if not found:
         print("no skidpad runs found. The detector wants a steady radius held for 4 s or more, one "
@@ -214,27 +241,23 @@ def main():
         return
 
     print(f"{'capture':<28} {'car':>5} {'PI':>4} {'dir':>3} {'s':>5} {'radius':>7} {'mph':>5} "
-          f"{'front a_max':>11} {'rear a_max':>10}  gives up first")
-    def cell(c):
-        return (f"{c['peak']:.2f} @{c['at_slip']:.1f}" + ("!" if c.get("warn") else "")) if c else "-"
+          f"{'a_max':>7} {'slip F/R':>9}  limited by")
     for rec, _ in found:
-        f_, r_ = rec["front"], rec["rear"]
-        first = "-"
-        if f_ and r_:
-            first = "front (understeer)" if f_["peak"] < r_["peak"] else "rear (oversteer)"
+        pl = rec["plateau"]
         print(f"{rec['capture']:<28} {str(rec['car']):>5} {str(rec['pi']):>4} {rec['dir']:>3} "
               f"{rec['s']:5.1f} {rec['radius_m']:7.1f} {rec['mph']:5.1f} "
-              f"{cell(f_):>11} {cell(r_):>10}  {first}")
+              f"{pl['a']:6.2f}{'!' if pl['status'] else ' '} "
+              f"{pl['slip_front']:4.2f}/{pl['slip_rear']:<4.2f}  "
+              f"{pl['limiting']} ({'understeer' if pl['limiting'] == 'front' else 'oversteer'})")
 
     # every warning, spelled out, so a bad run is self-diagnosing rather than needing a second pair of eyes
-    warns = [(rec, ax, c["warn"]) for rec, _ in found for ax, c in (("front", rec["front"]), ("rear", rec["rear"]))
-             if c and c.get("warn")]
+    warns = [(rec, rec["plateau"]["status"]) for rec, _ in found if rec["plateau"]["status"]]
     if warns:
         print()
-        for rec, ax, w in warns:
-            print(f"  ! {rec['capture']} {rec['dir']} run, {ax}: {w}")
-        print("  A good curve rises, peaks at slip ~1.0-1.1 and falls away. See docs/skidpad-protocol.md,")
-        print("  'When it goes wrong' -- usually the circle is too small or the throttle is too big.")
+        for rec, w in warns:
+            print(f"  ! {rec['capture']} {rec['dir']} run: {w}")
+        print("  The limiting axle should sit at slip ~0.9-1.2. Above that the tyre is sliding rather than")
+        print("  gripping; below it the limit was never found. See docs/skidpad-protocol.md.")
 
     if args.pooled:
         print()
@@ -242,11 +265,13 @@ def main():
         for rec, run in found:
             byc[(rec["car"], rec["pi"])].append((rec, run))
         for (car, pi), g in byc.items():
-            allf = [s for _, run in g for s in run]
-            cf, cr = curve(allf, "sf"), curve(allf, "sr")
             dirs = {rec["dir"] for rec, _ in g}
-            print(f"car {car} PI {pi}: {len(g)} runs, {''.join(sorted(dirs))}, "
-                  f"front {cf['peak'] if cf else '—'} g, rear {cr['peak'] if cr else '—'} g")
+            good = [rec["plateau"]["a"] for rec, _ in g if not rec["plateau"]["status"]]
+            allv = [rec["plateau"]["a"] for rec, _ in g]
+            body = (f"a_max {st.median(good):.2f} g over {len(good)} clean run(s)" if good
+                    else f"no clean run; best-effort {max(allv):.2f} g")
+            spread = (f", L/R spread {max(good) - min(good):.3f} g" if len(good) >= 2 else "")
+            print(f"car {car} PI {pi}: {len(g)} runs, {''.join(sorted(dirs))} -- {body}{spread}")
             if len(dirs) < 2:
                 print("    only one direction driven -- run the circle the other way too, so a camber or a "
                       "left/right asymmetry shows up instead of being read as grip")

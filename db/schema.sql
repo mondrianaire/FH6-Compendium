@@ -602,6 +602,11 @@ CREATE TABLE IF NOT EXISTS session_hit (
   drop_mph    REAL                      -- wall: one-frame speed lost; NULL for bottoming
 );
 
+-- build_web.py reads these as `... FROM session_hit WHERE session_id IN (...)` once per course, so the
+-- lookup key is session_id alone. Deliberately NOT a covering index over (kind, x, z, hard) as well:
+-- at this size the row fetches are not measurably slower, and an unmeasured optimisation is not one.
+CREATE INDEX IF NOT EXISTS ix_session_hit ON session_hit(session_id);
+
 CREATE TABLE IF NOT EXISTS course (
   route_key    TEXT PRIMARY KEY,         -- '-1700_-4450' — the start-cell key
   name         TEXT,                     -- RESOLVED by stage route_names (declared wins; else the derived event's name); see COURSE NAMES below. Never written from a JSON file except as a placeholder by telemetry.

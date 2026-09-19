@@ -164,6 +164,61 @@ async function viewBuilds(host) {
   list();
 }
 
+// modeled WOT acceleration (scripts/sim, precomputed to api/accel.json), keyed by car ordinal.
+let ACCEL = null;
+async function accelData() {
+  if (ACCEL === null) { try { ACCEL = await get("accel.json"); } catch (e) { ACCEL = { cars: {} }; } }
+  return ACCEL;
+}
+// a per-car acceleration / top-speed chart: speed vs time, gear-shift markers, the key figures vs the game's own.
+function accelChartHTML(rec) {
+  const tr = rec.trace || []; if (tr.length < 3) return null;
+  const W = 660, H = 230, padL = 40, padB = 26, padT = 12, padR = 14;
+  const tmax = Math.ceil(tr[tr.length - 1][0] / 2) * 2, vmax = Math.ceil((rec.top_mph || 200) / 20) * 20;
+  const px = (t) => padL + (t / (tmax || 1)) * (W - padL - padR);
+  const py = (v) => (H - padB) - (v / (vmax || 1)) * (H - padB - padT);
+  // speed guides at 60 / 100 / 150 / 200 mph and their times
+  const guides = [60, 100, 150, 200].filter((s) => s <= vmax).map((s) =>
+    `<line x1="${padL}" y1="${py(s).toFixed(1)}" x2="${W - padR}" y2="${py(s).toFixed(1)}" stroke="var(--line2)" stroke-dasharray="2 3" opacity=".6"/>
+     <text x="4" y="${(py(s) + 3).toFixed(1)}" font-size="9" fill="var(--dim)">${s}</text>`).join("");
+  // time ticks
+  const step = tmax <= 10 ? 2 : tmax <= 24 ? 4 : 6;
+  let tick = "";
+  for (let t = step; t <= tmax; t += step) tick += `<text x="${px(t).toFixed(1)}" y="${H - 8}" text-anchor="middle" font-size="9" fill="var(--dim)">${t}s</text>`;
+  // the curve
+  const pts = tr.map(([t, v]) => px(t).toFixed(1) + "," + py(v).toFixed(1)).join(" ");
+  // gear-shift markers (where the gear increments)
+  let shifts = "";
+  for (let i = 1; i < tr.length; i++) if (tr[i][2] !== tr[i - 1][2]) {
+    const t = tr[i][0], v = tr[i][1];
+    shifts += `<g><circle cx="${px(t).toFixed(1)}" cy="${py(v).toFixed(1)}" r="2.6" fill="var(--bg)" stroke="var(--acc2)" stroke-width="1.4"/>
+      <text x="${px(t).toFixed(1)}" y="${(py(v) - 6).toFixed(1)}" text-anchor="middle" font-size="8" fill="var(--acc2)">${tr[i][2]}</text></g>`;
+  }
+  // 0-60 / 0-100 markers on the curve
+  const mark = (t, s, lbl) => (t == null) ? "" :
+    `<line x1="${px(t).toFixed(1)}" y1="${py(s).toFixed(1)}" x2="${px(t).toFixed(1)}" y2="${H - padB}" stroke="var(--acc)" stroke-dasharray="2 2" opacity=".7"/>
+     <circle cx="${px(t).toFixed(1)}" cy="${py(s).toFixed(1)}" r="3" fill="var(--acc)"/>
+     <text x="${px(t).toFixed(1)}" y="${py(s).toFixed(1) - 8}" text-anchor="middle" font-size="9" font-weight="700" fill="var(--acc)">${lbl}</text>`;
+  const svg = `<svg viewBox="0 0 ${W} ${H}" class="accel-svg" style="width:100%;height:auto;background:var(--bg);border-radius:5px">
+    ${guides}${tick}
+    <polyline fill="none" stroke="var(--acc)" stroke-width="2.2" stroke-linejoin="round" points="${pts}"/>
+    ${shifts}${mark(rec.t60, 60, "0-60")}${rec.top_mph >= 100 ? mark(rec.t100, 100, "0-100") : ""}
+    <text x="${W - padR}" y="${(py(rec.top_mph) - 4).toFixed(1)}" text-anchor="end" font-size="9" fill="var(--dim)">top ${rec.top_mph} mph</text>
+  </svg>`;
+  const cmp = (sim, ref, u, lo) => `<div class="accel-fig"><b>${sim == null ? "—" : sim}${u}</b>`
+    + (ref != null ? `<span class="why">game ${ref}${u}${sim != null ? ` · ${lo ? (sim <= ref ? "" : "+") : (sim >= ref ? "+" : "")}${((sim - ref)).toFixed(u === "s" ? 1 : 0)}` : ""}</span>` : "") + `</div>`;
+  const figs = `<div class="accel-figs">
+    <div class="accel-cell"><span class="accel-k">0-60 mph</span>${cmp(rec.t60, rec.ref && rec.ref.t60, "s", true)}</div>
+    <div class="accel-cell"><span class="accel-k">0-100 mph</span>${cmp(rec.t100, rec.ref && rec.ref.t100, "s", true)}</div>
+    <div class="accel-cell"><span class="accel-k">¼ mile</span>${cmp(rec.tqmile, rec.ref && rec.ref.tqmile, "s", true)}</div>
+    <div class="accel-cell"><span class="accel-k">¼ trap</span>${cmp(rec.trap_mph, rec.ref && rec.ref.trap_mph, "", false)}</div>
+    <div class="accel-cell"><span class="accel-k">top speed</span>${cmp(rec.top_mph, rec.ref && rec.ref.top_mph, "", false)}</div></div>`;
+  return `<div class="panel accel"><div class="chips" style="margin-bottom:6px"><b>Modeled acceleration</b>
+    <span class="chip">WOT 0→top</span><span class="chip w">stock config</span></div>
+    ${svg}${figs}
+    <div class="why" style="margin-top:6px">Simulated from the game's own physics values (torque curve, gearing, mass, drag, tire).
+    Validated against the game's built-in figures: ~6% on top speed, ~16% on 0-60. Per-build (this tune's engine + gearing) is next.</div></div>`;
+}
 async function showBuild(hw) {
   const host = $("#detail");
   host.innerHTML = `<div class="panel why">loading…</div>`;
@@ -175,6 +230,10 @@ async function showBuild(hw) {
     ${t0.kg ? `<span class="chip">${n0(t0.kg)} kg · ${n0(t0.kg * KG_LB)} lb</span>` : ""}
     ${t0.locked ? '<span class="chip w">downloaded, locked</span>' : '<span class="chip">own save</span>'}
     <span class="chip mono">${esc(hw.slice(0, 8))}</span></div></div>`));
+
+  // modeled acceleration for this car (stock config), from the precomputed sim
+  try { const ac = await accelData(); const rec = ac.cars && ac.cars[String(b.ordinal)];
+    if (rec) { const h = accelChartHTML(rec); if (h) host.append(el(h)); } } catch (e) { /* chart is optional */ }
 
   // parts, grouped by the menu area you would walk in the shop
   const byArea = {};

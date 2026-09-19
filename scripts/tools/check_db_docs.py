@@ -162,6 +162,15 @@ def check_handoff():
     if undocumented:
         fails.append("tables absent from handoff-data-structures.md: %s" % undocumented)
 
+    # VIEWS are the consumer contract -- build_web.py generates the dashboard bundle from them and
+    # nothing re-derives -- but this check only ever looked at tables, so all 10 sat undocumented in
+    # the handoff while DATA-INVENTORY listed 6 of them. Require them by name.
+    views = names(lv, "view")
+    missing_views = sorted(v for v in views if "`%s`" % v not in text)
+    print("  %d views; %d documented" % (len(views), len(views) - len(missing_views)))
+    if missing_views:
+        fails.append("views absent from handoff-data-structures.md: %s" % missing_views)
+
     wrong = 0
     for t, fields in sorted(doc.items()):
         if t not in tables:

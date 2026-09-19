@@ -162,6 +162,37 @@ Row counts measured 2026-09-18. `primary key` is the real key; composite keys ar
 | `import_run` | 12,204 | run_id | `run_id`, `kind`, `source`, `started_utc`, `finished_utc`, `n_rows`, `ok`, `notes` |
 
 _Tables covered: 67 of 67 in the live database._
+### Views — the consumer contract (10)
+
+`db/schema.sql`'s own convention: *"`v_*` Views. The dashboard bundle is generated from these; no
+consumer re-derives."* A view is therefore not a convenience — it is the agreed shape a consumer reads,
+and changing one changes the contract. `build_web.py` reads them; the CLI and the dashboard get identical
+rows because neither recomputes.
+
+Row counts measured 2026-09-19 on a verified-quiet database (no import stage in flight before or after
+the read, `import_run` id stable across it — see the note below).
+
+| View | Rows | Built from | What it answers |
+| --- | ---: | --- | --- |
+| `v_build_sheet` | 30,004 | `tune_container` × `tune_part` × `ref_car` | One row per container × installed part: the printable build sheet, with `menu_path` and `confidence` already resolved. |
+| `v_tune_sheet` | 22,890 | `tune_container` × `tune_slider` × `ref_slider` | One row per container × slider with `norm` AND the de-normalised `value`, its `unit` and the `min`/`max` it was solved against. |
+| `v_rim_equivalent` | 87,136 | `tune_part` × `ref_wheel` | Rims interchangeable with the one a container carries — same `mass_level`, per slot. The "swap the look, keep the physics" query. |
+| `v_course_best` | 1,499 | `lap` × `course` | Best lap per course × class × car, pre-`rank`ed. The leaderboard the dashboard shows. |
+| `v_rivals_route` | 604 | `ref_rivals_event` → `ref_career_race` → `ref_track_info` | One row per Rivals variant with the route it resolves to — the naming chain flattened. |
+| `v_diag_by_turn` | 2,925 | `diag_event` × `ref_symptom` × `ref_route_turn` × `course_route` | Which corners cost the most and how often, with the turn's geometry attached. Filters `turn_id IS NOT NULL`. |
+| `v_diag_by_course` | 2,396 | `diag_event` × `ref_symptom` × `course` | **Schema 10.** Faults belonging to the whole lap rather than a corner (gearing), which `v_diag_by_turn`'s `turn_id` filter could never surface. |
+| `v_diag_by_setup` | 1,148 | `diag_event` × `ref_symptom` × `tune_container` × `ref_car` | What a given setup keeps doing wrong, wherever it happens. |
+| `v_torque_point` | 153,282 | `ref_torque_curve` | The `samples` JSON blob expanded to one row per point: `rpm`, `torque_nm`, `torque_lbft`, `power_hp`, plus `limiter` and `past_redline` flags. |
+| `v_friction_point` | 73,800 | `ref_friction_curve` | The friction `samples` blob expanded per point: `slip`, `mu_norm`, `mu`, keyed by compound × channel × surface × load band. |
+
+The last two exist because the curve tables store their samples as a JSON blob — the view is what makes
+a curve queryable with SQL instead of parsed in every consumer.
+
+> **Measuring a view here is not like measuring a table.** `diag_event` is emptied and re-inserted by the
+> `diagnosis` stage, so a count taken inside that window reads **0** and all three `v_diag_*` views look
+> broken. That happened three times while writing this section. Gate any measurement on
+> `check_db_docs.rebuild_in_flight()` and require the `import_run` id to be unchanged across the read.
+
 ## 3. The value catalogue — what the coded values mean
 
 Every list below is the **measured distinct values** in the live DB with row counts, not a guess at what a

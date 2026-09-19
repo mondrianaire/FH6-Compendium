@@ -278,7 +278,7 @@ SOURCE-READER: scripts/telemetry/fh6_live_daemon.py
 | `tune_part` | 38150 | columns: container, slot_index, slot, part_id, name, level… |
 | `tune_slider` | 22890 | columns: container, slider, norm, value, unit, min_value… |
 
-Views: `v_build_sheet`, `v_course_best`, `v_diag_by_setup`, `v_diag_by_turn`, `v_rim_equivalent`, `v_tune_sheet`.
+Views (**10**, was listed as 6 — `v_diag_by_course`, `v_friction_point`, `v_rivals_route` and `v_torque_point` were missing): `v_build_sheet`, `v_course_best`, `v_diag_by_course`, `v_diag_by_setup`, `v_diag_by_turn`, `v_friction_point`, `v_rim_equivalent`, `v_rivals_route`, `v_torque_point`, `v_tune_sheet`. Each one's columns, source tables, row count and purpose: **`docs/handoff-data-structures.md`** §2, "Views — the consumer contract". They are the agreed shape a consumer reads; `build_web.py` generates the dashboard bundle from them and no consumer re-derives, so changing a view changes the contract.
 
 ## 2. Data files under `data/`
 

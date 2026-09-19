@@ -177,6 +177,26 @@ def check_handoff():
     return fails
 
 
+def rebuild_in_flight(cx):
+    """(running, note) -- is an import/rebuild mid-run right now?
+
+    import_run gets its row when a stage STARTS and finished_utc when it ends, so
+    an unfinished row is a stage in progress. This matters for --refresh: a
+    rebuild stage does DELETE FROM x then re-INSERT, and a count taken inside
+    that window is a TRANSIENT ZERO. Writing that into the docs would look like
+    a measurement and be pure fiction -- observed 2026-09-18, when corner_segment
+    read 0 mid-rebuild and settled at 67,755 seconds later.
+    """
+    try:
+        row = cx.execute("SELECT run_id, kind, started_utc FROM import_run "
+                         "WHERE finished_utc IS NULL ORDER BY run_id DESC LIMIT 1").fetchone()
+    except sqlite3.Error:
+        return False, ""
+    if not row:
+        return False, ""
+    return True, "run %s (%s) started %s" % row
+
+
 COUNT_RE = re.compile(r"(\s*\|\s*`?([a-z_0-9]+)`?\s*\|\s*)([\d,]+)(\s*\|)")
 
 
@@ -196,6 +216,14 @@ def check_counts(strict=False, refresh=False):
     """
     fails = []
     lv = live()
+    running, note = rebuild_in_flight(lv)
+    if running:
+        print("  REBUILD IN FLIGHT -- %s" % note)
+        if refresh:
+            print("  REFUSING to --refresh: a stage mid DELETE/INSERT reports transient zeros,")
+            print("  and writing one into the docs would look like a measurement. Re-run after.")
+            return fails
+        print("  counts below may be mid-transaction; treat them as unsettled.")
     real = {t: lv.execute('select count(*) from "%s"' % t).fetchone()[0]
             for t in names(lv, "table")}
     grand = 0

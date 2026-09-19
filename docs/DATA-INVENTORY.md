@@ -216,18 +216,18 @@ SOURCE-READER: scripts/telemetry/fh6_live_daemon.py
 
 | table | rows | what it is |
 |---|---|---|
-| `corner_obs` | 17901 | per-corner history per lap — one row per lap × turn, across 1,475 laps. (It was empty until `course_match`+`corners` were rerun past the 2026-09-05 schema change; rebuild.py's I6 check guards that.) |
+| `corner_obs` | 17686 | per-corner history per lap — one row per lap × turn, across 1,475 laps. (It was empty until `course_match`+`corners` were rerun past the 2026-09-05 schema change; rebuild.py's I6 check guards that.) |
 | `course` | 127 | columns: route_key, name, is_rivals, event_id, length_m, turn_count… |
 | `course_event` | 84 | every course × candidate-event pairing `route_names` weighed — tier (game/map/length/declared) plus its evidence columns, `chosen`=1 on the winner. Filled by stage `route_names`. |
 | `course_route` | 125 | columns: route_key, route_id, match_kind, mean_dev_m, p95_dev_m, covered… + `anchor_route_id`, `anchor_events`, `anchor_agree` (2026-09-05) — the sphere most of the course's events started in and whether it is the geometry's route. match_kind gained `anchored` (route_id stays NULL, identity in `anchor_route_id` only): a sphere holding a strict majority of the course's events, shape unverified, never reaches corners, the centre-line overlay or naming. Recomputed wholesale by stage `course_match`; one row per course with ≥12 geometry points. |
-| `course_turn` | 2401 | the course's own turns (the namespace the map and the trace use). |
-| `diag_event` | 48518 | every detected failure incident, placed on a turn. |
+| `course_turn` | 2405 | the course's own turns (the namespace the map and the trace use). |
+| `diag_event` | 49063 | every detected failure incident, placed on a turn. |
 | `hw_package` | 671 | columns: hw_hash, ordinal, label, pi, class, engine_id… |
 | `hw_package_part` | 33550 | columns: hw_hash, slot_index, slot, part_id, name |
-| `import_run` | 12141 | columns: run_id, kind, source, started_utc, finished_utc, n_rows… |
-| `lap` | 1573 | columns: lap_id, route_key, session_id, cid, container, hw_hash… + (schema 5, 2026-09-06) `lap_dist_m` (odometer over the game-timed lap), `rewinds`, `pauses`, `pause_s`, `stitched` (the lap's opening came from the previous capture file). A lap is what the GAME timed (CurrentLap start → LapNumber+1 / LastLap published); rows a rewind revoked are not in it. See `lap_marker`. + `official` (schema 8: the GAME published this lap time — 433 laps. An official lap counts even with a rewind in it; an unofficial one must clear the 0.97 coverage floor and carry no rewinds before it can be crowned). |
+| `import_run` | 12190 | columns: run_id, kind, source, started_utc, finished_utc, n_rows… |
+| `lap` | 1574 | columns: lap_id, route_key, session_id, cid, container, hw_hash… + (schema 5, 2026-09-06) `lap_dist_m` (odometer over the game-timed lap), `rewinds`, `pauses`, `pause_s`, `stitched` (the lap's opening came from the previous capture file). A lap is what the GAME timed (CurrentLap start → LapNumber+1 / LastLap published); rows a rewind revoked are not in it. See `lap_marker`. + `official` (schema 8: the GAME published this lap time — 433 laps. An official lap counts even with a rewind in it; an unofficial one must clear the 0.97 coverage floor and carry no rewinds before it can be crowned). |
 | `lap_marker` | — | (schema 5) every gap in a lap's final line, placed on the lap: `kind` rewind (`dur_s` = seconds of driving undone, `over_line` when the start/finish was re-crossed and the game re-timed the lap), pause (menu; game clock frozen), gap (telemetry dropout, clock ran), jump (respawn/teleport; lap intact, trace not continuous); `t` from lap start, `race_s`, `dist_m`, `detail` JSON (silence_s, pos_gap_m, on_line, race_rebase_s…). Written by `import_telemetry.py` from the session JSON's lap rows. |
-| `lap_point` | 523452 | every lap's trace: arc, mph, grip state, x/z AND elev_m, + `dist_m` (schema 5: the odometer at the point, so a lap's points can be placed against the game's own distance, not just the resampled arc), + `thr` / `brk` (schema 6, 2026-09-11: throttle and brake 0-100 % from the capture's Accel / Brake, for the pedal paint; NULL on laps analysed before schema 6 until their capture is replayed with backfill_laps.py) + `lat_g` (schema 7) + `r_m` (schema 9, 2026-09-18: the DRIVEN radius `v/ω` from the capture's yaw rate — never the road's fitted `ref_route_turn.radius_m`; 192,995 points, and the same replay also stores `x`/`z` to one decimal instead of whole metres). |
+| `lap_point` | 516247 | every lap's trace: arc, mph, grip state, x/z AND elev_m, + `dist_m` (schema 5: the odometer at the point, so a lap's points can be placed against the game's own distance, not just the resampled arc), + `thr` / `brk` (schema 6, 2026-09-11: throttle and brake 0-100 % from the capture's Accel / Brake, for the pedal paint; NULL on laps analysed before schema 6 until their capture is replayed with backfill_laps.py) + `lat_g` (schema 7) + `r_m` (schema 9, 2026-09-18: the DRIVEN radius `v/ω` from the capture's yaw rate — never the road's fitted `ref_route_turn.radius_m`; 192,995 points, and the same replay also stores `x`/`z` to one decimal instead of whole metres). |
 | `obs_evidence` | 129 | columns: obs_id, subject, claim, confidence, source, observed_utc… |
 | `obs_menu` | 92 | observed shop tiles (92 rows) — menu positions proven in game. |
 | `obs_pi` | 223 | observed PI deltas per part (65 rows) — the empirical per-part PI store. |
@@ -270,8 +270,8 @@ SOURCE-READER: scripts/telemetry/fh6_live_daemon.py
 | `ref_wheel` | 1259 | every rim with mass and mass_level (rims are a weight class). |
 | `ref_wheel_category` | 5 | columns: category_id, name, display_order |
 | `schema_meta` | 2 | columns: key, value |
-| `session` | 644 | columns: session_id, started_utc, duration_s, frames, rate_pps, source… |
-| `session_car` | 1486 | columns: session_id, cid, ordinal, build_id, hw_hash, name… |
+| `session` | 645 | columns: session_id, started_utc, duration_s, frames, rate_pps, source… |
+| `session_car` | 1488 | columns: session_id, cid, ordinal, build_id, hw_hash, name… |
 | `setup` | 691 | columns: setup_hash, hw_hash, ordinal, label, n_containers, first_seen_utc |
 | `tune_container` | 763 | columns: container, ordinal, saved_utc, tune_name, locked, source… |
 | `tune_gear` | 5287 | EVERY SAVE'S GEAR LADDER, exact from the save file — final drive + per-gear ratios. This is why identity rarely needs a pull. |

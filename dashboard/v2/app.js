@@ -383,6 +383,9 @@ function courseMap(c, opts) {
   // terrain — clustered located spots from build_web (course.hits), sized by how often it happens across the
   // course's sessions. Display only (a barrier scrape slows the car, it never voids the lap). Drawn under the
   // turn numbers so a turn label always reads on top.
+  // Each marker is drawn at the ORIGIN inside a translate() group, so cmapScaleMarks() can hold it at a constant
+  // SCREEN size on a course-map zoom with `translate(cx,cy) scale(k)` — exactly as the turn markers are held.
+  // Drawing the shape in world px directly (as before) let the viewBox zoom balloon it. data-cx/-cy cache the base.
   const HITCOL = { bottoming: "#e3b341", wall: "#e5414e" };
   const hitMarks = (c.hits || []).map((h) => {
     const cx0 = px(h.x), cy0 = py(h.z), wall = h.kind === "wall", col = HITCOL[h.kind] || "#e3b341";
@@ -390,9 +393,9 @@ function courseMap(c, opts) {
     const nsess = h.sess ? ` · ${h.sess} session${h.sess === 1 ? "" : "s"}` : "";
     const label = (wall ? "barrier / terrain contact" : "bottoming") + ` ×${h.n}${h.hard ? " · " + h.hard + " hard" : ""}${nsess}`;
     const shape = wall
-      ? `<path d="M ${cx0.toFixed(1)} ${(cy0 - r).toFixed(1)} L ${(cx0 + r).toFixed(1)} ${cy0.toFixed(1)} L ${cx0.toFixed(1)} ${(cy0 + r).toFixed(1)} L ${(cx0 - r).toFixed(1)} ${cy0.toFixed(1)} Z" fill="${col}" stroke="#0b0e12" stroke-width="1"/>`
-      : `<circle cx="${cx0.toFixed(1)}" cy="${cy0.toFixed(1)}" r="${r}" fill="none" stroke="${col}" stroke-width="2"/><circle cx="${cx0.toFixed(1)}" cy="${cy0.toFixed(1)}" r="1.4" fill="${col}"/>`;
-    return `<g class="chit">${shape}<title>${esc(label)}</title></g>`;
+      ? `<path d="M 0 ${(-r).toFixed(1)} L ${r.toFixed(1)} 0 L 0 ${r.toFixed(1)} L ${(-r).toFixed(1)} 0 Z" fill="${col}" stroke="#0b0e12" stroke-width="1"/>`
+      : `<circle r="${r}" fill="none" stroke="${col}" stroke-width="2"/><circle r="1.4" fill="${col}"/>`;
+    return `<g class="chit" data-cx="${cx0.toFixed(1)}" data-cy="${cy0.toFixed(1)}" transform="translate(${cx0.toFixed(1)},${cy0.toFixed(1)})">${shape}<title>${esc(label)}</title></g>`;
   }).join("");
   const phaseKey = (selT && selT.seg) ? SO.filter((n) => selT.seg[n]).map((n) =>
     `<span><i style="background:${SC[n]}"></i>${esc(SL[n] || n)}</span>`).join("") : "";

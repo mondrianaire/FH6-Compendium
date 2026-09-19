@@ -3086,6 +3086,12 @@ function cmapScaleMarks() {
     if (t.dataset.sw0 == null) t.dataset.sw0 = t.getAttribute("stroke-width") || "3";
     t.setAttribute("stroke-width", (+t.dataset.sw0 * k).toFixed(2));   // keep the dark halo proportional to the shrunk glyph
   });
+  // 🔧 / 💥 hit markers hold their screen size too: each is an origin-drawn shape in a translate() group, so
+  // scaling it by k around its cached centre (data-cx/-cy) exactly cancels the viewBox zoom (app.js hitMarks).
+  m.svg.querySelectorAll(".cmap-hits .chit").forEach((g) => {
+    const cx0 = g.dataset.cx, cy0 = g.dataset.cy; if (cx0 == null || cy0 == null) return;
+    g.setAttribute("transform", `translate(${cx0},${cy0}) scale(${k.toFixed(4)})`);
+  });
 }
 function cmapFitSync() {
   const m = CMAPVIEW, host = m.svg && m.svg.parentNode; if (!host) return;

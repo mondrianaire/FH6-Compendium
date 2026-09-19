@@ -521,7 +521,11 @@ function paintIdBar() {
     ${g.sheet === "filled" ? `<button class="idb-sheet" data-act="sheet">🔓 Build sheet ▸</button>`
       : (g.sheet === "outline" && reach) ? `<button class="idb-sheet outline" data-act="sheet">🔓 Build sheet ▸</button>`
       : `<span class="idb-sheet dead">🔒 Build sheet</span>`}`;
-  const btn = el.querySelector("[data-act=sheet]"); if (btn) btn.onclick = () => { const b = $("#btnSheet"); if (b) b.click(); };
+  // CLONE STAYS REACHABLE WHEN COLLAPSED (Jett 2026-09-19): cloning is done from the Build sheet, so the mini bar's
+  // button must work even though the full header (#btnSheet) is collapsed/clipped out of view. Open the sheet
+  // DIRECTLY here — delegating to #btnSheet.click() was a no-op while that button sits under a collapsed header.
+  const btn = el.querySelector("[data-act=sheet]");
+  if (btn) btn.onclick = () => { if (typeof openSheet === "function") openSheet(); else { const b = $("#btnSheet"); if (b) b.click(); } };
 }
 
 // AN ALMOST UN-IGNORABLE WARNING (Jett 2026-09-18): course mode records laps, but if the live build/tune is NOT

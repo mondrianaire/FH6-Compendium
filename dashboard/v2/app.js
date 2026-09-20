@@ -436,16 +436,34 @@ function courseMap(c, opts) {
   // a glance -- a legible, bold label with a dark halo (paint-order:stroke) so it stays sharp over the
   // trace lines and the road, never a faint 9px tick. Clustered turns still separate because each number
   // carries its own halo.
-  const turns = (c.turns || []).filter((t) => t.x != null).map((t) => {
+  // Each turn is a numbered badge set BESIDE its apex, not on top of the racing line: a small dot marks the exact
+  // apex, a short leader ties the badge to it, and the number rides INSIDE a ring (T12 in a circle). Badges sit
+  // radially OUTWARD from the course centroid so they clear the road and separate from each other. Drawn as an
+  // origin-anchored translate() group like the hit markers, so cmapScaleMarks holds the whole badge -- dot, leader
+  // and ring -- at a constant screen size, anchored to the apex, on a course-map zoom.
+  const tPts = (c.turns || []).filter((t) => t.x != null);
+  let ctx0 = 0, cty0 = 0;
+  tPts.forEach((t) => { ctx0 += px(t.x); cty0 += py(t.z); });
+  if (tPts.length) { ctx0 /= tPts.length; cty0 /= tPts.length; }
+  const T_OFF = 16;   // badge stand-off from the apex, in fit-view screen px (held on zoom by cmapScaleMarks)
+  const turns = tPts.map((t) => {
     const on = tp != null && t.seq === tp;
     const dim = tp != null && !on;
-    const lx = (px(t.x) + 7).toFixed(1), ly = (py(t.z) - 6).toFixed(1);
-    return `<g class="cturn" data-turn="${t.seq}" style="cursor:pointer">
-      <circle cx="${px(t.x).toFixed(1)}" cy="${py(t.z).toFixed(1)}" r="${on ? 6 : 4}" fill="${on ? "#fff" : "var(--acc2)"}"
-        stroke="#0b0e12" stroke-width="${on ? 1.6 : 1}" opacity="${dim ? 0.4 : 1}"><title>${esc(turnLabel(t))} · ${n0(t.r)} m radius</title></circle>
-      <text x="${lx}" y="${ly}" font-size="${on ? 13 : 11}" font-weight="700" paint-order="stroke"
-        stroke="#0b0e12" stroke-width="3" stroke-linejoin="round" fill="${on ? "#fff" : "#e8edf3"}"
-        opacity="${dim ? 0.45 : 1}">${esc(turnLabel(t))}</text></g>`;
+    const ax = px(t.x), ay = py(t.z);
+    let ux = ax - ctx0, uy = ay - cty0; const ul = Math.hypot(ux, uy) || 1; ux /= ul; uy /= ul;   // outward unit vector
+    const bx = (ux * T_OFF).toFixed(1), by = (uy * T_OFF).toFixed(1);   // badge centre, offset outward from the apex
+    const lbl = turnLabel(t);
+    const rB = ((lbl.length >= 3 ? 9 : 8) + (on ? 1.5 : 0)).toFixed(1);   // ring wide enough for "T13"
+    const ring = on ? "#fff" : "var(--acc2)";
+    return `<g class="cturn" data-turn="${t.seq}" data-cx="${ax.toFixed(1)}" data-cy="${ay.toFixed(1)}"
+        transform="translate(${ax.toFixed(1)},${ay.toFixed(1)})" style="cursor:pointer" opacity="${dim ? 0.5 : 1}">
+      <line x1="0" y1="0" x2="${bx}" y2="${by}" stroke="var(--acc2)" stroke-width="1" opacity="0.55"/>
+      <circle r="2.2" fill="var(--acc2)" stroke="#0b0e12" stroke-width="0.75"/>
+      <g transform="translate(${bx},${by})">
+        <circle r="${rB}" fill="#0b0e12" stroke="${ring}" stroke-width="${on ? 1.8 : 1.3}"/>
+        <text text-anchor="middle" dominant-baseline="central" font-size="${on ? 10 : 9}" font-weight="700"
+          fill="${on ? "#fff" : "#e8edf3"}">${esc(lbl)}</text></g>
+      <title>${esc(lbl)} · ${n0(t.r)} m radius</title></g>`;
   }).join("");
   // BOTTOMING / BARRIER MARKERS (Jett 2026-09-18): 🔧 where the car bottomed out, 💥 where it hit a barrier /
   // terrain — clustered located spots from build_web (course.hits), sized by how often it happens across the

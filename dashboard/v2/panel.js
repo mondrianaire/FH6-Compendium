@@ -3196,17 +3196,12 @@ function cmapApply() { const m = CMAPVIEW; if (m.svg && m.vb) m.svg.setAttribute
 function cmapScaleMarks() {
   const m = CMAPVIEW; if (!m.svg) return;
   const k = (m.vb && m.W) ? (m.vb.w / m.W) : 1;
-  m.svg.querySelectorAll(".cturn circle").forEach((c) => {
-    if (c.dataset.r0 == null) c.dataset.r0 = c.getAttribute("r");
-    c.setAttribute("r", (+c.dataset.r0 * k).toFixed(2));
-    if (c.dataset.sw0 == null) c.dataset.sw0 = c.getAttribute("stroke-width") || "1";
-    c.setAttribute("stroke-width", (+c.dataset.sw0 * k).toFixed(2));
-  });
-  m.svg.querySelectorAll(".cturn text").forEach((t) => {
-    if (t.dataset.f0 == null) t.dataset.f0 = parseFloat(t.getAttribute("font-size"));
-    t.setAttribute("font-size", (+t.dataset.f0 * k).toFixed(2));
-    if (t.dataset.sw0 == null) t.dataset.sw0 = t.getAttribute("stroke-width") || "3";
-    t.setAttribute("stroke-width", (+t.dataset.sw0 * k).toFixed(2));   // keep the dark halo proportional to the shrunk glyph
+  // Turn badges hold their screen size AND their stand-off from the apex: each is an origin-anchored group
+  // (dot + leader + numbered ring) at its apex, so scaling it by k around the cached apex (data-cx/-cy) cancels
+  // the viewBox zoom -- the badge stays the same size and the same distance beside the turn (app.js turns).
+  m.svg.querySelectorAll(".cturn").forEach((g) => {
+    const cx0 = g.dataset.cx, cy0 = g.dataset.cy; if (cx0 == null || cy0 == null) return;
+    g.setAttribute("transform", `translate(${cx0},${cy0}) scale(${k.toFixed(4)})`);
   });
   // 🔧 / 💥 hit markers hold their screen size too: each is an origin-drawn shape in a translate() group, so
   // scaling it by k around its cached centre (data-cx/-cy) exactly cancels the viewBox zoom (app.js hitMarks).

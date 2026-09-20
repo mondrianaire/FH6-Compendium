@@ -1251,19 +1251,33 @@ const cursorSvg = (H) => `<g class="cur" style="display:none"><line y1="6" y2="$
 // full single loop (coverage ~0.85-1.15), and within 30% of its OWN CLASS's best time. That keeps
 // every competitive B/S1/X lap and drops cruise/drift runs (Irokawa's were ~+100% off) and overruns.
 function racingIds(all) {
-  const best = {};
   // VALIDITY honours `official` (Jett 2026-09-18), same as cleanLap: a lap the GAME timed counts even if it was
   // rewound or oddly covered (the rewind corrupts our race-clock span, never the game's own number). Only a lap
   // with no official time must be a whole, un-rewound, well-covered loop. Without this, official Rivals laps that
   // were rewound (rewinds>0, official=1) were dropped from every "racing only" view and never reached the Laps list.
   const ok = (t) => !t.void && !t.partial && t.t != null
     && (t.official || (!t.rewinds && (t.cov == null || (t.cov >= 0.85 && t.cov <= 1.15))));
-  all.forEach((t) => { if (ok(t) && (best[t.class] == null || t.t < best[t.class])) best[t.class] = t.t; });
+  // OUTLIERS OUT, TIGHT FIELD IN, per class (2026-09-20). The old rule kept every lap within 30% of the class best,
+  // which left a long slow tail -- valid laps nowhere near the pace -- so "racing only" was not a tight field.
+  // Lap times here are broadly spread (practice, lines, traffic), not a cluster plus a few outliers, so a lenient
+  // Tukey fence alone changes nothing. So bound the survivors' SPAN: keep a lap only within 15% of the class best,
+  // which forces a broad field tight, while a naturally tight field (its Q3 + 1*IQR fence below best*1.15) stays even
+  // tighter. Guardrails: never drop a lap within 6% of the outright best (competitive whatever the field does), and
+  // fall back to best*1.30 under 6 laps -- too few to trust a spread.
+  const byCls = {};
+  all.forEach((t) => { if (ok(t)) (byCls[t.class] = byCls[t.class] || []).push(t.t); });
+  const pctl = (a, p) => { const i = (a.length - 1) * p, lo = Math.floor(i), hi = Math.ceil(i); return a[lo] + (a[hi] - a[lo]) * (i - lo); };
+  const hiOf = {};
+  for (const cls in byCls) {
+    const ts = byCls[cls].slice().sort((a, b) => a - b), b = ts[0];
+    if (ts.length < 6) { hiOf[cls] = b * 1.30; continue; }
+    const q1 = pctl(ts, 0.25), q3 = pctl(ts, 0.75), fence = q3 + 1.0 * (q3 - q1);
+    hiOf[cls] = Math.max(b * 1.06, Math.min(b * 1.15, fence));
+  }
   return new Set(all.filter((t) => {
     if (!ok(t)) return false;
-    const b = best[t.class];
-    if (b != null && t.t != null && t.t > b * 1.30) return false;   // still drop cruise/drift runs far off class pace
-    return true;
+    const hi = hiOf[t.class];
+    return !(hi != null && t.t != null && t.t > hi);
   }).map((t) => String(t.id)));
 }
 // the preset + dimension chips, shared by the trace pane and the map's own filter drawer — one
@@ -1334,10 +1348,28 @@ function alignLiveToCourse(run, ref, c) {
   if (!ref || !(ref.pts || []).length || !(run || []).length) return null;
   const R = ref.pts, L = (c && c.len) || R[R.length - 1][0] || 1;
   const arcOf = (px, pz) => { let bd = Infinity, ba = 0; for (let i = 0; i < R.length; i++) { const dx = R[i][3] - px, dz = R[i][4] - pz, d = dx * dx + dz * dz; if (d < bd) { bd = d; ba = R[i][0]; } } return ba; };
-  const mapped = run.map((q) => [arcOf(q[3], q[4]), q[1], q[2] | 0, q[3], q[4], null, q[8] ?? null, q[9] ?? null]);   // LIVE.lap keeps pedals at [8]/[9]
+  // MENU / POSITIONING frames carry no on-course position — the game parks the car at the world origin during a
+  // menu or a load — so they map to a garbage arc and spike the live line. Drop them; keep only real positions.
+  const on = run.filter((q) => !(Math.abs(q[3]) < 0.5 && Math.abs(q[4]) < 0.5));
+  if (on.length < 3) return null;
+  const mapped = on.map((q) => [arcOf(q[3], q[4]), q[1], q[2] | 0, q[3], q[4], null, q[8] ?? null, q[9] ?? null]);   // LIVE.lap keeps pedals at [8]/[9]
   let start = 0;                                   // the last S/F wrap: the arc drops by most of a lap
   for (let i = 1; i < mapped.length; i++) if (mapped[i][0] < mapped[i - 1][0] - L * 0.4) start = i;
-  const lap = mapped.slice(start);
+  let lap = mapped.slice(start);
+  // START CLIP — a pre-timer LEAD-IN (the countdown / positioning at the line) sits at the very start under ~8 mph
+  // before the lap proper. Trim that CONTIGUOUS leading slow run only (bounded), so a genuinely slow opening corner
+  // mid-lap is never touched — only "extra data due to UI things" before the car is racing.
+  let s = 0; while (s < lap.length - 3 && s < 60 && lap[s][1] < 8) s++;
+  if (s) lap = lap.slice(s);
+  // FINISH CLIP — once the arc has run out to the far end of the lap (> 0.9 L), the first big backward jump is the
+  // S/F crossing; the "last run" hold keeps mapping the coast past the line, which is not part of the lap. Cut at
+  // that crossing. A LIVE, in-progress lap has not reached/wrapped the end yet, so nothing is trimmed until it is done.
+  let reachedEnd = false, cut = lap.length;
+  for (let i = 1; i < lap.length; i++) {
+    if (lap[i][0] > 0.9 * L) reachedEnd = true;
+    if (reachedEnd && lap[i][0] < lap[i - 1][0] - L * 0.4) { cut = i; break; }
+  }
+  lap = lap.slice(0, cut);
   return lap.length >= 3 ? lap : null;
 }
 function courseTrace(c) {

@@ -2787,7 +2787,7 @@ def main():
         _win_arc = {}
         for cid_, wins in _trace_wins.items():
             for w in wins:
-                pcs_ = resample(lap_pts(w, grip=True)); pts_all = _globalise_arc(pcs_)
+                pcs_ = resample(lap_pts(w, grip=True), step=1.0); pts_all = _globalise_arc(pcs_)   # 1 m arc — the analysis substrate (lap_point): ~9x denser than the old 4 m + 300 cap, de-quantised, peak lat_g carried. build_web decimates the drawn trace
                 if len(pts_all) >= 30: _win_arc[id(w)] = (pts_all[-1][2], pts_all)
         _ref_arc = max((a for a, _ in _win_arc.values()), default=0)
         # THE COURSE IS THE REFERENCE, NOT THE SESSION. A session that only ever drove a fragment of a long course had
@@ -2869,14 +2869,17 @@ def main():
                      (round(p[8] / 2.55) if len(p) > 8 else None),
                      (round(p[9], 3) if len(p) > 9 else None),
                      (round(p[10], 1) if (len(p) > 10 and p[10] is not None) else None)] for p in pts_]
-        def _thin(pts_, n):
-            # Thin to ~n points but NEVER drop an impact: the map/trace draw their impact markers from these very
-            # points, so a thinned-out hit would vanish from the map while the stored `impacts` count still claimed it.
-            # (Latent today — every stored lap resamples to < 600 points — but a 10 km route strides by 8.)
-            k = max(1, len(pts_) // n)
-            if k == 1: return pts_
-            keep = set(range(0, len(pts_), k)) | {i for i, p in enumerate(pts_) if len(p) > 4 and p[4] == 4}
-            return [pts_[i] for i in sorted(keep)]
+        def _disp(pts_, step=3.0):
+            # Decimate a native-resolution trace to ~step m of arc for DRAWING ONLY (the per-tune speed chart) --
+            # the analysis reads the full lap_point trace, not this. Keep every non-calm frame: an off-limit or
+            # IMPACT state paints the map/chart and must survive, and the stored `impacts` count is drawn from
+            # these very points, so a decimated-out hit would vanish from the map while the count still claimed it.
+            if len(pts_) < 3: return pts_
+            out = [pts_[0]]; last = pts_[0][2] if len(pts_[0]) > 2 else 0.0
+            for p in pts_[1:-1]:
+                if (len(p) > 2 and (p[2] - last) >= step) or (len(p) > 4 and p[4]):
+                    out.append(p); last = (p[2] if len(p) > 2 else last)
+            out.append(pts_[-1]); return out
         # EVERY lap that covers the course goes to the append-only lap store — competitiveness (the 107% rule) is
         # judged at read time against each build's own best, so a later faster lap RE-RATES history instead of
         # deleting it. The model keeps only the best per tune (a compact summary; the store holds the record).
@@ -2945,7 +2948,7 @@ def main():
                                   # (none produced here); partial / rewind / coverage remain their own fields.
                                   "impacts": _imp, "void": 0,  # was: 1 if (_contacts(w) and _solo) else 0
                                   "tune_hash": _th,
-                                  "pts": _pts_out(_thin(pts_w, 300), pts_w),
+                                  "pts": _pts_out(pts_w, pts_w),   # the 1 m analysis trace to lap_point, UNCAPPED (a_max, grip_envelope, corner_segment read this); the map/speed-chart is decimated downstream in build_web
                                   "lap_dist_m": round(pts_w[-1][6] - pts_w[0][6]) if len(pts_w[0]) > 6 else None,
                                   "rewinds": sum(1 for m in _markers if m["kind"] == "rewind" and w["t0"] - 0.05 <= m["t"] <= w["t1"] + 0.05),
                                   "pauses": sum(1 for m in _markers if m["kind"] == "pause" and w["t0"] - 0.05 <= m["t"] <= w["t1"] + 0.05),
@@ -2984,7 +2987,7 @@ def main():
             # point at the exact spot on the course map (no arc-to-path alignment guesswork). Older 2-column
             # traces still render: every consumer treats columns 3-5 as optional.
             speed_traces_new[cid_] = {"lap_s": lt, "session": sid, "build_id": carrec.get("build_id"), "class": carrec.get("class"), "pi": carrec.get("pi"), "drivetrain": carrec.get("drivetrain"),
-                                      "pts": _pts_out(_thin(pts_all, 300), pts_all)}
+                                      "pts": _pts_out(_disp(pts_all), pts_all)}
         # (course model + mturn_for were loaded above, before clustering)
         def pass_view(m):
             return {"mph_in": m["mph_in"], "mph_min": m["mph_min"], "mph_out": m.get("mph_out"), "brake_on_m": m.get("brake_on_m"), "throttle_on_m": m.get("throttle_on_m"), "lat_g": m["lat_g_peak"], "apex": m.get("apex"), "t0": m["t0"], "stint": m.get("stint"), "first_red": (m["first_red"]["axle"] + " ph" + str(m["first_red"]["phase"])) if m.get("first_red") else None, "session": sid}

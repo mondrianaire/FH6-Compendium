@@ -434,9 +434,23 @@ def main(argv=None):
         # Selected only when the columns exist, so a build against a not-yet-migrated database still runs.
         _ped = {r[1] for r in cx.execute("PRAGMA table_info(lap_point)")} >= {"thr", "brk"}
         _psel = "SELECT arc_m, mph, grip, x, z, elev_m" + (", thr, brk" if _ped else "") + " FROM lap_point WHERE lap_id=? ORDER BY i"
+
+        def _disp_trace(rows, step=4.0):
+            # DISPLAY decimation (Jett 2026-09-20): lap_point is now NATIVE 60 Hz for the analysis (a_max,
+            # grip_envelope, corner_segment all read it), but the drawn map / speed trace only needs ~step m of
+            # arc to look smooth. Keep every NON-CALM frame so the grip paint and the impact markers survive --
+            # arc_m = col 0, grip = col 2 -- otherwise a decimated-out hit would vanish while `impacts` still claims it.
+            if len(rows) < 3:
+                return rows
+            out = [rows[0]]; last = rows[0][0]
+            for r in rows[1:-1]:
+                if (r[0] - last) >= step or r[2]:
+                    out.append(r); last = r[0]
+            out.append(rows[-1])
+            return out
         for lid in keep:
-            traces[lid] = [[r["arc_m"], r["mph"], r["grip"], r["x"], r["z"], r["elev_m"]] + ([r["thr"], r["brk"]] if _ped else [])
-                           for r in cx.execute(_psel, (lid,))]
+            traces[lid] = _disp_trace([[r["arc_m"], r["mph"], r["grip"], r["x"], r["z"], r["elev_m"]] + ([r["thr"], r["brk"]] if _ped else [])
+                                       for r in cx.execute(_psel, (lid,))])
         # RE-ANCHOR TRACE ARC TO ONE COMMON FRAME (Jett 2026-09-10). Each lap's stored arc starts wherever
         # its recording began, so on a LOOP a free-roam lap sits half a lap off the Rivals laps and the
         # speed-trace overlay is incoherent (Irokawa: the S1 free-roam laps were ~900 m out of phase). A lap
@@ -470,17 +484,26 @@ def main(argv=None):
             _ref = traces[_ref_id]
             _rp = [(p[0], p[3], p[4]) for p in _ref if p[3] is not None and p[4] is not None and p[0] is not None]
             _L = _rp[-1][0] if _rp else 0
-            if len(_rp) >= 8 and _L > 1:
-                _RA = _np.array([q[0] for q in _rp], float)
-                _RX = _np.array([q[1] for q in _rp], float)
-                _RZ = _np.array([q[2] for q in _rp], float)
+            # BOUND THE O(N*M) ALIGNMENT MATRIX. The nearest-neighbour re-phasing only needs a COARSE trace to find
+            # the modal origin offset -- but a pathological "lap" (a 46 km free-roam wander recorded as one loop)
+            # carries ~46k points, and a full 46k x 46k matrix asks for ~16 GiB and OOMs the build. It sails through
+            # the impossible-speed guard because it is absurdly LONG, not fast. Stride BOTH the reference and each
+            # lap to <= _ALIGN_CAP points FOR THE MATRIX ONLY; the single offset it yields is still applied to every
+            # point, so the trace loses memory, not resolution. (Jett 2026-09-20 -- exposed by the 1 m analysis trace)
+            _ALIGN_CAP = 2000
+            _rpm = _rp[::-(-len(_rp) // _ALIGN_CAP)] if len(_rp) > _ALIGN_CAP else _rp
+            if len(_rpm) >= 8 and _L > 1:
+                _RA = _np.array([q[0] for q in _rpm], float)
+                _RX = _np.array([q[1] for q in _rpm], float)
+                _RZ = _np.array([q[2] for q in _rpm], float)
                 for lid, tr in traces.items():
                     ix = [k for k, p in enumerate(tr) if p[3] is not None and p[4] is not None and p[0] is not None]
                     if len(ix) < 12:
                         continue
-                    PX = _np.array([tr[k][3] for k in ix], float)
-                    PZ = _np.array([tr[k][4] for k in ix], float)
-                    OWN = _np.array([tr[k][0] for k in ix], float)
+                    _mix = ix[::-(-len(ix) // _ALIGN_CAP)] if len(ix) > _ALIGN_CAP else ix   # matrix inputs only; `off` still applies to all of `ix`
+                    PX = _np.array([tr[k][3] for k in _mix], float)
+                    PZ = _np.array([tr[k][4] for k in _mix], float)
+                    OWN = _np.array([tr[k][0] for k in _mix], float)
                     nn = ((_RX[None, :] - PX[:, None]) ** 2 + (_RZ[None, :] - PZ[:, None]) ** 2).argmin(axis=1)
                     deltas = _np.mod(_RA[nn] - OWN, _L)                  # per-point origin offset (mod loop)
                     # modal offset: the delta with the most neighbours within a 60 m circular window,

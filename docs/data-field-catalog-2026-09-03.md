@@ -404,7 +404,7 @@ field at a time. Content below is grouped by physical location, not by topic.
 | ref_route_turn.dir | enum | — | L(1918)/R(1894) | direction |
 | ref_route_turn.kind | enum | — | fast(1110), hairpin(286), medium(1539), sweeper(118), tight(759) | severity — matches own comment |
 | ref_route_turn.length_m/width_m | float ×2 | — | 8–840 / 0–42 | turn length / road width at apex |
-| ref_route_turn.bank_deg | float | — | 0.0–113.55 (suspect >90°) | banking angle |
+| ref_route_turn.bank_deg | float | NULL on Route30106 (43) | −11.16–31.13 (2026-09-20) | SIGNED camber at the apex: + banked into the turn, − off-camber. Was acos(n_y) = total tilt (grade+camber, unsigned, max 139.69°) until 2026-09-20 — see `fh6_turns.py` BANKING |
 | ref_route_turn.road_class/road_type/road_profile/offroad/surface_src | mixed | — | — | surface at apex |
 | ref_route_turn.surface_m | float, nullable | — | 0.0–24.9 | mislabeled comment — actually nav-distance, not tilt |
 

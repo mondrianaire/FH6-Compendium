@@ -60,14 +60,70 @@ def _finite(pts):
     return [p for p in pts if len(p) >= 9 and all(math.isfinite(v) for v in p[:9])]
 
 
+# BANKING (2026-09-20). bank_deg used to be acos(n_y): the angle between the surface normal and
+# straight up. That is the road's TOTAL tilt -- grade and camber together, unsigned -- so a 10%
+# climb read as 6 deg of "banking", and where the normal points below horizontal it ran past 90
+# (max 139.69 deg, all on Route30106). Banking is the tilt ACROSS the road, toward or away from the
+# turn centre: sin(bank) = n . c, with c the horizontal unit vector pointing at the centre of the
+# curve. It is signed: + = banked into the turn (outside edge high), - = off-camber.
+#
+# FRAME CHECK. On 168 of 169 routes floats 6-8 are a true surface normal: unit length on every
+# point (551,399/551,399), perpendicular to the recorded lateral vector (|n.l| p50 0.0008) and to
+# travel, and its tilt matches the one the lateral + travel vectors imply to a median 0.2 deg.
+# Route30106 (unnamed, is_race 0, no course matches it) is the exception: 524 points face DOWN
+# (n_y < 0) and 18% fail the perpendicularity check while the road itself stays at y ~ 114 m. So a
+# normal is used only where the surface faces up AND it is perpendicular to the lateral vector the
+# same record carries; otherwise the bank is unknown (NULL), not clamped -- a clamp would publish a
+# made-up number for a frame that is not a surface at all.
+#
+# Even its self-consistent frames give 39-89 deg "banks" on a road that never leaves y 101-118 m, so a
+# route with ANY down-facing normal has its banking withheld whole (turns_for). Measured with that in
+# place: every other turn is within +/-31.1 deg (Temple Cross Country, "steep banked turns"; the real
+# world tops out near 31-33 deg), and the sign agrees with the one the lateral vector's own tilt
+# gives on 2,717/2,727 turns (median |diff| 0.10 deg). BANK_MAX_DEG is a guard above that, not a clamp.
+FRAME_MAX_LAT_DOT = 0.2   # |n . lateral| above this: the two vectors disagree (~11.5 deg off square)
+BANK_MAX_DEG = 45.0       # a steeper reading is NULL: no surveyed road here is past 31.1 deg
+
+
+def _frame_ok(p):
+    nm = math.sqrt(p[6] ** 2 + p[7] ** 2 + p[8] ** 2)
+    lm = math.sqrt(p[3] ** 2 + p[4] ** 2 + p[5] ** 2)
+    if abs(nm - 1.0) >= 1e-3 or lm <= 0 or p[7] <= 0:
+        return False
+    return abs(p[3] * p[6] + p[4] * p[7] + p[5] * p[8]) / (nm * lm) <= FRAME_MAX_LAT_DOT
+
+
+def bank_at(rs, i, turn_sign, step=STEP_M, loop=False):
+    """Signed banking at resampled point i, degrees. turn_sign is the sign of the curvature there
+    (+ = heading increasing). None where the point has no trusted normal."""
+    nv = rs[i][4]
+    if nv is None:
+        return None
+    n = len(rs)
+    w = max(1, int(round(HEAD_WIN_M / step / 2)))
+    a, b = (i - w) % n, (i + w) % n
+    if not loop:
+        a, b = max(0, i - w), min(n - 1, i + w)
+    dx, dz = rs[b][0] - rs[a][0], rs[b][2] - rs[a][2]
+    h = math.hypot(dx, dz)
+    nm = math.sqrt(sum(v * v for v in nv))
+    if h <= 0 or nm <= 0:
+        return None
+    # the tangent (dx, dz)/h rotated 90 deg toward the side the heading turns to = toward the centre
+    cx, cz = (-dz / h, dx / h) if turn_sign > 0 else (dz / h, -dx / h)
+    return math.degrees(math.asin(max(-1.0, min(1.0, (nv[0] * cx + nv[2] * cz) / nm))))
+
+
 def resample(pts, step=STEP_M):
-    """Uniform-arc resample of (x, y, z, half_width, bank_deg) along the centre-line."""
+    """Uniform-arc resample of (x, y, z, half_width, normal) along the centre-line.
+
+    `normal` is the record's unit surface normal (floats 6-8), or None where the frame fails
+    _frame_ok(). Banking is NOT an angle to interpolate: it is read off the normal at the apex by
+    bank_at(), which needs the turn's direction to give it a sign."""
     src = []
     for p in pts:
         half = math.sqrt(p[3] ** 2 + p[4] ** 2 + p[5] ** 2)
-        nm = math.sqrt(p[6] ** 2 + p[7] ** 2 + p[8] ** 2)
-        bank = math.degrees(math.acos(max(-1.0, min(1.0, p[7] / nm)))) if abs(nm - 1.0) < 1e-3 else None
-        src.append((p[0], p[1], p[2], half, bank))
+        src.append((p[0], p[1], p[2], half, tuple(p[6:9]) if _frame_ok(p) else None))
     out, acc = [src[0]], 0.0
     arcs = [0.0]
     for i in range(1, len(src)):
@@ -82,7 +138,8 @@ def resample(pts, step=STEP_M):
             out.append((a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t,
                         a[2] + (b[2] - a[2]) * t,
                         a[3] + (b[3] - a[3]) * t,
-                        (a[4] + (b[4] - a[4]) * t) if (a[4] is not None and b[4] is not None) else None))
+                        tuple(u + (v - u) * t for u, v in zip(a[4], b[4]))
+                        if (a[4] is not None and b[4] is not None) else None))
             arcs.append(arcs[-1] + step)
     return out, arcs
 
@@ -144,6 +201,8 @@ def turns_for(route, step=STEP_M, k_min=K_MIN, min_deg=MIN_DEG, gap_m=GAP_M):
     rs, arcs = resample(pts, step)
     if len(rs) < 30:
         return []
+    # one down-facing normal anywhere = this file's frames are not a road surface (see BANKING)
+    frames_ok = all(p[7] > 0 for p in pts)
     loop = bool(route.get("is_loop"))
     k = curvature(rs, step, loop=loop)
     n = len(rs)
@@ -234,7 +293,8 @@ def turns_for(route, step=STEP_M, k_min=K_MIN, min_deg=MIN_DEG, gap_m=GAP_M):
             "kind": kind_of(radius),
             "length_m": round(arc_len, 1),
             "width_m": round(p[3] * 2.0, 1) if p[3] else None,
-            "bank_deg": round(p[4], 2) if p[4] is not None else None,
+            "bank_deg": (lambda _b: round(_b, 2) if _b is not None and abs(_b) <= BANK_MAX_DEG else None)(
+                bank_at(rs, gi, 1 if k[ai] > 0 else -1, step, loop) if frames_ok else None),
             "_ti": _aarc(idx[0]), "_m0": _aarc(idx[_mid[0]]), "_m1": _aarc(idx[_mid[-1]]), "_ex": _aarc(idx[-1]),
         })
     out.sort(key=lambda t: t["apex_arc_m"])

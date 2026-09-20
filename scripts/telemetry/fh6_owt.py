@@ -169,6 +169,8 @@ def parse(path, full=False):
     n_all, secs, arr = _layout(b, path)
     # 14 floats per record: 0-2 position, 3-5 the lateral half-width vector (perpendicular to
     # travel on 98% of steps), 6-8 the unit surface normal (banking), 9-13 sparse link data.
+    # (The normal is a true one on every route except Route30106, whose frames face down on 524
+    # points -- fh6_turns.py BANKING measures this and withholds that route's banking.)
     # full=True keeps all of them; the matcher only needs position and 3 floats is far cheaper.
     #
     # RECORD BYTES 44..51 ARE NOT FLOATS.  Slots [11] and [12] are four u16 -- that is why they

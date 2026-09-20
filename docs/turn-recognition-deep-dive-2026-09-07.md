@@ -69,7 +69,7 @@ One shared `courseMap()` (app.js:297‑332) draws all turn dots (id + radius too
 - **The 5‑segment model is a category error to attribute to `detect_turns()`** — it returns one span/one apex, no phases at all; phases live in a wholly separate behavioral detector, capped at 4/5 live.
 - **6 of `ref_route_turn`'s 22 columns (all surface enrichment) never reach any dashboard JSON** despite being 87‑92% populated.
 - **`course_turn.kind`'s schema comment doesn't match its own data** (hairpin/sweeper/kink/chicane documented vs NULL/fast/hairpin/medium actually written) — a third, undocumented taxonomy.
-- **`bank_deg` has an unclamped, implausible outlier** (max 113.55° vs mean 4.82°, 3,810 rows) with nothing downstream flagging it.
+- **`bank_deg` has an unclamped, implausible outlier** (max 113.55° vs mean 4.82°, 3,810 rows) with nothing downstream flagging it. *RESOLVED 2026-09-20: it was total tilt (grade+camber, unsigned), not banking, and every >45° value was Route30106's broken frames; now signed camber (+ into the turn), 30106 NULL — see `fh6_turns.py` BANKING.*
 - **60 m compound‑merge distance is a hardcoded literal** (analyze_session.py:578) even though `turn_lab.py` treats it as tunable — the two files can no longer stay experimentally linked.
 - **Self‑crossing/out‑and‑back roads are explicitly unsolved** (`geo_near`, 2569‑2598: "a real piece of work and is not attempted here").
 - **`corner_obs` has zero downstream readers** — computed, then never selected by `build_web.py` or `panel.js`.

@@ -260,7 +260,7 @@ SOURCE-READER: scripts/telemetry/fh6_live_daemon.py
 | `session_hit` | — | where the car bottomed out (`kind='bottoming'`, suspension at full compression) or hit a barrier/terrain (`kind='wall'`, one-frame speed loss) per session, with world `x`/`z`, `mph`, `hard`, `wheel` (bottoming) and `drop_mph` (wall). From `analyze_session`'s `bottoming`/`wall` detectors. `build_web` attributes each hit to a course by proximity to its driven line and clusters them into 🔧/💥 map markers (`course/<key>.json` → `hits`). Display only — a barrier scrape slows the car but NEVER voids the lap. Stage `telemetry`. |
 | `ref_route_point` | 275737 | columns: route_id, i, x, y, z |
 | `ref_route_surface` | 275737 | columns: route_id, i, road_class, road_type, road_profile, offroad… |
-| `ref_route_turn` | 3878 | the MAP's turns with width_m and bank_deg (a DIFFERENT id namespace from course_turn — never join by id). |
+| `ref_route_turn` | 3878 | the MAP's turns with width_m and bank_deg (SIGNED camber, + into the turn; NULL on Route30106) (a DIFFERENT id namespace from course_turn — never join by id). |
 | `ref_slider` | 36 | columns: slider, slot_index, group_name, display_name, unit, band_source… |
 | `ref_slot` | 50 | THE MENU MAP: menu_area, menu_area_order, menu_order, in_upgrade_shop, category, key_column — the game's own upgrade tree. |
 | `ref_string` | 59268 | the game's string tables (58,722 rows) — the ID → name layer. |

@@ -1175,7 +1175,7 @@ CREATE TABLE IF NOT EXISTS ref_route_turn (
   kind          TEXT,                    -- hairpin | tight | medium | fast | sweeper
   length_m      REAL,
   width_m       REAL,                    -- road width at the apex
-  bank_deg      REAL,                    -- surface tilt off horizontal at the apex
+  bank_deg      REAL,                    -- SIGNED camber at the apex: + into the turn, - off-camber; NULL = no trusted normal (fh6_turns BANKING)
   segments      TEXT,                    -- JSON: the 5 WHERE-phases {braking,turn_in,mid,exit,straight}, each [arc0,arc1]
   -- what the road AT this turn is made of. Read at the turn's own apex point, which is one of
   -- the .owt centre-line points the turn was derived from, so there is no spatial guess in the

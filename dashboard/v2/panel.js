@@ -4573,7 +4573,7 @@ function turnGlyph(t, W, H) {
   const arrow = `<g transform="translate(${a0[0].toFixed(1)},${a0[1].toFixed(1)}) rotate(${ang.toFixed(1)})"><path d="M-4.5,-3.2 L2.5,0 L-4.5,3.2 Z" fill="${SEG_COL.braking}"/></g>`;
   const ap = t.x != null ? P([t.x, t.z]) : null;
   const apex = ap ? `<circle cx="${ap[0].toFixed(1)}" cy="${ap[1].toFixed(1)}" r="3.4" fill="none" stroke="var(--ink)" stroke-width="1.2" opacity=".85"/>` : "";
-  const tip = `${t.kind || "turn"}${t.r != null ? ` · ${Math.round(t.r)} m radius` : ""}${t.deg != null ? ` · ${Math.round(t.deg)}°` : ""}${t.dir ? ` ${t.dir === "L" ? "left" : "right"}` : ""}${t.width != null ? ` · ${t.width.toFixed(0)} m wide` : ""}${t.bank ? ` · ${t.bank.toFixed(1)}° banked` : ""} — drawn to scale, entered from the left; the ring is the apex`;
+  const tip = `${t.kind || "turn"}${t.r != null ? ` · ${Math.round(t.r)} m radius` : ""}${t.deg != null ? ` · ${Math.round(t.deg)}°` : ""}${t.dir ? ` ${t.dir === "L" ? "left" : "right"}` : ""}${t.width != null ? ` · ${t.width.toFixed(0)} m wide` : ""}${t.bank ? ` · ${bankWord(t.bank)}` : ""} — drawn to scale, entered from the left; the ring is the apex`;
   return `<svg class="tgly" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><title>${esc(tip)}</title>${paths}${arrow}${apex}</svg>`;
 }
 const TL_HEAD = { braking: "brake", turn_in: "entry", mid: "mid", exit: "exit", straight: "str" };
@@ -4949,7 +4949,7 @@ function turnStatsHTML(t, ls) {
   // unit words are trimmed): "Tight left · R34m · 99° · 14.7m wide · 2° bank · apex 268m".
   const geo = [t.kind && cap1(t.kind) + (dirW ? " " + dirW : ""), t.r != null && "R" + Math.round(t.r) + "m",
     t.deg != null && Math.round(t.deg) + "°", t.width != null && (+t.width).toFixed(1) + "m wide",
-    t.bank != null && (Math.abs(t.bank) < 1.5 ? "flat" : Math.abs(Math.round(t.bank)) + "° bank"),
+    t.bank != null && bankWord(t.bank),
     t.s != null && "apex " + Math.round(t.s) + "m", nLaps ? "" : "not timed yet"].filter(Boolean).join(" · ");
   const header = `<div class="gh tstat-h"><b>${esc(turnLabel(t))}</b><span class="why">${esc(geo)}</span>
     <span class="tstat-nav"><button class="mini" data-turnstep="prev" title="previous turn">‹</button><button class="mini" data-turnstep="next" title="next turn">›</button><button class="mini" data-turnclear title="clear selection">✕</button></span></div>`;
@@ -5759,6 +5759,13 @@ function statsHTML() {
   }).join("")}</div>`;
 }
 
+// Banking is SIGNED (ref_route_turn.bank_deg, 2026-09-20): + = banked into the turn, - = off-camber
+// (the outside edge is LOW, so the road tips the car out). Never show the magnitude alone.
+function bankWord(b) {
+  if (Math.abs(b) < 1.5) return "flat";
+  return Math.abs(Math.round(b)) + "° " + (b > 0 ? "bank" : "off-camber");
+}
+
 // Course conclusions: the corners on THIS route ranked by what went wrong there, geometry beside.
 function conclusionsHTML() {
   if (!DIAG || !COURSE) return `<div class="why">no course</div>`;
@@ -5766,7 +5773,7 @@ function conclusionsHTML() {
   if (!rows.length) return `<div class="why">no failures placed on this course's turns yet</div>`;
   return `<div class="grp">${rows.map((r) => `<div class="frow">
     <div class="fl"><b>${esc(turnLabel(r))} <span class="dim">${esc(r.kind || "")}</span></b>
-      <span class="why">${r.radius_m ? n0(r.radius_m) + " m radius" : ""}${r.width_m ? " · " + n1(r.width_m) + " m wide" : ""}${r.bank_deg != null ? " · " + n1(r.bank_deg) + "° bank" : ""}</span>
+      <span class="why">${r.radius_m ? n0(r.radius_m) + " m radius" : ""}${r.width_m ? " · " + n1(r.width_m) + " m wide" : ""}${r.bank_deg != null ? " · " + bankWord(r.bank_deg) : ""}</span>
       <span class="why">${esc(r.symptom)} · ${r.occurrences} on ${r.laps_affected} laps</span></div>
     <div class="fr"><span class="chip b">${esc(r.primary_fix || "")}</span></div></div>`).join("")}</div>`;
 }

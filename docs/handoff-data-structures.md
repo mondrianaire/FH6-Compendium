@@ -160,7 +160,7 @@ Row counts measured 2026-09-18. `primary key` is the real key; composite keys ar
 | table | rows | primary key | columns |
 | --- | ---: | --- | --- |
 | `schema_meta` | 2 | key | `key`, `value` |
-| `import_run` | 12,805 | run_id | `run_id`, `kind`, `source`, `started_utc`, `finished_utc`, `n_rows`, `ok`, `notes` |
+| `import_run` | 12,823 | run_id | `run_id`, `kind`, `source`, `started_utc`, `finished_utc`, `n_rows`, `ok`, `notes` |
 
 _Tables covered: 67 of 67 in the live database._
 ### Views — the consumer contract (10)

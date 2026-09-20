@@ -330,6 +330,25 @@ def main(argv=None):
                                         "aMax": round(_pctl(_bv, 0.90), 3), "p10": round(_pctl(_bv, 0.10), 3), "n": len(_bv)})
         class_grip[_cls] = _entry
 
+    # RADIUS ENVELOPE (grip_envelope, schema 11). How fast a class actually carried a given DRIVEN
+    # radius: the p90 of observed speed in the band, projected to the band midpoint. Class property,
+    # course-independent, so compute once and stamp on every course -- same as classGrip above.
+    # NOT a ceiling and NOT a limit: it is a LOWER BOUND, bounded by the hardest anyone drove, and the
+    # UI must say so. `grip used` (classGrip) remains the authority on how hard a corner WAS driven.
+    radius_env = {}
+    if fh6db.has_table(cx, "grip_envelope"):
+        for _r in cx.execute("""SELECT scope_key, surface, radius_band, r_mid_m, a_p50, a_p90,
+                                       v_envelope_mph, bias_g, bias_note, n_samples, n_laps
+                                  FROM grip_envelope WHERE publishable = 1 AND scope = 'class'
+                                 ORDER BY scope_key, surface, r_mid_m"""):
+            radius_env.setdefault(_r["scope_key"], {}).setdefault(_r["surface"], []).append({
+                "band": _r["radius_band"], "rMid": _r["r_mid_m"],
+                "aP50": _r["a_p50"], "aP90": _r["a_p90"], "vMph": _r["v_envelope_mph"],
+                # the bias travels as DATA (handoff-grip-envelope.md §5): the UI renders what this
+                # says and may neither invent a caveat nor drop one.
+                "biasG": _r["bias_g"], "biasNote": _r["bias_note"],
+                "n": _r["n_samples"], "nLaps": _r["n_laps"]})
+
     # ================================================================================================
     # A DECLARED NAME IS NOT A VERIFIED ROAD (2026-09-18). A course keyed route:<id> takes that route's
     # NAME from the declaration -- an event id in routes.json -- which is the strongest naming evidence
@@ -418,9 +437,23 @@ def main(argv=None):
         # Selected only when the columns exist, so a build against a not-yet-migrated database still runs.
         _ped = {r[1] for r in cx.execute("PRAGMA table_info(lap_point)")} >= {"thr", "brk"}
         _psel = "SELECT arc_m, mph, grip, x, z, elev_m" + (", thr, brk" if _ped else "") + " FROM lap_point WHERE lap_id=? ORDER BY i"
+
+        def _disp_trace(rows, step=4.0):
+            # DISPLAY decimation (Jett 2026-09-20): lap_point is now NATIVE 60 Hz for the analysis (a_max,
+            # grip_envelope, corner_segment all read it), but the drawn map / speed trace only needs ~step m of
+            # arc to look smooth. Keep every NON-CALM frame so the grip paint and the impact markers survive --
+            # arc_m = col 0, grip = col 2 -- otherwise a decimated-out hit would vanish while `impacts` still claims it.
+            if len(rows) < 3:
+                return rows
+            out = [rows[0]]; last = rows[0][0]
+            for r in rows[1:-1]:
+                if (r[0] - last) >= step or r[2]:
+                    out.append(r); last = r[0]
+            out.append(rows[-1])
+            return out
         for lid in keep:
-            traces[lid] = [[r["arc_m"], r["mph"], r["grip"], r["x"], r["z"], r["elev_m"]] + ([r["thr"], r["brk"]] if _ped else [])
-                           for r in cx.execute(_psel, (lid,))]
+            traces[lid] = _disp_trace([[r["arc_m"], r["mph"], r["grip"], r["x"], r["z"], r["elev_m"]] + ([r["thr"], r["brk"]] if _ped else [])
+                                       for r in cx.execute(_psel, (lid,))])
         # RE-ANCHOR TRACE ARC TO ONE COMMON FRAME (Jett 2026-09-10). Each lap's stored arc starts wherever
         # its recording began, so on a LOOP a free-roam lap sits half a lap off the Rivals laps and the
         # speed-trace overlay is incoherent (Irokawa: the S1 free-roam laps were ~900 m out of phase). A lap
@@ -454,17 +487,26 @@ def main(argv=None):
             _ref = traces[_ref_id]
             _rp = [(p[0], p[3], p[4]) for p in _ref if p[3] is not None and p[4] is not None and p[0] is not None]
             _L = _rp[-1][0] if _rp else 0
-            if len(_rp) >= 8 and _L > 1:
-                _RA = _np.array([q[0] for q in _rp], float)
-                _RX = _np.array([q[1] for q in _rp], float)
-                _RZ = _np.array([q[2] for q in _rp], float)
+            # BOUND THE O(N*M) ALIGNMENT MATRIX. The nearest-neighbour re-phasing only needs a COARSE trace to find
+            # the modal origin offset -- but a pathological "lap" (a 46 km free-roam wander recorded as one loop)
+            # carries ~46k points, and a full 46k x 46k matrix asks for ~16 GiB and OOMs the build. It sails through
+            # the impossible-speed guard because it is absurdly LONG, not fast. Stride BOTH the reference and each
+            # lap to <= _ALIGN_CAP points FOR THE MATRIX ONLY; the single offset it yields is still applied to every
+            # point, so the trace loses memory, not resolution. (Jett 2026-09-20 -- exposed by the 1 m analysis trace)
+            _ALIGN_CAP = 2000
+            _rpm = _rp[::-(-len(_rp) // _ALIGN_CAP)] if len(_rp) > _ALIGN_CAP else _rp
+            if len(_rpm) >= 8 and _L > 1:
+                _RA = _np.array([q[0] for q in _rpm], float)
+                _RX = _np.array([q[1] for q in _rpm], float)
+                _RZ = _np.array([q[2] for q in _rpm], float)
                 for lid, tr in traces.items():
                     ix = [k for k, p in enumerate(tr) if p[3] is not None and p[4] is not None and p[0] is not None]
                     if len(ix) < 12:
                         continue
-                    PX = _np.array([tr[k][3] for k in ix], float)
-                    PZ = _np.array([tr[k][4] for k in ix], float)
-                    OWN = _np.array([tr[k][0] for k in ix], float)
+                    _mix = ix[::-(-len(ix) // _ALIGN_CAP)] if len(ix) > _ALIGN_CAP else ix   # matrix inputs only; `off` still applies to all of `ix`
+                    PX = _np.array([tr[k][3] for k in _mix], float)
+                    PZ = _np.array([tr[k][4] for k in _mix], float)
+                    OWN = _np.array([tr[k][0] for k in _mix], float)
                     nn = ((_RX[None, :] - PX[:, None]) ** 2 + (_RZ[None, :] - PZ[:, None]) ** 2).argmin(axis=1)
                     deltas = _np.mod(_RA[nn] - OWN, _L)                  # per-point origin offset (mod loop)
                     # modal offset: the delta with the most neighbours within a 60 m circular window,
@@ -496,11 +538,14 @@ def main(argv=None):
             route["path"] = [[r["x"], r["z"]] for r in cx.execute(
                 "SELECT x, z FROM ref_route_point WHERE route_id=? ORDER BY i",
                 (route["route_id"],))]
-            rr = cx.execute("SELECT length_m, is_loop FROM ref_route WHERE route_id=?",
+            rr = cx.execute("SELECT length_m, is_loop, road_class FROM ref_route WHERE route_id=?",
                             (route["route_id"],)).fetchone()
             if rr:
                 route["length_m"] = rr["length_m"]
                 route["is_loop"] = rr["is_loop"]
+                # which envelope surface this course reads against. 'mixed'/None are NOT published
+                # surfaces, so the drill-down says why rather than guessing a row.
+                route["road_class"] = rr["road_class"]
         # DEFINITIONAL FALLBACK: a course keyed route:<id> IS game route <id> -- the catalogue matcher assigned
         # that key off the start/finish line + path, so the identity is already settled by the key. The owt
         # geometric re-match (course_route) gates its verdict on COVERAGE so it will not attach lap RECORDS to a
@@ -623,8 +668,10 @@ def main(argv=None):
         # requiring a pass to cover the turn's full phase set (a pass sampled in fewer phases sums a smaller
         # turnT and must not be crowned fastest), and a crash corner reads as impact grip + a slow, low rank.
         _seg = _cl.defaultdict(lambda: _cl.defaultdict(list))
-        _cs_peakg = "peak_lat_g" in {r[1] for r in cx.execute("PRAGMA table_info(corner_segment)")}   # schema 7
-        _pg = ", cs.peak_lat_g" if _cs_peakg else ""
+        _cs_cols = {r[1] for r in cx.execute("PRAGMA table_info(corner_segment)")}
+        _cs_peakg = "peak_lat_g" in _cs_cols                                   # schema 7
+        _cs_medr = "med_r_m" in _cs_cols                                       # schema 12
+        _pg = (", cs.peak_lat_g" if _cs_peakg else "") + (", cs.med_r_m" if _cs_medr else "")
         for sr in cx.execute("SELECT cs.turn_id, cs.segment, cs.entry_mph, cs.min_mph, cs.exit_mph, "
                              "cs.grip_state, cs.time_s, cs.grip_hist, cs.mean_mph, cs.lap_id" + _pg +
                              " FROM corner_segment cs WHERE cs.route_key = ?", (key,)):
@@ -634,7 +681,8 @@ def main(argv=None):
                 _gh = None
             _seg[sr["turn_id"]][sr["segment"]].append(
                 [sr["lap_id"], sr["entry_mph"], sr["min_mph"], sr["exit_mph"], sr["grip_state"],
-                 sr["time_s"], _gh, sr["mean_mph"], (sr["peak_lat_g"] if _cs_peakg else None)])
+                 sr["time_s"], _gh, sr["mean_mph"], (sr["peak_lat_g"] if _cs_peakg else None),
+                 (sr["med_r_m"] if _cs_medr else None)])
         for t in turns:
             po = _seg.get(t.get("id"))
             if po:
@@ -761,7 +809,7 @@ def main(argv=None):
                        {"key": key, "name": c["name"], "len": _disp_len, "rivals": c["rivals"],
                         "path": geo.get("path") or [], "turns": turns, "laps": laps,
                         "traces": traces, "route": route, "naming": naming, "hits": hits,
-                        "n_turns_catalogued": n_cat, "classGrip": class_grip,
+                        "n_turns_catalogued": n_cat, "classGrip": class_grip, "radiusEnvelope": radius_env,
                         # when this history was built, so the course view can stamp the comparison it feeds
                         # ("history built 10:44") instead of leaving freshness to the status bar (handoff §3)
                         "built_at": fh6db.utcnow()})

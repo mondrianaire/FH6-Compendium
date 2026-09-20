@@ -83,6 +83,11 @@ One row per `(scope, scope_key, surface, radius_band)`:
   be dead code. `hw_hash` ships only if the coverage gate (§6.7) passes. Classes **D (17 laps) and X (16)** are
   below the sample gate before any split and are **unpublishable**, not "thin".
 - Radius bands 15–30, 30–50, 50–80, 80–120, 120–200, 200–400, 400+ m.
+- **`bias_g` + `bias_note` per row** (DECIDED 2026-09-19, see `handoff-grip-envelope.md` §5). The estimator
+  reads optimistically where the car carries body slip — +0.21 g at 50–80 m — and Jett's call is to publish
+  the band with that stated. It is a COLUMN so the UI cannot drop it or invent it, and it is MEASURED from
+  the row's own samples (median implied `v²/r` − median recorded `|lat_g|`), never a literal: the figure
+  moves with the sample filter, so a frozen constant would go quietly wrong.
 - **`a_p50` / `a_p90` taken over RAW per-sample `|lat_g|` in the bin** [A8] — not a percentile of per-phase peaks.
   A peak-then-percentile is a percentile-of-maxima: upward-biased, and inflating with sample density, so two bins
   with identical true grip would report different numbers purely from how many samples composed each phase.

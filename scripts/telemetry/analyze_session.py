@@ -231,6 +231,9 @@ def split_multilap(pts, close_m=35.0, min_lap_m=250.0):
             break
         cuts.pop()
     return cuts
+# The fastest average speed any FH6 car sustains over a whole pass. A lap window (a short drag run) or a stored
+# lap time (a rewind-corrupted clock) that implies more is a measurement artifact, not a lap -- used to gate both.
+SHORT_LAP_VMAX = 150.0    # m/s (~540 km/h)
 INTS = ("IsRaceOn","Gear","Accel","Brake","Clutch","HandBrake","Steer","CarOrdinal","CarPI","CarClass","DrivetrainType","NumCylinders","CarGroup","LapNumber","RacePosition","Trailing323","NormDrivingLine","NormAIBrakeDiff")
 
 def cid(r): return f'{r["CarOrdinal"]}|{r["DrivetrainType"]}|{r["NumCylinders"]}|{r["CarPI"]}'
@@ -2297,12 +2300,33 @@ def main():
             # is already handled below by split_multilap, which cuts on the road returning to itself and keeps the
             # time with the driving. (What sent me looking was a Colossus trace I believed was missing; it was in
             # the store the whole time, under -3750_300 from session 213928, 23.42 mi. Nothing needed fixing here.)
-            k_ = 0; t_start = ev["t0"]; cur_lap = rows_ev[0]["LapNumber"] if rows_ev else None
+            k_ = 0; t_start = ev["t0"]; cur_lap = rows_ev[0]["LapNumber"] if rows_ev else None; _w0 = len(lap_windows)
             for r in rows_ev:
                 if r["LapNumber"] != cur_lap:
                     k_ += 1; lap_windows.append({"ev": ei, "lap": k_, "t0": round(t_start, 1), "t1": round(r["t"], 1)}); t_start = r["t"]; cur_lap = r["LapNumber"]
             k_ += 1; lap_windows.append({"ev": ei, "lap": k_, "t0": round(t_start, 1), "t1": ev["t1"]})
-        lw_full = [w for w in lap_windows if w["t1"] - w["t0"] >= 15]   # the stub after a finish line is not a lap
+            for _w in lap_windows[_w0:]: _w["sole"] = (len(lap_windows) - _w0 == 1)   # this window IS the whole event
+        # A sub-15 s window is normally the stub left AFTER a finish-line crossing — but a point-to-point run
+        # (a drag strip: one event = one full ~6 s launch that never splits) is a complete lap despite being
+        # short. Keep a window when it is the SOLE window of its event (a whole pass); apply the 15 s floor only
+        # to split fragments, where a real stub can appear. Before this, every ~6 s drag run was discarded and a
+        # 50-run Irokawa Space Center session stored 4 laps (the only windows long enough to clear the floor).
+        #
+        # ...but "sole and short" alone admits a REWIND-COLLAPSED long lap: when a Colossus lap's paused/rewound
+        # frames drop out, its one window spans ~13 s of surviving rows yet still traces ~10.9 km — 838 m/s, which
+        # no car does. So a short sole window only qualifies when its implied average speed is physically possible
+        # (<= SHORT_LAP_VMAX) over a plausibly short course; a whole-pass drag run (a few hundred m at ~60-120 m/s)
+        # passes, the collapsed mega-lap does not and falls back to the 15 s floor (which drops it).
+        def _short_pass_ok(w):
+            dur = w["t1"] - w["t0"]
+            if dur >= 15:
+                return True
+            if not w.get("sole") or dur <= 0.5:
+                return False
+            _wp = [(r["PosX"], r["PosZ"]) for r in loop_rows if w["t0"] <= r["t"] <= w["t1"]]
+            arc = sum(math.hypot(_wp[i][0] - _wp[i - 1][0], _wp[i][1] - _wp[i - 1][1]) for i in range(1, len(_wp)))
+            return arc <= 3000 and arc / dur <= SHORT_LAP_VMAX
+        lw_full = [w for w in lap_windows if w["t1"] - w["t0"] >= 15 or _short_pass_ok(w)]
         lap_windows = lw_full or lap_windows
         # LapNumber does not increment in free roam or on unregistered routes, so a multi-lap run arrives as ONE
         # window. Cut it where the car returned to where the window started — the road's own finish line.
@@ -2318,6 +2342,13 @@ def main():
         _split.sort(key=lambda x: x["t0"])
         for _i, _w in enumerate(_split, 1): _w["lap"] = _i
         lap_windows = _split or lap_windows
+        # Recompute "sole" against the FINAL window set: a window is a whole pass (never a split-off stub) iff it is
+        # the only window of its event AFTER split_multilap. A P2P drag run stays sole (one event, one window, no
+        # cut); a looped free-roam event that split into laps is no longer sole. This flag lets the short-lap gates
+        # below keep a ~6 s drag lap while still dropping the sub-15 s fragment left after a finish-line crossing.
+        _evc = defaultdict(int)
+        for w in lap_windows: _evc[w["ev"]] += 1
+        for w in lap_windows: w["sole"] = (_evc[w["ev"]] == 1)
         total_laps = len(lap_windows)
         def lap_of(t):
             for li, w in enumerate(lap_windows):
@@ -2445,8 +2476,10 @@ def main():
         # per lap, orphan (one-lap-only) turns 4 vs 11.
         geo = None; lat_acc = None
         # a "lap" for GEOMETRY must be a lap: the 15 s rule admits aborted stubs (Edamame stored 48 lap paths,
-        # only 2 of them whole), and a 500 m fragment as the reference lap is how the turn map lost turns.
-        _cand_laps = [w for w in lap_windows if (w["t1"] - w["t0"]) >= 15]
+        # only 2 of them whole), and a 500 m fragment as the reference lap is how the turn map lost turns. A P2P
+        # drag run is the exception: one event = one whole ~6 s pass ("sole"), a complete lap that never splits, so
+        # it is a candidate despite the short duration (the arc-consensus filter below still drops true fragments).
+        _cand_laps = [w for w in lap_windows if (w["t1"] - w["t0"]) >= 15 or _short_pass_ok(w)]
         def _arc_of_win(w):
             _p = resample(lap_pts(w)); return sum(pc[-1][2] for pc in _p) if _p else 0
         _cand_arcs = {id(w): _arc_of_win(w) for w in _cand_laps}
@@ -2754,7 +2787,7 @@ def main():
         _win_arc = {}
         for cid_, wins in _trace_wins.items():
             for w in wins:
-                pcs_ = resample(lap_pts(w, grip=True)); pts_all = _globalise_arc(pcs_)
+                pcs_ = resample(lap_pts(w, grip=True), step=1.0); pts_all = _globalise_arc(pcs_)   # 1 m arc — the analysis substrate (lap_point): ~9x denser than the old 4 m + 300 cap, de-quantised, peak lat_g carried. build_web decimates the drawn trace
                 if len(pts_all) >= 30: _win_arc[id(w)] = (pts_all[-1][2], pts_all)
         _ref_arc = max((a for a, _ in _win_arc.values()), default=0)
         # THE COURSE IS THE REFERENCE, NOT THE SESSION. A session that only ever drove a fragment of a long course had
@@ -2836,14 +2869,17 @@ def main():
                      (round(p[8] / 2.55) if len(p) > 8 else None),
                      (round(p[9], 3) if len(p) > 9 else None),
                      (round(p[10], 1) if (len(p) > 10 and p[10] is not None) else None)] for p in pts_]
-        def _thin(pts_, n):
-            # Thin to ~n points but NEVER drop an impact: the map/trace draw their impact markers from these very
-            # points, so a thinned-out hit would vanish from the map while the stored `impacts` count still claimed it.
-            # (Latent today — every stored lap resamples to < 600 points — but a 10 km route strides by 8.)
-            k = max(1, len(pts_) // n)
-            if k == 1: return pts_
-            keep = set(range(0, len(pts_), k)) | {i for i, p in enumerate(pts_) if len(p) > 4 and p[4] == 4}
-            return [pts_[i] for i in sorted(keep)]
+        def _disp(pts_, step=3.0):
+            # Decimate a native-resolution trace to ~step m of arc for DRAWING ONLY (the per-tune speed chart) --
+            # the analysis reads the full lap_point trace, not this. Keep every non-calm frame: an off-limit or
+            # IMPACT state paints the map/chart and must survive, and the stored `impacts` count is drawn from
+            # these very points, so a decimated-out hit would vanish from the map while the count still claimed it.
+            if len(pts_) < 3: return pts_
+            out = [pts_[0]]; last = pts_[0][2] if len(pts_[0]) > 2 else 0.0
+            for p in pts_[1:-1]:
+                if (len(p) > 2 and (p[2] - last) >= step) or (len(p) > 4 and p[4]):
+                    out.append(p); last = (p[2] if len(p) > 2 else last)
+            out.append(pts_[-1]); return out
         # EVERY lap that covers the course goes to the append-only lap store — competitiveness (the 107% rule) is
         # judged at read time against each build's own best, so a later faster lap RE-RATES history instead of
         # deleting it. The model keeps only the best per tune (a compact summary; the store holds the record).
@@ -2875,6 +2911,13 @@ def main():
                 _solo = 1 if (_ev.get("solo") and not _sess_saw_rivals) else 0
                 _imp = _impacts(pts_w)
                 _lap_s, _lap_official = _game_lap_s(w)
+                # A time that implies an IMPOSSIBLE average speed over the lap's own path is a corrupted clock, not
+                # a time. A rewind-heavy lap can leave _game_lap_s reading 13 s for a 10.9 km Colossus lap (838 m/s)
+                # -- a pre-existing race-clock corruption independent of window length. Strike the time (keep the
+                # trace) rather than publish it, exactly as the lap canon treats a whole lap with no trustworthy
+                # official time: an untimed lap, struck from the leaderboard, its grip line still on the map.
+                if _lap_s and arc_w and arc_w / _lap_s > SHORT_LAP_VMAX:
+                    _lap_s, _lap_official = None, False
                 _th = _tune_hash_for(cid_, w)
                 # A LAP BELONGS TO THE COURSE WHOSE LINE IT CROSSED — not to whichever course this loop is on.
                 # This wrote the outer `key`, so every window a car drove was filed under EVERY course that car
@@ -2905,7 +2948,7 @@ def main():
                                   # (none produced here); partial / rewind / coverage remain their own fields.
                                   "impacts": _imp, "void": 0,  # was: 1 if (_contacts(w) and _solo) else 0
                                   "tune_hash": _th,
-                                  "pts": _pts_out(_thin(pts_w, 300), pts_w),
+                                  "pts": _pts_out(pts_w, pts_w),   # the 1 m analysis trace to lap_point, UNCAPPED (a_max, grip_envelope, corner_segment read this); the map/speed-chart is decimated downstream in build_web
                                   "lap_dist_m": round(pts_w[-1][6] - pts_w[0][6]) if len(pts_w[0]) > 6 else None,
                                   "rewinds": sum(1 for m in _markers if m["kind"] == "rewind" and w["t0"] - 0.05 <= m["t"] <= w["t1"] + 0.05),
                                   "pauses": sum(1 for m in _markers if m["kind"] == "pause" and w["t0"] - 0.05 <= m["t"] <= w["t1"] + 0.05),
@@ -2917,6 +2960,20 @@ def main():
             # becomes the stored trace -- the backfill surfaced five courses whose trace covered under half the
             # longest. Require near-full coverage, and rank on the GAME clock, not the pause-inflated wall span.
             _full = [w for w in valid if _win_arc[id(w)][0] >= 0.9 * _ref_arc]
+            # ...and drop any window whose time is not physically possible over its own path. A rewind-collapsed
+            # window (a whole Colossus lap left as ~13 s of surviving rows over ~10.9 km) would otherwise win the
+            # "fastest trace" slot on _bw_key and poison the course model's best_lap for good -- and the model
+            # keeps the fastest trace across sessions, so one bad analysis outlives the session that made it.
+            # Checked on BOTH the game clock and the wall span, since _bw_key ranks on the span when the clock is
+            # null, and a collapsed window is short on both.
+            def _win_plausible(w):
+                a = _win_arc[id(w)][0]; g = _game_lap_s(w)[0]; dur = w["t1"] - w["t0"]
+                if a and g and a / g > SHORT_LAP_VMAX:
+                    return False
+                if a and dur > 0 and a / dur > SHORT_LAP_VMAX:
+                    return False
+                return True
+            _full = [w for w in _full if _win_plausible(w)]
             if not _full:
                 continue   # no window covered the course: the lap store keeps the partials, the model saves no best trace
             def _bw_key(w):
@@ -2930,7 +2987,7 @@ def main():
             # point at the exact spot on the course map (no arc-to-path alignment guesswork). Older 2-column
             # traces still render: every consumer treats columns 3-5 as optional.
             speed_traces_new[cid_] = {"lap_s": lt, "session": sid, "build_id": carrec.get("build_id"), "class": carrec.get("class"), "pi": carrec.get("pi"), "drivetrain": carrec.get("drivetrain"),
-                                      "pts": _pts_out(_thin(pts_all, 300), pts_all)}
+                                      "pts": _pts_out(_disp(pts_all), pts_all)}
         # (course model + mturn_for were loaded above, before clustering)
         def pass_view(m):
             return {"mph_in": m["mph_in"], "mph_min": m["mph_min"], "mph_out": m.get("mph_out"), "brake_on_m": m.get("brake_on_m"), "throttle_on_m": m.get("throttle_on_m"), "lat_g": m["lat_g_peak"], "apex": m.get("apex"), "t0": m["t0"], "stint": m.get("stint"), "first_red": (m["first_red"]["axle"] + " ph" + str(m["first_red"]["phase"])) if m.get("first_red") else None, "session": sid}
@@ -3074,6 +3131,15 @@ def main():
         for cid_, tr_ in speed_traces_new.items():
             prev_ = trm.get(cid_)
             if prev_ is None or (tr_.get("lap_s") or 9e9) < (prev_.get("lap_s") or 9e9) or prev_.get("session") == sid: trm[cid_] = tr_   # same-session re-analysis may REPAIR a bad trace (the escape best_laps already has)
+        # RETIRE A CORRUPTED TRACE. A rewind-collapsed lap an earlier analysis crowned "fastest" (its time implies
+        # an impossible average speed over its own path) sits on the min-lap_s slot forever, since a trace only
+        # improves on time and nothing beats a bogus few-second lap. The selection above no longer mints one, but
+        # a model poisoned before the guard existed heals only if the trace is removed. Run it over the whole set
+        # on every analysis of the course, keyed on nothing session-specific, so it self-heals the next time the
+        # course is driven -- not only when the exact session that made it is re-run.
+        for _k in [k for k, t in trm.items()
+                   if t.get("lap_s") and t.get("pts") and ((t["pts"][-1][0] or 0) / t["lap_s"]) > SHORT_LAP_VMAX]:
+            del trm[_k]
         # RETIRE SHORT TRACES. A stored trace only improves on lap TIME, so a partial lap that once won the slot
         # keeps it forever — it is short, therefore quick, therefore never beaten. The backfill surfaced five
         # courses whose trace covered under half the longest. Coverage is judged against the course's own mapped

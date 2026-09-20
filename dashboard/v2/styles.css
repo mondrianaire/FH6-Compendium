@@ -1787,3 +1787,8 @@ body.fixed #pRight > .body:has(.tstat){overflow-y:auto}
 /* the constant-steer (understeer gradient) tile -- same fixed-width discipline as the slip tile */
 .dt.slip.ust{width:172px;min-width:172px;max-width:172px;justify-content:center}
 .dt.slip.ust .slipcue{font-size:10px}
+/* Radius envelope (Stage C, 2026-09-19): sits beside `grip used` in the turn title bar. Deliberately
+   quieter than the grip-ceiling row -- it is a LOWER BOUND from other people's laps, not a measurement
+   of this pass, and must not read as the louder of the two. */
+.tsum-env .tg-pct { color: var(--ink); }
+.tsum-env .tg-thinnote { color: #e3b341; }

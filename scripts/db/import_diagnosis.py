@@ -400,6 +400,14 @@ def run(cx, verbose=False):
     if verbose:
         print("  deterministic sidecars: %d file(s), %d event(s)" % (n_det_files, n_det))
 
+    # A sidecar caches the lap_id it saw at scan time, but lap_id is reassigned on every telemetry re-import
+    # (autoincrement, not a stable key), so a churned id would orphan the diag_event -> lap foreign key and fail
+    # the whole stage -- which a full backfill (every capture re-analysed) triggers wholesale. The fault is still
+    # placed by session / route / turn / cid, and the grip and brake paths already emit NULL lap_ids, so an
+    # unresolvable cached lap_id simply drops to NULL rather than hard-failing the cascade.
+    _valid_lap = {r[0] for r in cx.execute("SELECT lap_id FROM lap")}
+    ev = [e if (e[3] is None or e[3] in _valid_lap) else (e[:3] + (None,) + e[4:]) for e in ev]
+
     with cx:
         cx.execute("DELETE FROM diag_event")
         n = fh6db.upsert_many(cx, "diag_event", [

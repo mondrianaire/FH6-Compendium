@@ -593,6 +593,12 @@ CREATE TABLE IF NOT EXISTS session_event (
 -- its driven line and clusters them into a few located map markers (🔧 bottoming / 💥 barrier). NOT a lap
 -- validity signal — a barrier scrape slows the car but never voids the lap. Added 2026-09-18.
 CREATE TABLE IF NOT EXISTS session_hit (
+  -- SURROGATE key, and it has to be: the same car bottoms at the same spot at the same speed on
+  -- different laps, so 6,754 of 26,871 rows were exact FULL-ROW duplicates of another row (measured
+  -- 2026-09-19). Those are distinct physical events the table records no lap or time for, so any
+  -- natural key would delete real observations and thin the map overlay. This makes a row addressable;
+  -- it does NOT enforce uniqueness, and nothing here can.
+  hit_id      INTEGER PRIMARY KEY,
   session_id  TEXT NOT NULL REFERENCES session(session_id) ON DELETE CASCADE,
   kind        TEXT NOT NULL,            -- 'bottoming' (suspension at full compression) | 'wall' (barrier/terrain one-frame speed loss)
   x           REAL, z REAL,             -- world position of the hit
@@ -734,9 +740,68 @@ CREATE TABLE IF NOT EXISTS corner_segment (
   grip_hist  TEXT,                    -- JSON [calm,front,rear,both,impact] sample counts -> the true grip mix
   time_s     REAL,
   peak_lat_g REAL,                    -- peak |lateral g| in this phase for this lap (schema 7, 2026-09-12) -> grip-ceiling rating
+  -- schema 12: the DRIVEN radius through this phase (median of lap_point.r_m). The turn's catalogued
+  -- ref_route_turn.radius_m is the road's fitted CENTRE-LINE and misses recorded lat_g by a median
+  -- 0.39 g, so grip_envelope is looked up by THIS, never by the catalogued radius.
+  med_r_m    REAL,
   PRIMARY KEY (lap_id, turn_id, segment)
 ) WITHOUT ROWID;
 CREATE INDEX IF NOT EXISTS ix_corner_segment ON corner_segment(route_key, turn_id, segment);
+
+-- ============================================================================
+-- GRIP ENVELOPE (schema 11, 2026-09-19) -- how much lateral g a class actually
+-- holds at a given corner radius, and therefore how fast it can carry that
+-- radius. Computed INSIDE import_corners.py, so it inherits the `corners`
+-- stage's DOWNSTREAM membership and a session import can never leave it stale.
+--
+-- IT IS A LOWER BOUND, NOT A LIMIT. Nothing in the data records driver intent or
+-- remaining margin, so this is bounded by the hardest anyone drove -- never "the
+-- car's maximum". That wording ships in the UI verbatim.
+--
+-- `grip used` (schema 7 a_max) remains the authority on how hard a corner WAS
+-- driven. This answers a different question and must not be called a ceiling.
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS grip_envelope (
+  scope         TEXT NOT NULL,      -- 'class' is the only scope at launch: 123 builds exist but only 4
+  scope_key     TEXT NOT NULL,      -- have >=27 laps, so a hw_hash scope would be dead code (plan A7)
+  surface       TEXT NOT NULL,      -- tarmac | dirt | mixed | unknown, from ref_route.road_class
+  radius_band   TEXT NOT NULL,      -- 15-30 | 30-50 | 50-80 | 80-120 | 120-200
+  r_mid_m       REAL NOT NULL,      -- band midpoint, the radius v_envelope_mph is quoted at
+
+  n_samples     INTEGER NOT NULL,
+  n_laps        INTEGER NOT NULL,   -- DISTINCT laps: 20 correlated samples from one steady lap are not 20 trials
+  n_builds      INTEGER NOT NULL,
+
+  -- Percentiles over RAW per-sample |lat_g| in the bin, never over per-phase peaks: a
+  -- peak-then-percentile is a percentile-of-maxima, upward-biased and inflating with sample
+  -- density, so two bins with identical true grip would differ purely by how many samples
+  -- composed each phase (plan A8).
+  a_p50         REAL,               -- g
+  a_p90         REAL,               -- g; NULL when the bin is saturated (see pct_saturated)
+  -- MEASURED p90 of observed speed, projected to r_mid_m (v ~ sqrt(r) at constant lateral g),
+  -- NOT derived from a_p90. sqrt(a_p90 * r) is not the p90 of speed and under-covered: 76.2 %
+  -- of held-out samples against a nominal 90 %, where this reads 88.5 %. Independent of the
+  -- lat_g ceiling, so saturated bins get a bound too. Project it with v * sqrt(r / r_mid).
+  v_envelope_mph REAL,
+
+  pct_saturated REAL NOT NULL,      -- share of samples >= 2.9 g. lat_g is censored at 3.00 g, so a bin
+                                    -- over 2 % publishes no p90 -- the true p90 is unknowable there
+  pct_grip3     REAL NOT NULL,      -- share with grip=3 (all four sliding). Kept but reported separately:
+                                    -- it mixes genuine four-wheel drift with wheelspin
+
+  -- DECIDED 2026-09-19 (handoff-grip-envelope.md §5): the radius estimator reads optimistically
+  -- where the car carries body slip, and the band is published WITH that stated rather than hidden.
+  -- MEASURED per row from its own samples, never a literal -- the figure moves with the sample
+  -- filter, so a frozen constant would go quietly wrong.
+  bias_g        REAL,               -- signed g: median implied v^2/r - median recorded |lat_g|
+  bias_note     TEXT,               -- e.g. '+0.21 g optimistic - body slip makes r = v/omega read tight'
+
+  publishable   INTEGER NOT NULL,   -- 0 = do not show. Consumers filter on THIS, not on n_samples
+  why_not       TEXT,               -- why not, in words, when publishable = 0
+  computed_utc  TEXT NOT NULL,
+  PRIMARY KEY (scope, scope_key, surface, radius_band)
+);
+CREATE INDEX IF NOT EXISTS ix_grip_envelope ON grip_envelope(surface, radius_band, publishable);
 
 -- ============================================================================
 -- OBSERVATION LAYER — what a person saw. Every row names its source.

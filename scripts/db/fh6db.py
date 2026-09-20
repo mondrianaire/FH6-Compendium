@@ -68,7 +68,7 @@ DEFAULT_DB = os.path.join(REPO_ROOT, "data", "fh6.db")
 SCHEMA_PATH = os.path.join(REPO_ROOT, "db", "schema.sql")
 GAMEDB_PATH = r"C:\Users\mondr\Downloads\forza raw data files\FH6_Database.sqlite"
 
-SCHEMA_VERSION = "10"  # 10 = COURSE-LEVEL DIAGNOSIS (v_diag_by_course: faults that belong to the lap, not a turn -- gearing, 2026-09-18); 9 = DRIVEN RADIUS (lap_point.r_m from yaw rate; x/z no longer rounded to whole metres, 2026-09-18); 8 = OFFICIAL LAP TIMES (lap.official: the game published this lap_s; a rewound lap with an official time counts, 2026-09-18); 7 = PEAK LATERAL-G (lap_point.lat_g, corner_segment.peak_lat_g, 2026-09-12); 6 = PEDALS ON THE TRACE (lap_point.thr / brk, 0-100 %, 2026-09-11); 2 = COURSE NAMES; 3 = ANCHORS; 4 = the game's EVENT CATALOGUE (2026-09-05); 5 = LAPS AS THE GAME TIMED THEM (lap.lap_dist_m/rewinds/pauses/pause_s/stitched, lap_point.dist_m, lap_marker, 2026-09-06) -- applied by migrate()
+SCHEMA_VERSION = "12"  # 12 = DRIVEN RADIUS PER PHASE (corner_segment.med_r_m: the radius the car took, so the envelope is looked up by the driven line and never by the catalogued centre-line, 2026-09-19); 11 = GRIP ENVELOPE (grip_envelope: lateral g a class holds per radius band, with its MEASURED bias_g; a lower bound, never a limit, 2026-09-19); 10 = COURSE-LEVEL DIAGNOSIS (v_diag_by_course: faults that belong to the lap, not a turn -- gearing, 2026-09-18); 9 = DRIVEN RADIUS (lap_point.r_m from yaw rate; x/z no longer rounded to whole metres, 2026-09-18); 8 = OFFICIAL LAP TIMES (lap.official: the game published this lap_s; a rewound lap with an official time counts, 2026-09-18); 7 = PEAK LATERAL-G (lap_point.lat_g, corner_segment.peak_lat_g, 2026-09-12); 6 = PEDALS ON THE TRACE (lap_point.thr / brk, 0-100 %, 2026-09-11); 2 = COURSE NAMES; 3 = ANCHORS; 4 = the game's EVENT CATALOGUE (2026-09-05); 5 = LAPS AS THE GAME TIMED THEM (lap.lap_dist_m/rewinds/pauses/pause_s/stitched, lap_point.dist_m, lap_marker, 2026-09-06) -- applied by migrate()
 
 #: The confidence vocabulary. Every `confidence` column in the schema uses exactly these.
 CONFIDENCE = ("proven", "verified", "derived", "read", "unknown")
@@ -469,7 +469,7 @@ V2_COLUMNS["lap_point"] = [("r_m", "REAL"),   # schema 9: driven radius from yaw
 # the per-phase grip MIX (2026-09-10): sample counts across the 5 grip states, so a turn shows its
 # TYPICAL grip, not the single worst moment. grip_state also switches meaning here to the modal state.
 # peak_lat_g (schema 7, 2026-09-12): the peak |lat_g| in that phase for that lap -> the grip-ceiling rating.
-V2_COLUMNS["corner_segment"] = [("grip_hist", "TEXT"), ("peak_lat_g", "REAL")]
+V2_COLUMNS["corner_segment"] = [("grip_hist", "TEXT"), ("peak_lat_g", "REAL"), ("med_r_m", "REAL")]
 V2_TABLES["lap_marker"] = """CREATE TABLE IF NOT EXISTS lap_marker (
   lap_id   INTEGER NOT NULL REFERENCES lap(lap_id) ON DELETE CASCADE,
   i        INTEGER NOT NULL,
@@ -496,6 +496,46 @@ V2_TABLES["corner_segment"] = """CREATE TABLE IF NOT EXISTS corner_segment (
   peak_lat_g REAL,
   PRIMARY KEY (lap_id, turn_id, segment)
 ) WITHOUT ROWID"""
+
+#: schema 11 -- GRIP ENVELOPE. Computed inside import_corners.py; the index comes from
+#: schema_indexes() replaying schema.sql, so only the table is listed here.
+V2_TABLES["grip_envelope"] = """CREATE TABLE IF NOT EXISTS grip_envelope (
+  scope         TEXT NOT NULL,      -- 'class' is the only scope at launch: 123 builds exist but only 4
+  scope_key     TEXT NOT NULL,      -- have >=27 laps, so a hw_hash scope would be dead code (plan A7)
+  surface       TEXT NOT NULL,      -- tarmac | dirt | mixed | unknown, from ref_route.road_class
+  radius_band   TEXT NOT NULL,      -- 15-30 | 30-50 | 50-80 | 80-120 | 120-200
+  r_mid_m       REAL NOT NULL,      -- band midpoint, the radius v_envelope_mph is quoted at
+
+  n_samples     INTEGER NOT NULL,
+  n_laps        INTEGER NOT NULL,   -- DISTINCT laps: 20 correlated samples from one steady lap are not 20 trials
+  n_builds      INTEGER NOT NULL,
+
+  -- Percentiles over RAW per-sample |lat_g| in the bin, never over per-phase peaks: a
+  -- peak-then-percentile is a percentile-of-maxima, upward-biased and inflating with sample
+  -- density, so two bins with identical true grip would differ purely by how many samples
+  -- composed each phase (plan A8).
+  a_p50         REAL,               -- g
+  a_p90         REAL,               -- g; NULL when the bin is saturated (see pct_saturated)
+  v_envelope_mph REAL,              -- MEASURED p90 of observed speed at r_mid_m, not derived from a_p90
+
+  pct_saturated REAL NOT NULL,      -- share of samples >= 2.9 g. lat_g is censored at 3.00 g, so a bin
+                                    -- over 2 % publishes no p90 -- the true p90 is unknowable there
+  pct_grip3     REAL NOT NULL,      -- share with grip=3 (all four sliding). Kept but reported separately:
+                                    -- it mixes genuine four-wheel drift with wheelspin
+
+  -- DECIDED 2026-09-19 (handoff-grip-envelope.md §5): the radius estimator reads optimistically
+  -- where the car carries body slip, and the band is published WITH that stated rather than hidden.
+  -- MEASURED per row from its own samples, never a literal -- the figure moves with the sample
+  -- filter, so a frozen constant would go quietly wrong.
+  bias_g        REAL,               -- signed g: median implied v^2/r - median recorded |lat_g|
+  bias_note     TEXT,               -- e.g. '+0.21 g optimistic - body slip makes r = v/omega read tight'
+
+  publishable   INTEGER NOT NULL,   -- 0 = do not show. Consumers filter on THIS, not on n_samples
+  why_not       TEXT,               -- why not, in words, when publishable = 0
+  computed_utc  TEXT NOT NULL,
+  PRIMARY KEY (scope, scope_key, surface, radius_band)
+);"""
+
 
 
 def ensure_columns(cx, table, cols):
@@ -550,6 +590,49 @@ def ensure_indexes(cx, schema_path=None):
     return n
 
 
+def rebuild_session_hit(cx):
+    """One-time: give session_hit its surrogate hit_id. Returns 1 if it rebuilt, else 0.
+
+    SQLite cannot ALTER a PRIMARY KEY in, so the table has to be recreated and copied. hit_id is an
+    INTEGER PRIMARY KEY, which is an alias for the implicit rowid -- no extra B-tree, no extra storage.
+    Row COUNT is asserted identical before the swap; this must never lose a hit.
+    """
+    if not has_table(cx, "session_hit"):
+        return 0
+    cols = [r[1] for r in cx.execute("PRAGMA table_info(session_hit)")]
+    if "hit_id" in cols:
+        return 0
+    before = cx.execute("SELECT COUNT(*) FROM session_hit").fetchone()[0]
+    cx.execute("PRAGMA foreign_keys=OFF")
+    try:
+        cx.execute("""CREATE TABLE session_hit__new (
+  hit_id      INTEGER PRIMARY KEY,
+  session_id  TEXT NOT NULL REFERENCES session(session_id) ON DELETE CASCADE,
+  kind        TEXT NOT NULL,
+  x           REAL, z REAL,
+  mph         INTEGER,
+  hard        INTEGER,
+  wheel       TEXT,
+  drop_mph    REAL
+)""")
+        cx.execute("INSERT INTO session_hit__new(session_id, kind, x, z, mph, hard, wheel, drop_mph) "
+                   "SELECT session_id, kind, x, z, mph, hard, wheel, drop_mph FROM session_hit")
+        after = cx.execute("SELECT COUNT(*) FROM session_hit__new").fetchone()[0]
+        if after != before:
+            cx.execute("DROP TABLE session_hit__new")
+            raise RuntimeError("session_hit copy lost rows: %d -> %d" % (before, after))
+        cx.execute("DROP TABLE session_hit")
+        cx.execute("ALTER TABLE session_hit__new RENAME TO session_hit")
+        ensure_indexes(cx)                      # the rename drops the old index with the old table
+        bad = cx.execute("PRAGMA foreign_key_check(session_hit)").fetchall()
+        if bad:
+            raise RuntimeError("session_hit foreign keys broken after rebuild: %r" % bad[:3])
+        cx.commit()
+    finally:
+        cx.execute("PRAGMA foreign_keys=ON")
+    return 1
+
+
 def migrate(cx):
     """Bring a live database up to SCHEMA_VERSION. Idempotent; commits.
 
@@ -568,6 +651,7 @@ def migrate(cx):
         if not cx.execute("SELECT 1 FROM sqlite_master WHERE type='view' AND name=?", (name,)).fetchone():
             cx.execute(ddl)
             n_tabs += 1
+    n_tabs += rebuild_session_hit(cx)
     n_tabs += ensure_indexes(cx)
     if meta_get(cx, "schema_version") != SCHEMA_VERSION:
         meta_set(cx, "schema_version", SCHEMA_VERSION)

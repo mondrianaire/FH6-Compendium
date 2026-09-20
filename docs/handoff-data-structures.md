@@ -109,25 +109,26 @@ Row counts measured 2026-09-18. `primary key` is the real key; composite keys ar
 
 | table | rows | primary key | columns |
 | --- | ---: | --- | --- |
-| `session` | 645 | session_id | `session_id`, `started_utc`, `duration_s`, `frames`, `rate_pps`, `source`, `file_path`, `imported_at`, `summary` |
-| `session_car` | 1,488 | session_id, cid | `session_id`, `cid`, `ordinal`, `build_id`, `hw_hash`, `name`, `class`, `pi`, `drivetrain`, `cyl`, `live_s` |
-| `session_event` | 1,048 | session_id, i | `session_id`, `i`, `t0`, `t1`, `cid`, `mode`, `solo`, `laps`, `distance_m`, `duration_s`, `start_x`, `start_z`, `end_x`, `end_z`, `route_key`, `start_is_line` |
-| `session_hit` | 26,422 | session_id, kind, x, z | `session_id`, `kind`, `x`, `z`, `mph`, `hard`, `wheel`, `drop_mph` |
-| `course` | 127 | route_key | `route_key`, `name`, `is_rivals`, `event_id`, `length_m`, `turn_count`, `n_laps`, `n_sessions`, `confidence`, `updated_utc`, `geometry`, `profile`, `declared_name`, `declared_source`, `name_source`, `name_confidence` |
+| `session` | 651 | session_id | `session_id`, `started_utc`, `duration_s`, `frames`, `rate_pps`, `source`, `file_path`, `imported_at`, `summary` |
+| `session_car` | 1,496 | session_id, cid | `session_id`, `cid`, `ordinal`, `build_id`, `hw_hash`, `name`, `class`, `pi`, `drivetrain`, `cyl`, `live_s` |
+| `session_event` | 1,176 | session_id, i | `session_id`, `i`, `t0`, `t1`, `cid`, `mode`, `solo`, `laps`, `distance_m`, `duration_s`, `start_x`, `start_z`, `end_x`, `end_z`, `route_key`, `start_is_line` |
+| `session_hit` | 26,876 | hit_id | `hit_id`, `session_id`, `kind`, `x`, `z`, `mph`, `hard`, `wheel`, `drop_mph` |
+| `course` | 133 | route_key | `route_key`, `name`, `is_rivals`, `event_id`, `length_m`, `turn_count`, `n_laps`, `n_sessions`, `confidence`, `updated_utc`, `geometry`, `profile`, `declared_name`, `declared_source`, `name_source`, `name_confidence` |
 | `course_turn` | 2,409 | route_key, turn_id | `route_key`, `turn_id`, `seq`, `arc_m`, `apex_x`, `apex_z`, `radius_m`, `angle_deg`, `kind`, `n_obs` |
-| `course_route` | 125 | route_key | `route_key`, `route_id`, `match_kind`, `mean_dev_m`, `p95_dev_m`, `covered`, `len_ratio`, `runner_up`, `computed_utc`, `anchor_route_id`, `anchor_events`, `anchor_agree` |
-| `course_event` | 84 | route_key, event_id | `route_key`, `event_id`, `tier`, `route_id`, `d_route_m`, `d_course_m`, `loop_ok`, `road_ok`, `declared_ok`, `chosen`, `computed_utc` |
-| `lap` | 1,574 | lap_id | `lap_id`, `route_key`, `session_id`, `cid`, `container`, `hw_hash`, `t0`, `lap_s`, `arc_m`, `coverage`, `is_partial`, `build_id`, `class`, `pi`, `drivetrain`, `tune_hash`, `solo`, `impacts`, `void`, `lap_dist_m`, `rewinds`, `pauses`, `pause_s`, `stitched`, `is_race`, `official` |
-| `lap_point` | 515,322 | lap_id, i | `lap_id`, `i`, `arc_m`, `mph`, `grip`, `x`, `z`, `elev_m`, `dist_m`, `thr`, `brk`, `lat_g`, `r_m` |
+| `course_route` | 130 | route_key | `route_key`, `route_id`, `match_kind`, `mean_dev_m`, `p95_dev_m`, `covered`, `len_ratio`, `runner_up`, `computed_utc`, `anchor_route_id`, `anchor_events`, `anchor_agree` |
+| `course_event` | 85 | route_key, event_id | `route_key`, `event_id`, `tier`, `route_id`, `d_route_m`, `d_course_m`, `loop_ok`, `road_ok`, `declared_ok`, `chosen`, `computed_utc` |
+| `lap` | 1,696 | lap_id | `lap_id`, `route_key`, `session_id`, `cid`, `container`, `hw_hash`, `t0`, `lap_s`, `arc_m`, `coverage`, `is_partial`, `build_id`, `class`, `pi`, `drivetrain`, `tune_hash`, `solo`, `impacts`, `void`, `lap_dist_m`, `rewinds`, `pauses`, `pause_s`, `stitched`, `is_race`, `official` |
+| `lap_point` | 526,057 | lap_id, i | `lap_id`, `i`, `arc_m`, `mph`, `grip`, `x`, `z`, `elev_m`, `dist_m`, `thr`, `brk`, `lat_g`, `r_m` |
 | `lap_marker` | 787 | lap_id, i | `lap_id`, `i`, `kind`, `t`, `dur_s`, `race_s`, `dist_m`, `over_line`, `detail` |
-| `corner_obs` | 17,685 | lap_id, turn_id | `lap_id`, `turn_id`, `route_key`, `entry_mph`, `apex_mph`, `exit_mph`, `min_mph`, `grip_state`, `time_s`, `score` |
-| `corner_segment` | 67,741 | lap_id, turn_id, segment | `lap_id`, `turn_id`, `route_key`, `segment`, `n_samples`, `entry_mph`, `exit_mph`, `min_mph`, `mean_mph`, `grip_state`, `time_s`, `grip_hist`, `peak_lat_g` |
+| `corner_obs` | 17,699 | lap_id, turn_id | `lap_id`, `turn_id`, `route_key`, `entry_mph`, `apex_mph`, `exit_mph`, `min_mph`, `grip_state`, `time_s`, `score` |
+| `corner_segment` | 67,798 | lap_id, turn_id, segment | `lap_id`, `turn_id`, `route_key`, `segment`, `n_samples`, `entry_mph`, `exit_mph`, `min_mph`, `mean_mph`, `grip_state`, `time_s`, `grip_hist`, `peak_lat_g`, `med_r_m` |
+| `grip_envelope` | 73 | scope, scope_key, surface, radius_band | `scope`, `scope_key`, `surface`, `radius_band`, `r_mid_m`, `n_samples`, `n_laps`, `n_builds`, `a_p50`, `a_p90`, `v_envelope_mph`, `pct_saturated`, `pct_grip3`, `bias_g`, `bias_note`, `publishable`, `why_not`, `computed_utc` |
 
 ### Observation layer — human evidence, every row names its source
 
 | table | rows | primary key | columns |
 | --- | ---: | --- | --- |
-| `obs_pi` | 223 | obs_id | `obs_id`, `ordinal`, `container`, `hw_hash`, `slot`, `part_id`, `pi_before`, `pi_after`, `delta`, `source`, `observed_utc`, `note` |
+| `obs_pi` | 257 | obs_id | `obs_id`, `ordinal`, `container`, `hw_hash`, `slot`, `part_id`, `pi_before`, `pi_after`, `delta`, `source`, `observed_utc`, `note` |
 | `obs_menu` | 92 | obs_id | `obs_id`, `ordinal`, `slot`, `tile`, `tile_count`, `name`, `part_id`, `source`, `observed_utc` |
 | `obs_evidence` | 129 | obs_id | `obs_id`, `subject`, `claim`, `confidence`, `source`, `observed_utc`, `superseded_by` |
 
@@ -144,7 +145,7 @@ Row counts measured 2026-09-18. `primary key` is the real key; composite keys ar
 | table | rows | primary key | columns |
 | --- | ---: | --- | --- |
 | `ref_symptom` | 17 | symptom | `symptom`, `phase`, `primary_fix`, `secondary_fix`, `tertiary_fix`, `verify_test`, `detector`, `source` |
-| `diag_event` | 49,067 | event_id | `event_id`, `symptom`, `session_id`, `cid`, `lap_id`, `container`, `hw_hash`, `route_key`, `turn_id`, `phase`, `t`, `mph`, `severity`, `detail`, `source` |
+| `diag_event` | 49,362 | event_id | `event_id`, `symptom`, `session_id`, `cid`, `lap_id`, `container`, `hw_hash`, `route_key`, `turn_id`, `phase`, `t`, `mph`, `severity`, `detail`, `source` |
 
 ### Materialized deliverables
 
@@ -152,16 +153,47 @@ Row counts measured 2026-09-18. `primary key` is the real key; composite keys ar
 | --- | ---: | --- | --- |
 | `plan_clone` | 0 | plan_id | `plan_id`, `target_container`, `source_container`, `generated_utc`, `n_steps`, `n_customize`, `n_unknown`, `verdict` |
 | `plan_clone_step` | 0 | plan_id, step_no | `plan_id`, `step_no`, `phase`, `slot`, `menu_path`, `part_id`, `name`, `tile`, `tile_count`, `confidence`, `note` |
-| `plan_readiness` | 0 | container | `container`, `ready`, `n_unknown`, `n_derived`, `blockers`, `computed_utc` |
+| `plan_readiness` | 763 | container | `container`, `ready`, `n_unknown`, `n_derived`, `blockers`, `computed_utc` |
 
 ### Meta
 
 | table | rows | primary key | columns |
 | --- | ---: | --- | --- |
 | `schema_meta` | 2 | key | `key`, `value` |
-| `import_run` | 12,204 | run_id | `run_id`, `kind`, `source`, `started_utc`, `finished_utc`, `n_rows`, `ok`, `notes` |
+| `import_run` | 12,823 | run_id | `run_id`, `kind`, `source`, `started_utc`, `finished_utc`, `n_rows`, `ok`, `notes` |
 
 _Tables covered: 67 of 67 in the live database._
+### Views — the consumer contract (10)
+
+`db/schema.sql`'s own convention: *"`v_*` Views. The dashboard bundle is generated from these; no
+consumer re-derives."* A view is therefore not a convenience — it is the agreed shape a consumer reads,
+and changing one changes the contract. `build_web.py` reads them; the CLI and the dashboard get identical
+rows because neither recomputes.
+
+Row counts measured 2026-09-19 on a verified-quiet database (no import stage in flight before or after
+the read, `import_run` id stable across it — see the note below).
+
+| View | Rows | Built from | What it answers |
+| --- | ---: | --- | --- |
+| `v_build_sheet` | 30,004 | `tune_container` × `tune_part` × `ref_car` | One row per container × installed part: the printable build sheet, with `menu_path` and `confidence` already resolved. |
+| `v_tune_sheet` | 22,890 | `tune_container` × `tune_slider` × `ref_slider` | One row per container × slider with `norm` AND the de-normalised `value`, its `unit` and the `min`/`max` it was solved against. |
+| `v_rim_equivalent` | 87,136 | `tune_part` × `ref_wheel` | Rims interchangeable with the one a container carries — same `mass_level`, per slot. The "swap the look, keep the physics" query. |
+| `v_course_best` | 1,499 | `lap` × `course` | Best lap per course × class × car, pre-`rank`ed. The leaderboard the dashboard shows. |
+| `v_rivals_route` | 604 | `ref_rivals_event` → `ref_career_race` → `ref_track_info` | One row per Rivals variant with the route it resolves to — the naming chain flattened. |
+| `v_diag_by_turn` | 2,925 | `diag_event` × `ref_symptom` × `ref_route_turn` × `course_route` | Which corners cost the most and how often, with the turn's geometry attached. Filters `turn_id IS NOT NULL`. |
+| `v_diag_by_course` | 2,396 | `diag_event` × `ref_symptom` × `course` | **Schema 10.** Faults belonging to the whole lap rather than a corner (gearing), which `v_diag_by_turn`'s `turn_id` filter could never surface. |
+| `v_diag_by_setup` | 1,148 | `diag_event` × `ref_symptom` × `tune_container` × `ref_car` | What a given setup keeps doing wrong, wherever it happens. |
+| `v_torque_point` | 153,282 | `ref_torque_curve` | The `samples` JSON blob expanded to one row per point: `rpm`, `torque_nm`, `torque_lbft`, `power_hp`, plus `limiter` and `past_redline` flags. |
+| `v_friction_point` | 73,800 | `ref_friction_curve` | The friction `samples` blob expanded per point: `slip`, `mu_norm`, `mu`, keyed by compound × channel × surface × load band. |
+
+The last two exist because the curve tables store their samples as a JSON blob — the view is what makes
+a curve queryable with SQL instead of parsed in every consumer.
+
+> **Measuring a view here is not like measuring a table.** `diag_event` is emptied and re-inserted by the
+> `diagnosis` stage, so a count taken inside that window reads **0** and all three `v_diag_*` views look
+> broken. That happened three times while writing this section. Gate any measurement on
+> `check_db_docs.rebuild_in_flight()` and require the `import_run` id to be unchanged across the read.
+
 ## 3. The value catalogue — what the coded values mean
 
 Every list below is the **measured distinct values** in the live DB with row counts, not a guess at what a
@@ -242,11 +274,39 @@ hit, keyed to the session rather than to a lap, so a hit outside a timed lap is 
 
 `hard` is a 0/1 severity flag — `1` on 19,345 rows, `0` on 7,077.
 
+**`hit_id` (2026-09-19) is a SURROGATE key and had to be.** 6,754 of 26,871 rows were exact
+**full-row** duplicates of another row: the same car bottoms at the same spot at the same speed on a
+later lap, and the table records no lap or timestamp to separate them. A natural key over any column
+set would delete real observations and thin the map overlay, so `hit_id` makes a row addressable
+without claiming the data is unique — nothing here can. `import_telemetry.py` wipes the table and
+re-inserts, so there is no double-import a unique constraint would have caught anyway.
+
 **`wheel` is NULL on exactly the 2,005 `wall` rows** and set on every `bottoming` row (RR 6,152,
 RL 6,122, FR 6,105, FL 6,038). A wall strike has no single wheel, so NULL there is meaningful, not
 missing data — do not "fix" it with a default.
 
 `x`/`z` are in the telemetry metre frame, so a hit plots directly on the course map with no transform.
+
+### Radius envelope — `grip_envelope.surface`, `grip_envelope.publishable`
+
+How fast a class has actually carried a given DRIVEN radius (schema 11): the p90 of observed speed in the
+band, projected to the band midpoint. **A lower bound, never a limit** — nothing in the data separates the
+car's limit from the hardest anyone drove, and that wording ships in the UI.
+
+| `surface` | Meaning | bins |
+| --- | --- | ---: |
+| `tarmac` | paved route — the only surface with enough laps to publish | 34 |
+| `mixed` | route mixes paved and loose; blends two grip regimes, so NOT published | 16 |
+| `unknown` | no `road_class` on the matched route, so NOT published | 14 |
+| `dirt` | loose route — 32 samples over 9 bins, none clears the sample gate | 9 |
+
+`publishable` is `1` (24) or `0` (49). **Consumers filter on it, never on `n_samples`** — a bin can be
+unpublishable for reasons sample size does not express (thin class, unresolved surface). `why_not` says
+which, in words, so a UI can explain an absence instead of silently showing nothing.
+
+`bias_g` / `bias_note` carry the estimator's MEASURED optimism per row (see
+`docs/handoff-grip-envelope.md` §5). The 50–80 m band is published WITH its bias by Jett's decision of
+2026-09-19; the UI renders what the column says and may neither invent a caveat nor drop one.
 
 ### Lap markers — `lap_marker.kind`
 
@@ -255,8 +315,17 @@ reversal, and the lap is cut at the landing lap clock.
 
 ### Session events — `session_event.mode`
 
-`race` (372), `timed solo (Rivals / time trial)` (325), and the `— lapped` variants of both (229 / 67).
-`solo` is `1` (554) or `0` (439).
+Four values. The `lapped` variants were described in prose here but never written as literal values,
+so nothing could check them:
+
+| Value | Events |
+| --- | ---: |
+| `timed solo (Rivals / time trial)` | 488 |
+| `race` | 380 |
+| `timed solo (Rivals / time trial) · lapped` | 240 |
+| `race · lapped` | 68 |
+
+`solo` is `1` (728) or `0` (448).
 
 ### Road and turn vocabulary
 
@@ -286,10 +355,37 @@ reversal, and the lap is cut at the landing lap clock.
 
 ### Reliability tiers — `ref_field_reliability.tier_name`
 
-The slider-value reliability hierarchy stored as data: `database` > `2-point solve` >
-`global band (field-proven)` > `mass-derived formula` > `single anchor` > `position-only` / `unknown`
-(37 rows over the profiled fields). It matches the standing rule — DB row beats a 2-point solve, beats a
-band, beats a formula, beats an anchor — and anything below a DB row is marked derived.
+The slider-value reliability hierarchy stored as data — `database` > `2-point solve` > `global band
+(field-proven)` > `mass-derived formula` > `single anchor` > `position-only` / `unknown`. It matches the
+standing rule: a DB row beats a 2-point solve, beats a band, beats a formula, beats an anchor, and
+anything below a DB row is marked derived.
+
+**`tier` is the ladder; `tier_name` is per-domain, and there are TWO vocabularies on it** — which the
+prose above hid. 37 rows:
+
+| tier | `tier_name` | fields |
+| ---: | --- | ---: |
+| 0 | `database` | 7 |
+| 0 | `proven` | 2 |
+| 1 | `2-point solve` | 6 |
+| 1 | `derived` | 2 |
+| 2 | `unknown` | 2 |
+| 2 | `global band (field-proven)` | 1 |
+| 3 | `mass-derived formula` | 2 |
+| 4 | `single anchor` | 6 |
+| 4 | `single anchor (unscoped)` | 2 |
+| 5 | `position-only` | 7 |
+
+- **Slider values** use the named hierarchy (`database`, `2-point solve`, `global band (field-proven)`,
+  `mass-derived formula`, `single anchor`, `position-only`).
+- **Part-name confidence** (`ref_part.confidence`, `tune_part.confidence`) reuses the same ladder with the
+  confidence vocabulary: `proven` at 0, `derived` at 1, `unknown` at 2.
+- **`single anchor (unscoped)`** is a WEAKER tier 4, for stores keyed by car ordinal alone with no parts
+  fingerprint — `data/car-mass.json` masses and `data/car-tune-ranges.json` points. One historical
+  screenshot of one build's mass gets reused for every build of that car. That build-scoping gap is the
+  reason the variant exists; do not collapse it into plain `single anchor`.
+
+Compare on `tier` when you need an ordering, never on `tier_name`.
 
 ### Event catalogue vocabulary
 

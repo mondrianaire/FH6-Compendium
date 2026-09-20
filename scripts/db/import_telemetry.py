@@ -35,6 +35,7 @@ import fh6db                                            # noqa: E402
 
 DATA = os.path.join(ROOT, "data")
 PARTIAL_BELOW = 0.9          # arc coverage under this is a fragment, not a lap
+LAP_VMAX_MPS = 150.0         # ~540 km/h; a lap time implying a faster average is a rewind-corrupted clock, not a time
 
 
 def jload(path):
@@ -195,6 +196,14 @@ def run(cx, verbose=False, data_dir=None):
         arc = pts[-1][0] if pts and len(pts[-1]) else None
         L = lengths.get(rk) or 0
         cov = (arc / L) if (arc and L) else None
+        _official = meta.get("official") or 0
+        # LAST LINE OF DEFENCE at the boundary the dashboard reads. A time implying an impossible average speed
+        # over its own path is a rewind-corrupted clock, not a time; the analyzer nulls it at source, but a stale
+        # course-model trace (a collapsed lap crowned "fastest" by an earlier analysis) can still arrive here with
+        # one. Strike the untrustable time, keep the trace -- exactly the lap canon's untimed lap -- so no source
+        # can put an impossible lap time in front of the dashboard.
+        if lap_s and arc and arc / lap_s > LAP_VMAX_MPS:
+            lap_s, _official = None, 0
         lap_id += 1
         lrows.append((lap_id, rk, sid, cid, meta.get("container"), meta.get("hw_hash"),
                       t0, lap_s, arc, cov,
@@ -204,7 +213,7 @@ def run(cx, verbose=False, data_dir=None):
                       meta.get("solo") or 0, meta.get("is_race"), meta.get("impacts") or 0, meta.get("void") or 0,
                       meta.get("lap_dist_m"), meta.get("rewinds") or 0, meta.get("pauses") or 0,
                       meta.get("pause_s") or 0.0, meta.get("stitched") or 0,
-                      meta.get("official") or 0))
+                      _official))
         for i, p in enumerate(pts):
             prows.append((lap_id, i,
                           p[0] if len(p) > 0 else None,

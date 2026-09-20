@@ -18,6 +18,7 @@ long the car was in the corner, and the worst grip state seen there.
 Run:  python scripts/db/import_corners.py [--db PATH] [-v]
 """
 import argparse
+import datetime
 import json
 import math
 import os
@@ -74,6 +75,185 @@ def _route_segment_map(rp, seg_turns):
     return [seg_at(arc[i]) for i in range(len(rp))], _np.array(rx, float), _np.array(rz, float)
 
 
+# ---------------------------------------------------------------------------
+# GRIP ENVELOPE (schema 11) -- see db/schema.sql's grip_envelope block and
+# docs/plan-grip-envelope.md. Computed here rather than as its own rebuild.py
+# stage so it inherits the `corners` stage's DOWNSTREAM membership: telemetry,
+# routes, anchors, course_match and consolidate all already cascade into
+# corners, so a routine session import can never leave a stale envelope.
+# ---------------------------------------------------------------------------
+
+#: Scope is 15-200 m (Jett, 2026-09-18). Outside it the yaw-rate radius degrades
+#: badly -- 200-400 m reads -0.182 g and 400 m+ reads -0.270 g, because at
+#: near-straight radii the yaw rate is steering correction, not cornering.
+ENV_BANDS = [("15-30", 15.0, 30.0), ("30-50", 30.0, 50.0), ("50-80", 50.0, 80.0),
+             ("80-120", 80.0, 120.0), ("120-200", 120.0, 200.0)]
+ENV_MIN_SAMPLES = 20
+ENV_MIN_LAPS = 8            # gate 6: 20 correlated samples from one steady lap are not 20 trials
+ENV_SATURATION_G = 2.9      # lat_g is censored at 3.00 g
+ENV_MAX_SATURATED = 0.02    # gate 5: over this share, the bin's true p90 is unknowable
+#: Classes whose WHOLE corpus is below the sample gate before any split. Not
+#: "thin" -- unpublishable. Re-check the lap counts before removing either.
+ENV_THIN_CLASSES = {"D", "X"}
+#: Only a resolved, single-surface road can carry an envelope. `mixed` blends two
+#: grip regimes along one route and `unknown` has no road_class at all; both are
+#: computed and stored, but not published. The real fix is per-SAMPLE surface via
+#: ref_route_surface (which is per route POINT), not a better route-level label.
+ENV_PUBLISHABLE_SURFACES = {"tarmac", "dirt"}
+
+_MPS = 0.44704              # mph -> m/s
+_G = 9.80665
+
+
+def r_mid_of(band):
+    lo, hi = next((lo, hi) for b, lo, hi in ENV_BANDS if b == band)
+    return (lo + hi) / 2.0
+
+
+def _pct(sorted_vals, q):
+    """Percentile by nearest-rank over an already-sorted list."""
+    if not sorted_vals:
+        return None
+    k = max(0, min(len(sorted_vals) - 1, int(round(q * (len(sorted_vals) - 1)))))
+    return sorted_vals[k]
+
+
+def _median(sorted_vals):
+    return _pct(sorted_vals, 0.5)
+
+
+def build_envelope(cx, verbose=False):
+    """Recompute grip_envelope from lap_point. Returns {'grip_envelope': n_rows}.
+
+    The sample definition is the documented one: driven radius present, no
+    impact, off the brakes, throttle <= 50 (the friction-circle control -- a
+    sample taken under power or braking is not measuring the lateral limit), and
+    a STEADY radius, meaning the radius changed by under 15 % from the previous
+    sample of the same lap. Transitional samples read high: the estimator is
+    measuring a direction change, not a corner.
+    """
+    if not fh6db.has_table(cx, "grip_envelope"):
+        return {"grip_envelope": 0}
+    cols = {r[1] for r in cx.execute("PRAGMA table_info(lap_point)")}
+    if not {"r_m", "lat_g", "thr", "brk"} <= cols:
+        return {"grip_envelope": 0}           # pre-schema-9 DB: nothing to build from
+
+    rows = cx.execute("""
+        WITH s AS (
+          SELECT p.lap_id, p.r_m, ABS(p.lat_g) AS ag, p.mph, p.grip,
+                 l.class AS cls, l.build_id,
+                 CASE WHEN r.road_class = 'paved' THEN 'tarmac'
+                      WHEN r.road_class = 'loose' THEN 'dirt'
+                      WHEN r.road_class = 'mixed' THEN 'mixed'
+                      ELSE 'unknown' END AS surf,
+                 LAG(p.r_m) OVER (PARTITION BY p.lap_id ORDER BY p.i) AS prev_r
+            FROM lap_point p
+            JOIN lap l ON l.lap_id = p.lap_id
+            LEFT JOIN course_route cr ON cr.route_key = l.route_key
+            LEFT JOIN ref_route  r  ON r.route_id  = cr.route_id
+           WHERE p.r_m IS NOT NULL AND p.lat_g IS NOT NULL
+             AND p.grip != 4                      -- impacts are never grip
+             AND p.brk = 0 AND p.thr <= 50        -- friction-circle control
+             AND p.r_m BETWEEN 15 AND 200
+             AND p.mph IS NOT NULL AND l.class IS NOT NULL)
+        SELECT cls, surf, r_m, ag, mph, grip, lap_id, build_id FROM s
+         WHERE prev_r IS NOT NULL AND ABS(r_m - prev_r) / r_m < 0.15""").fetchall()
+
+    bins = {}
+    for cls, surf, r_m, ag, mph, grip, lap_id, build_id in rows:
+        band = next((b for b, lo, hi in ENV_BANDS if lo <= r_m < hi), None)
+        if band is None:
+            continue
+        d = bins.setdefault(("class", cls, surf, band),
+                            {"ag": [], "imp": [], "vmid": [], "laps": set(), "builds": set(),
+                             "sat": 0, "g3": 0})
+        d["ag"].append(ag)
+        # Speed projected to the band midpoint. v ~ sqrt(r) at constant lateral g, so this
+        # removes the within-band radius spread before the percentile is taken -- without it
+        # a sample at 79 m and one at 51 m are pooled as though they were the same corner.
+        d["vmid"].append(mph * (r_mid_of(band) / r_m) ** 0.5)
+        # implied lateral g from the driven radius: a = v^2 / r
+        v = mph * _MPS
+        d["imp"].append((v * v / r_m) / _G)
+        d["laps"].add(lap_id)
+        d["builds"].add(build_id)
+        if ag >= ENV_SATURATION_G:
+            d["sat"] += 1
+        if grip == 3:
+            d["g3"] += 1
+
+    now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    out = []
+    for (scope, key, surf, band), d in sorted(bins.items()):
+        lo, hi = next((lo, hi) for b, lo, hi in ENV_BANDS if b == band)
+        r_mid = (lo + hi) / 2.0
+        ag = sorted(d["ag"])
+        n = len(ag)
+        n_laps, n_builds = len(d["laps"]), len(d["builds"])
+        pct_sat = d["sat"] / n
+        pct_g3 = d["g3"] / n
+
+        # Why a bin is not published, most disqualifying first. Every reason is a
+        # measured fact, so the UI can say WHY a bin is absent instead of it
+        # simply not being there.
+        why = None
+        if key in ENV_THIN_CLASSES:
+            why = "class %s is below the sample gate before any split" % key
+        elif surf not in ENV_PUBLISHABLE_SURFACES:
+            why = ("surface '%s' is not a resolved single surface" % surf if surf != "unknown"
+                   else "no road_class on the matched route")
+        elif n < ENV_MIN_SAMPLES:
+            why = "%d samples, needs %d" % (n, ENV_MIN_SAMPLES)
+        elif n_laps < ENV_MIN_LAPS:
+            why = "%d distinct laps, needs %d" % (n_laps, ENV_MIN_LAPS)
+
+        a_p50 = _median(ag)
+        # gate 5: a saturated bin's p90 is unknowable, so it publishes none.
+        a_p90 = _pct(ag, 0.90) if pct_sat <= ENV_MAX_SATURATED else None
+        # THE SPEED BOUND IS MEASURED, NOT DERIVED (2026-09-19). It was
+        # sqrt(a_p90 * r_mid), which is NOT the p90 of speed: within a band a sample can be
+        # fast at low g or slow at high g, so the two distributions do not map and the derived
+        # bound under-covered -- 76.2 % of held-out samples against a nominal 90 %. Taking the
+        # percentile over observed speed directly gives 88.5 %. It also works where the derived
+        # form could not: mph has no ceiling (max seen 273.3) while lat_g censors at 3.00 g, so
+        # the saturated A and S1 bins get a bound too -- 2,022 held-out samples scored against
+        # 252. Quoted AT r_mid_m; project to a specific radius with v * sqrt(r / r_mid).
+        v_env = _pct(sorted(d["vmid"]), 0.90) if len(d["vmid"]) >= ENV_MIN_SAMPLES else None
+        # Saturation nulls the P90 -- and therefore the envelope speed -- but it does NOT
+        # unpublish the row. The median sits far below the 3.00 g censoring point and stays
+        # sound; only the upper tail is clipped. Discarding a valid a_p50 with it would have
+        # silently dropped classes A and S1, the two biggest in the corpus, whose bins run
+        # 3.0-12.1 % saturated. A consumer reads `v_envelope_mph IS NULL` with `pct_saturated`
+        # to say why there is no speed here.
+
+        # The flag, measured from this row's own samples (handoff §5). Signed:
+        # positive means the radius estimator reads optimistically here.
+        bias = _median(sorted(d["imp"])) - a_p50
+        note = None
+        if bias is not None and abs(bias) >= 0.05:
+            note = ("%+.2f g optimistic - body slip makes r = v/omega read tight" % bias if bias > 0
+                    else "%+.2f g conservative - yaw rate under-reads curvature here" % bias)
+
+        out.append((scope, key, surf, band, r_mid, n, n_laps, n_builds,
+                    round(a_p50, 4) if a_p50 is not None else None,
+                    round(a_p90, 4) if a_p90 is not None else None,
+                    round(v_env, 2) if v_env is not None else None,
+                    round(pct_sat, 5), round(pct_g3, 5),
+                    round(bias, 4) if bias is not None else None, note,
+                    0 if why else 1, why, now))
+
+    with cx:
+        cx.execute("DELETE FROM grip_envelope")
+        fh6db.upsert_many(cx, "grip_envelope", [
+            "scope", "scope_key", "surface", "radius_band", "r_mid_m", "n_samples", "n_laps",
+            "n_builds", "a_p50", "a_p90", "v_envelope_mph", "pct_saturated", "pct_grip3",
+            "bias_g", "bias_note", "publishable", "why_not", "computed_utc"], out, chunk=500)
+    if verbose:
+        pub = sum(1 for r in out if r[15])
+        print("  grip_envelope: %d bins, %d publishable" % (len(out), pub))
+    return {"grip_envelope": len(out)}
+
+
 def run(cx, verbose=False):
     # only courses whose game route we identified BY SHAPE can carry road-derived turns: an
     # 'anchored' course (start sphere only, route_id NULL) never reaches here, and the kind is
@@ -87,6 +267,11 @@ def run(cx, verbose=False):
     # so a `--only corners` run against a not-yet-migrated DB degrades to no-column rather than crashing.
     _has_lat = "lat_g" in {r[1] for r in cx.execute("PRAGMA table_info(lap_point)")}
     _seg_has_lat = "peak_lat_g" in {r[1] for r in cx.execute("PRAGMA table_info(corner_segment)")}
+    # schema 12: the DRIVEN radius per phase. The turn's catalogued radius_m is the road's fitted
+    # centre-line, NOT the line the car took -- it misses recorded lat_g by a median 0.39 g -- so the
+    # radius envelope must be looked up by what was driven, and that is this column.
+    _has_r = "r_m" in {r[1] for r in cx.execute("PRAGMA table_info(lap_point)")}
+    _seg_has_r = "med_r_m" in {r[1] for r in cx.execute("PRAGMA table_info(corner_segment)")}
     for co in courses:
         turns = [dict(t) for t in cx.execute("""
             SELECT turn_id, seq, apex_x, apex_z, radius_m, width_m, bank_deg, kind, angle_deg
@@ -105,6 +290,7 @@ def run(cx, verbose=False):
         laps = cx.execute("SELECT lap_id FROM lap WHERE route_key=?", (co["route_key"],)).fetchall()
         for lp in laps:
             pts = cx.execute("SELECT i, arc_m, mph, grip, x, z" + (", lat_g" if _has_lat else "")
+                             + (", r_m" if _has_r else "")
                              + " FROM lap_point WHERE lap_id=? ORDER BY i", (lp["lap_id"],)).fetchall()
             if len(pts) < 8:
                 skipped += 1
@@ -180,9 +366,16 @@ def run(cx, verbose=False):
                             slat = [s["lat_g"] for s in ss if s["lat_g"] is not None]
                             if slat:
                                 speak = round(max(slat), 3)
+                        # MEDIAN, not mean: a phase can clip one transitional sample whose r = v/omega
+                        # reads far off, and a mean would carry it into the band lookup.
+                        smedr = None
+                        if _has_r:
+                            sr = sorted(x["r_m"] for x in ss if x["r_m"] is not None)
+                            if sr:
+                                smedr = round(sr[len(sr) // 2], 2)
                         seg_rows.append((lp["lap_id"], stid, co["route_key"], sname, len(ss),
                                          smphs[0], smphs[-1], min(smphs), round(savg, 1),
-                                         gstate, ghist, round(ssecs, 3) if ssecs else None, speak))
+                                         gstate, ghist, round(ssecs, 3) if ssecs else None, speak, smedr))
     with cx:
         cx.execute("DELETE FROM corner_obs")
         n = fh6db.upsert_many(cx, "corner_obs", [
@@ -192,10 +385,16 @@ def run(cx, verbose=False):
         if fh6db.has_table(cx, "corner_segment"):
             cx.execute("DELETE FROM corner_segment")
             _cs_cols = ["lap_id", "turn_id", "route_key", "segment", "n_samples", "entry_mph", "exit_mph",
-                        "min_mph", "mean_mph", "grip_state", "grip_hist", "time_s"] + (["peak_lat_g"] if _seg_has_lat else [])
-            _cs_rows = seg_rows if _seg_has_lat else [r[:12] for r in seg_rows]
+                        "min_mph", "mean_mph", "grip_state", "grip_hist", "time_s"]                 + (["peak_lat_g"] if _seg_has_lat else []) + (["med_r_m"] if _seg_has_r else [])
+            _cs_rows = seg_rows
+            if not _seg_has_r:
+                _cs_rows = [r[:13] for r in _cs_rows]
+            if not _seg_has_lat:
+                _cs_rows = [r[:12] for r in _cs_rows]
             m = fh6db.upsert_many(cx, "corner_segment", _cs_cols, _cs_rows, chunk=5000)
-    return {"corner_obs": n, "corner_segment": m, "_laps_skipped": skipped}
+    counts = {"corner_obs": n, "corner_segment": m, "_laps_skipped": skipped}
+    counts.update(build_envelope(cx, verbose))
+    return counts
 
 
 def main(argv=None):

@@ -24,7 +24,15 @@ What it checks:
      disk location, read instructions and reader -- and the location resolves.
      The binary ones do the same inside docs/formats/*.bt, checked by
      scripts/tools/check_bt_template.py paths.
-  7. Two-way store reconciliation: every store tracked under data/ is
+  7. Every value that EXISTS in a catalogued enum column is documented in the
+     §3 value catalogue -- the only place that says what a coded value MEANS.
+     The value SET is failed on; the counts beside it are only reported.
+  8. Every committed data/*.json parses and declares a version or its
+     provenance -- so a consumer knows which shape it reads, and a stale copy
+     is distinguishable from a fresh one.
+  9. The import pipeline (scripts/db/) and the gates (scripts/tools/) are all
+     listed in DATA-INVENTORY §7, and every docs//scripts path it names exists.
+ 10. Two-way store reconciliation: every store tracked under data/ is
      documented here, which is the rule this inventory exists to enforce
      ("when a store is added, add it here in the same commit") and which
      nothing checked until now. It found three on its first run.
@@ -103,7 +111,13 @@ def check_schema():
         # not, the object exists on fresh databases and silently nowhere else,
         # which is the failure fh6db.py's own comments warn about.
         for n in missing_live:
-            if n in MIGRATIONS:
+            # INDEXES are migrated generically: ensure_indexes() parses every CREATE INDEX out
+            # of schema.sql and replays the missing ones, so no index NAME ever appears in
+            # fh6db.py. Without this, every newly declared index would be misreported as
+            # broken -- which is exactly what happened to ix_grip_envelope on 2026-09-19.
+            if kind == "index" and "def ensure_indexes" in MIGRATIONS:
+                print("      '%s' is pending: ensure_indexes() replays it from schema.sql" % n)
+            elif n in MIGRATIONS:
                 print("      '%s' is pending: registered in migrate(), applies on the next rebuild" % n)
             else:
                 fails.append("%s '%s' is declared in schema.sql, MISSING from the live DB, and NOT "
@@ -118,8 +132,17 @@ def check_schema():
         only_dec = [c for c in A if c not in B]
         only_live = [c for c in B if c not in A]
         if only_dec or only_live:
-            fails.append("%s column mismatch: declared-only=%s live-only=%s"
-                         % (t, only_dec, only_live))
+            # A declared column gets the same PENDING/BROKEN split as a table or view: if it is
+            # registered in V2_COLUMNS, migrate() will ALTER it in on the next rebuild. Without
+            # this, every newly declared column failed the gate until a rebuild happened to run --
+            # which is normal, not a defect. corner_segment.med_r_m hit it on 2026-09-19.
+            pend = [c for c in only_dec if '"%s"' % c in MIGRATIONS or "'%s'" % c in MIGRATIONS]
+            rest = [c for c in only_dec if c not in pend]
+            if pend:
+                print("      %s: %s pending -- registered in V2_COLUMNS, applies on the next rebuild"
+                      % (t, ", ".join(pend)))
+            if rest or only_live:
+                fails.append("%s column mismatch: declared-only=%s live-only=%s" % (t, rest, only_live))
         elif A != B:
             order_drift.append(t)
     if order_drift:
@@ -161,6 +184,15 @@ def check_handoff():
           % (len(tables), len(set(doc) & tables), len(set(doc) - tables)))
     if undocumented:
         fails.append("tables absent from handoff-data-structures.md: %s" % undocumented)
+
+    # VIEWS are the consumer contract -- build_web.py generates the dashboard bundle from them and
+    # nothing re-derives -- but this check only ever looked at tables, so all 10 sat undocumented in
+    # the handoff while DATA-INVENTORY listed 6 of them. Require them by name.
+    views = names(lv, "view")
+    missing_views = sorted(v for v in views if "`%s`" % v not in text)
+    print("  %d views; %d documented" % (len(views), len(views) - len(missing_views)))
+    if missing_views:
+        fails.append("views absent from handoff-data-structures.md: %s" % missing_views)
 
     wrong = 0
     for t, fields in sorted(doc.items()):
@@ -352,7 +384,147 @@ def check_stores():
     return fails
 
 
+def check_values():
+    """Every value that EXISTS in a catalogued enum column is documented.
+
+    The §3 value catalogue is the only place that says what a coded value MEANS,
+    and nothing checked it. Unlike row counts, an enum's value SET is stable and
+    a new member is a real event: the docs become silently wrong about a column
+    someone reads to interpret data. So the set is FAILED on, while the counts
+    beside it are only reported -- same split as `counts`.
+
+    Self-maintaining, like parsing CREATE INDEX out of schema.sql: the columns
+    checked are whatever the §3 headings name as `table.column`. Document a new
+    enum with a heading and it is covered; no second list to drift.
+
+    Found on its first run: session_event.mode's two `lapped` variants (described
+    in prose but never written as literal values, so unverifiable) and three
+    ref_field_reliability.tier_name values missing entirely, which had hidden the
+    fact that TWO vocabularies share that tier ladder.
+    """
+    fails = []
+    text = io.open(HANDOFF, encoding="utf-8").read()
+    try:
+        sec = text[text.index("## 3. The value catalogue"):text.index("## 4.")]
+    except ValueError:
+        return ["handoff-data-structures.md has no '## 3. The value catalogue' section"]
+
+    lv = live()
+    tables = names(lv, "table")
+    checked = drifted = 0
+    for block in re.split(r"\n(?=### )", sec):
+        head = block.split("\n", 1)[0]
+        for t, c in re.findall(r"`([a-z_0-9]+)\.([a-z_0-9]+)`", head):
+            if t not in tables:
+                fails.append("value catalogue names `%s.%s` but there is no table %s" % (t, c, t))
+                continue
+            if c not in cols(lv, t):
+                fails.append("value catalogue names `%s.%s` but %s has no column %s" % (t, c, t, c))
+                continue
+            rows = list(lv.execute('select "%s", count(*) from "%s" group by 1 order by 2 desc' % (c, t)))
+            checked += 1
+            missing = []
+            for v, n in rows:
+                tok = "NULL" if v is None else str(v)
+                if ("`%s`" % tok) not in block:
+                    missing.append((tok, n))
+            if missing:
+                fails.append("%s.%s has undocumented value(s): %s"
+                             % (t, c, ", ".join("%r (%s rows)" % (m, format(n, ",")) for m, n in missing)))
+            else:
+                # counts beside the values drift like every other count -- report only
+                for v, n in rows:
+                    tok = "NULL" if v is None else str(v)
+                    if re.search(r"`%s`[^|\n]*?\(\s*([\d,]+)\s*\)" % re.escape(tok), block):
+                        m = re.search(r"`%s`[^|\n]*?\(\s*([\d,]+)\s*\)" % re.escape(tok), block)
+                        if int(m.group(1).replace(",", "")) != n:
+                            drifted += 1
+            print("  %-38s %d distinct, all documented" % ("%s.%s" % (t, c), len(rows)))
+    print("  %d enum columns checked" % checked)
+    if drifted:
+        print("  %d inline counts have drifted (reported, not failed -- the DB is written live)" % drifted)
+    return fails
+
+
+#: A committed JSON store must say what it IS. Either a version key -- so a consumer knows which
+#: shape it is reading -- or provenance, for a store that is a capture rather than a format.
+JSON_VERSION_KEYS = ("schema_version", "schema", "version")
+JSON_PROVENANCE_KEYS = ("captured", "source", "sources", "generated", "note", "_note", "_summary")
+#: field-catalog.json's top level is a LIST, so it can carry neither. It is the source for the three
+#: ref_field* tables; if its shape ever changes, nothing in the file will say so. Recorded, not excused.
+JSON_SHAPE_EXEMPT = {"field-catalog.json"}
+
+
+def check_json():
+    """Every committed JSON store parses, and declares a version or its provenance."""
+    fails = []
+    import json as _json
+    files = sorted(glob.glob(os.path.join(ROOT, "data", "*.json")))
+    if not files:
+        print("  NOTE: no data/*.json here; skipped")
+        return fails
+    bad, versioned, prov, exempt = [], 0, [], []
+    for f in files:
+        name = os.path.basename(f)
+        try:
+            d = _json.load(io.open(f, encoding="utf-8"))
+        except Exception as e:                                   # noqa: BLE001
+            bad.append((name, str(e)[:60]))
+            continue
+        if name in JSON_SHAPE_EXEMPT or not isinstance(d, dict):
+            exempt.append(name)
+            continue
+        keys = set(d)
+        if keys & set(JSON_VERSION_KEYS):
+            versioned += 1
+        elif keys & set(JSON_PROVENANCE_KEYS):
+            prov.append(name)
+        else:
+            fails.append("%s declares neither a version nor provenance -- a stale copy is "
+                         "indistinguishable from a fresh one" % name)
+    print("  %d stores: %d versioned, %d carry provenance instead, %d cannot declare either"
+          % (len(files), versioned, len(prov), len(exempt)))
+    if prov:
+        print("      provenance-only: %s" % ", ".join(sorted(prov)))
+    if exempt:
+        print("      shape-exempt (top level is a list): %s" % ", ".join(sorted(exempt)))
+    for name, err in bad:
+        fails.append("%s does not parse: %s" % (name, err))
+    return fails
+
+
+def check_scripts():
+    """The pipeline and the gates are listed in DATA-INVENTORY §7, and every path it names exists.
+
+    Enforced only where an omission actually hurts: scripts/db/ (the import cascade) and
+    scripts/tools/ (the gates). A stage nobody knows about is how import_corners.py came to own the
+    grip envelope while appearing in no inventory at all. One-off probes and migrations under
+    scripts/analysis/ and scripts/sim/ are deliberately NOT enumerated -- see the section.
+
+    Also checks every docs/ and scripts/ path named anywhere in the file resolves, because a doc that
+    points at a file that moved is worse than one that says nothing.
+    """
+    fails = []
+    text = io.open(INVENTORY, encoding="utf-8").read()
+    for label, pattern in (("scripts/db", os.path.join(ROOT, "scripts", "db", "*.py")),
+                           ("scripts/tools", os.path.join(ROOT, "scripts", "tools", "*.py"))):
+        on_disk = sorted(os.path.basename(p) for p in glob.glob(pattern))
+        missing = [n for n in on_disk if "`%s/%s`" % (label, n) not in text]
+        print("  %-14s %d on disk, %d listed" % (label, len(on_disk), len(on_disk) - len(missing)))
+        if missing:
+            fails.append("%s not listed in DATA-INVENTORY §7: %s" % (label, ", ".join(missing)))
+
+    # every path the inventory names must resolve
+    named = set(re.findall(r"`((?:docs|scripts)/[A-Za-z0-9_./-]+\.(?:md|py))`", text))
+    gone = sorted(p for p in named if not os.path.exists(os.path.join(ROOT, p)))
+    print("  %d docs/scripts paths named; %d do not resolve" % (len(named), len(gone)))
+    if gone:
+        fails.append("DATA-INVENTORY names paths that do not exist: %s" % ", ".join(gone))
+    return fails
+
+
 CHECKS = {"schema": check_schema, "handoff": check_handoff, "counts": check_counts,
+          "values": check_values, "json": check_json, "scripts": check_scripts,
           "sources": check_sources, "stores": check_stores}
 
 if __name__ == "__main__":

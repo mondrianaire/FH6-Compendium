@@ -521,7 +521,11 @@ function paintIdBar() {
     ${g.sheet === "filled" ? `<button class="idb-sheet" data-act="sheet">🔓 Build sheet ▸</button>`
       : (g.sheet === "outline" && reach) ? `<button class="idb-sheet outline" data-act="sheet">🔓 Build sheet ▸</button>`
       : `<span class="idb-sheet dead">🔒 Build sheet</span>`}`;
-  const btn = el.querySelector("[data-act=sheet]"); if (btn) btn.onclick = () => { const b = $("#btnSheet"); if (b) b.click(); };
+  // CLONE STAYS REACHABLE WHEN COLLAPSED (Jett 2026-09-19): cloning is done from the Build sheet, so the mini bar's
+  // button must work even though the full header (#btnSheet) is collapsed/clipped out of view. Open the sheet
+  // DIRECTLY here — delegating to #btnSheet.click() was a no-op while that button sits under a collapsed header.
+  const btn = el.querySelector("[data-act=sheet]");
+  if (btn) btn.onclick = () => { if (typeof openSheet === "function") openSheet(); else { const b = $("#btnSheet"); if (b) b.click(); } };
 }
 
 // AN ALMOST UN-IGNORABLE WARNING (Jett 2026-09-18): course mode records laps, but if the live build/tune is NOT
@@ -2605,6 +2609,52 @@ function turnGripCeiling(c, t, ls) {
   }
   return { cls, cg, aMax, n, coarse, band, bestG: Math.round(bestG * 100) / 100, util, apex: bestApex, avail, nLaps };
 }
+// RADIUS ENVELOPE (Stage C, 2026-09-19). How fast this class has actually carried a corner of this
+// DRIVEN radius, from course.radiusEnvelope (grip_envelope: the p90 of observed speed in the band,
+// projected to the band midpoint). Three rules this must not break:
+//   1. It is a LOWER BOUND, never "the car's maximum" -- nothing in the data separates the car's limit
+//      from the hardest anyone tried, so the wording says "has carried", not "can carry".
+//   2. Its vocabulary is "radius envelope". NEVER "ceiling" or "grip limit" -- those belong to
+//      turnGripCeiling(), and two names for one idea would grow a second source of truth for grip.
+//   3. The BIAS travels as data (biasG/biasNote). Render what the row says; never invent a caveat and
+//      never drop one. The 50-80 m band is published WITH its bias by Jett's call, 2026-09-19.
+// Looked up by the DRIVEN radius (phaseObs mid r[9], corner_segment.med_r_m), never by the turn's
+// catalogued radius -- the centre-line radius misses recorded lat_g by a median 0.39 g.
+// Honest by construction: returns a reason, not a number, whenever it cannot answer.
+function turnRadiusEnvelope(c, t, ls) {
+  const cls = scopeOneClass(ls);
+  if (!cls) return { reason: "mixed" };
+  const env = (c.radiusEnvelope || {})[cls];
+  if (!env) return { cls, reason: "no-class" };
+  const rc = ((c.route || {}).road_class) || null;
+  const surf = rc === "paved" ? "tarmac" : rc === "loose" ? "dirt" : null;
+  if (!surf) return { cls, reason: rc ? "surface-" + rc : "no-surface" };
+  const bands = env[surf];
+  if (!bands || !bands.length) return { cls, surf, reason: "no-surface-rows" };
+  // the driven radius through the mid phase, over the laps in scope
+  const mid = (t.phaseObs || {}).mid || [];
+  const rs = [];
+  mid.forEach((r) => {
+    if (!ls.set.has(String(r[0]))) return;
+    if (r.length > 9 && r[9] != null && r[9] > 0) rs.push(r[9]);
+  });
+  if (!rs.length) return { cls, surf, reason: "no-driven-radius" };
+  rs.sort((a, b) => a - b);
+  const rDriven = rs[Math.floor(rs.length / 2)];
+  const row = bands.find((b) => {
+    const [lo, hi] = b.band.split("-").map(Number);
+    return rDriven >= lo && rDriven < hi;
+  });
+  if (!row) return { cls, surf, rDriven, reason: "out-of-scope" };
+  // the bound is quoted at the band midpoint; project it to the radius actually driven.
+  // v is proportional to sqrt(r) at constant lateral g -- the same relation the bound was fitted under.
+  const vAt = row.vMph != null ? row.vMph * Math.sqrt(rDriven / row.rMid) : null;
+  // what the best pass in scope actually took through the mid phase
+  let bestApex = null;
+  mid.forEach((r) => { if (ls.set.has(String(r[0])) && r[2] != null && (bestApex == null || r[2] > bestApex)) bestApex = r[2]; });
+  return { cls, surf, rDriven: Math.round(rDriven), row, vAt, bestApex,
+           gap: (vAt != null && bestApex != null) ? bestApex - vAt : null };
+}
 let TURN_SORT = (() => { try { return localStorage.getItem("fh6TurnSort") || "find"; } catch (e) { return "find"; } })();
 // MAP_VIEW: how the left course map colours its traces — "laptime" (each lap by its recorded time, a gradient)
 // or "phases" (the whole road painted by the 5-phase turn model). Toggled from the map's floating legend.
@@ -3207,17 +3257,12 @@ function cmapApply() { const m = CMAPVIEW; if (m.svg && m.vb) m.svg.setAttribute
 function cmapScaleMarks() {
   const m = CMAPVIEW; if (!m.svg) return;
   const k = (m.vb && m.W) ? (m.vb.w / m.W) : 1;
-  m.svg.querySelectorAll(".cturn circle").forEach((c) => {
-    if (c.dataset.r0 == null) c.dataset.r0 = c.getAttribute("r");
-    c.setAttribute("r", (+c.dataset.r0 * k).toFixed(2));
-    if (c.dataset.sw0 == null) c.dataset.sw0 = c.getAttribute("stroke-width") || "1";
-    c.setAttribute("stroke-width", (+c.dataset.sw0 * k).toFixed(2));
-  });
-  m.svg.querySelectorAll(".cturn text").forEach((t) => {
-    if (t.dataset.f0 == null) t.dataset.f0 = parseFloat(t.getAttribute("font-size"));
-    t.setAttribute("font-size", (+t.dataset.f0 * k).toFixed(2));
-    if (t.dataset.sw0 == null) t.dataset.sw0 = t.getAttribute("stroke-width") || "3";
-    t.setAttribute("stroke-width", (+t.dataset.sw0 * k).toFixed(2));   // keep the dark halo proportional to the shrunk glyph
+  // Turn badges hold their screen size AND their stand-off from the apex: each is an origin-anchored group
+  // (dot + leader + numbered ring) at its apex, so scaling it by k around the cached apex (data-cx/-cy) cancels
+  // the viewBox zoom -- the badge stays the same size and the same distance beside the turn (app.js turns).
+  m.svg.querySelectorAll(".cturn").forEach((g) => {
+    const cx0 = g.dataset.cx, cy0 = g.dataset.cy; if (cx0 == null || cy0 == null) return;
+    g.setAttribute("transform", `translate(${cx0},${cy0}) scale(${k.toFixed(4)})`);
   });
   // 🔧 / 💥 hit markers hold their screen size too: each is an origin-drawn shape in a translate() group, so
   // scaling it by k around its cached centre (data-cx/-cy) exactly cancels the viewBox zoom (app.js hitMarks).
@@ -3652,18 +3697,31 @@ function locateRouteInEvent(haveCourse) {
   const hits = [];                                              // named routes only — all 88 Rivals routes are named
   for (const [id, r] of Object.entries(WORLD.routes)) {
     if (!r.name || !(r.pts || []).length) continue;
-    const d = segNear(r._lo || r.pts);   // strided ~16 m copy: full-density r.pts is for DRAWING the focus route, not per-frame matching
-    if (d < 45) hits.push({ id, name: r.name, len: r.len || 0, loop: r.loop, dist: d });
+    const pts = r._lo || r.pts;
+    const d = segNear(pts);   // strided ~16 m copy: full-density r.pts is for DRAWING the focus route, not per-frame matching
+    if (d < 45) hits.push({ id, name: r.name, len: r.len || 0, loop: r.loop, dist: d, race: !!r.is_race,
+      startD: pts.length ? Math.hypot(LIVEPOS[0] - pts[0][0], LIVEPOS[1] - pts[0][1]) : Infinity });   // distance to this route's START
   }
   hits.sort((a, b) => a.dist - b.dist);
-  let best = null;
+  let best = null, startAnchored = false;
   if (hits.length) {
     const nearD = hits[0].dist;
-    // routes share roads, so several can be equally near. A Rivals run is the route you LOADED, which
-    // on a shared stretch is the through-route, not a sub-segment of it — break the near-tie toward the
-    // LONGER route (the Goliath over a sprint that reuses its start), then name the runner-up as shared.
     const tied = hits.filter((h) => h.dist <= nearD + 15);
-    best = tied.reduce((m, h) => (h.len > m.len ? h : m), tied[0]);
+    // START-ANCHORED FIRST (Jett 2026-09-19): several catalogued routes share one tarmac — the Irokawa Space
+    // Center Drag Strip (is_race, 825 m) sits on the Irokawa Circuit loop (free-roam, 1869 m) AND under Launch
+    // Control (is_race, 8.4 km) and Nangan (2.9 km). You spawn at the START of the route you LOADED, and only the
+    // drag strip STARTS here (its first point is 0 m away; the others start 200-1400 m off). So when the car is at
+    // a route's start line, pick the route whose START it is — that's the event you loaded. The EVENT_ROUTE_LOCK
+    // below then holds it through the whole run (all these routes stay within its 90 m radius on the shared tarmac).
+    const atStart = tied.filter((h) => h.race && h.startD < 80);   // race routes only: a free-roam loop's start that happens to sit ON the strip must not steal it
+    if (atStart.length) {
+      best = atStart.reduce((m, h) => (h.startD < m.startD ? h : m), atStart[0]);
+      startAnchored = true;   // a fresh event start -> this pick is authoritative and overrides a stale lock below
+    } else {
+      // not near any start (mid shared road): a RACE route wins over a co-located free-roam one, then LENGTH
+      // separates two of the same kind (the Goliath over a sprint that reuses its start).
+      best = tied.reduce((m, h) => (h.race !== m.race ? (h.race ? h : m) : (h.len > m.len ? h : m)), tied[0]);
+    }
     // "shares road with X" only when X is a COMPARABLE-length route (>= half the through-route). A tiny
     // course the through-route merely spawns beside -- Sekibe Scramble (~2 km) next to a 25-min route --
     // is a plaza coincidence at the start line, not a shared road, and must not be named (Jett 2026-09-07).
@@ -3677,7 +3735,7 @@ function locateRouteInEvent(haveCourse) {
   // generous radius that covers the decimated centre-line and a parked/menu position); only release when the locked
   // route has clearly fallen away, i.e. a different event was loaded. The daemon's named S/F loop still wins — it
   // returns before we reach here (locateCourse: if (LOOP) return) and adoptLoop sets the lock authoritatively.
-  if (EVENT_ROUTE_LOCK && (!best || best.id !== EVENT_ROUTE_LOCK.id)) {
+  if (!startAnchored && EVENT_ROUTE_LOCK && (!best || best.id !== EVENT_ROUTE_LOCK.id)) {
     const lr = WORLD.routes[EVENT_ROUTE_LOCK.id], lpts = lr && (lr._lo || lr.pts);
     const ld = lpts && lpts.length > 1 ? segNear(lpts) : Infinity;
     if (lr && ld <= 90) best = { id: EVENT_ROUTE_LOCK.id, name: lr.name, len: lr.len || 0, loop: lr.loop, dist: ld, alsoName: best ? best.name : null };
@@ -4852,6 +4910,22 @@ function turnStatsHTML(t, ls) {
     const bandTxt = gcx.coarse ? "class-wide, speed-coarse" : `${gcx.band.lo}${gcx.band.hi ? "–" + gcx.band.hi : "+"} mph band`;
     gripLine = `<div class="tsum tsum-grip" title="your best of ${gcx.nLaps} lap${gcx.nLaps === 1 ? "" : "s"} here pulled ${gcx.bestG} g of the ${esc(gcx.cls)} grip ceiling a_max ${gcx.aMax} g (${bandTxt} · p90 of ${gcx.n} class laps)${thin ? " · THIN: only " + gcx.nLaps + " of your laps support this" : ""} · a gentle corner uses less lateral g by nature, so a low % can be the corner not the driver · dirt & aero not separated${gcx.avail ? " · +mph is a near-limit estimate" : ""}"><span class="tg-lab">grip used</span> <b class="tg-pct${atLimit ? " tg-max" : ""}${thin ? " tg-thin" : ""}">${gcx.util}%</b> <span class="why">of the ${esc(gcx.cls)} grip limit${thin ? ` · <span class="tg-thinnote">${gcx.nLaps} lap${gcx.nLaps === 1 ? "" : "s"}</span>` : ""}${tail}</span></div>`;
   }
+  // RADIUS ENVELOPE (Stage C): what this class has actually carried at this DRIVEN radius. A lower
+  // bound, not a limit -- the wording says "has carried", and the bias rides along from the column.
+  const rex = turnRadiusEnvelope(COURSE, t, ls);
+  let envLine = "";
+  if (rex.vAt != null) {
+    const b = rex.row;
+    const bias = b.biasG != null && Math.abs(b.biasG) >= 0.05 ? b.biasNote : null;
+    const gapTxt = rex.gap != null
+      ? (rex.gap >= 0 ? `<b class="tg-max">at or above it</b>` : `<b>${Math.round(-rex.gap)} mph</b> under`)
+      : "";
+    envLine = `<div class="tsum tsum-env" title="the ${esc(rex.cls)} class has carried ${Math.round(rex.vAt)} mph at a driven radius of ${rex.rDriven} m on ${esc(rex.surf)} — the p90 of observed speed in the ${esc(b.band)} m band (${b.n} samples over ${b.nLaps} laps), projected to this radius. A LOWER BOUND, not the car's maximum: nothing here separates the car's limit from the hardest anyone drove.${bias ? " · " + esc(bias) : ""}"><span class="tg-lab">radius envelope</span> <b class="tg-pct">${Math.round(rex.vAt)} mph</b> <span class="why">carried at ${rex.rDriven} m · your best ${gapTxt}${bias ? ` · <span class="tg-thinnote">${esc(bias)}</span>` : ""}</span></div>`;
+  } else if (rex.reason === "mixed") {
+    envLine = `<div class="tsum tsum-env"><span class="tg-lab">radius envelope</span> <span class="why">scope to one class to read it — speed at a radius is car-dependent</span></div>`;
+  } else if (rex.reason && rex.reason.startsWith("surface-")) {
+    envLine = `<div class="tsum tsum-env"><span class="tg-lab">radius envelope</span> <span class="why">not published for ${esc(rex.reason.slice(8))} roads — it blends two grip regimes along one route</span></div>`;
+  }
   // PER-PHASE APEX-MPH MEDIANS (2026-09-16): the five phase min-speed medians, restored here from the retired
   // left-pane turn table (audit: this compact 5-phase view existed ONLY in that table). One chip per phase,
   // coloured to the phase legend; the wtg table below still carries the per-phase time detail.
@@ -4861,7 +4935,7 @@ function turnStatsHTML(t, ls) {
   // ONE compacted title info bar: identity + geometry (header) ∪ the time summary ∪ the grip ceiling ∪ the
   // per-phase apex-mph medians ∪ the 5-phase corner model (the per-phase time-budget bar). Detailed per-phase
   // typical-vs-best TABLE stays below.
-  const titleBar = `<div class="grp tstat-title">${header}${sumRow}${gripLine}${phaseSpeeds}${budgetSegs ? `<div class="budget budget--title" title="the 5-phase corner model · each segment = median seconds in that phase, coloured to the phase legend">${budgetSegs}</div>` : ""}</div>`;
+  const titleBar = `<div class="grp tstat-title">${header}${sumRow}${gripLine}${envLine}${phaseSpeeds}${budgetSegs ? `<div class="budget budget--title" title="the 5-phase corner model · each segment = median seconds in that phase, coloured to the phase legend">${budgetSegs}</div>` : ""}</div>`;
   const cmpTable = hasBest ? `<table class="tstat-cmp"><thead><tr><th>phase</th><th>typical</th><th>best lap</th><th>Δ s</th><th>where it goes</th></tr></thead><tbody>
     ${cmp.map((r) => { const d = r.best != null ? r.typ - r.best : null; const flag = worst && worst.n === r.n && worst.d > 0.03; const pct = d != null && d > 0 ? Math.round(d / maxD * 100) : 0;
       return `<tr class="${flag ? "tb-flag" : ""}"><td><span class="pdot" style="background:${SEG_COL[r.n]}"></span>${esc(SEG_LABEL[r.n])}</td>

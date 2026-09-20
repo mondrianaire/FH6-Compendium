@@ -117,6 +117,8 @@ function adoptMode(m) {
   if (prev.suggest !== MODE.suggest || prev.game !== MODE.game) onModeChange(prev, MODE);
 }
 let WORLD = null, DIAG = null, COURSES = null, COURSE = null, COURSE_KEY = null;
+let FINDINGS = null;            // findings.json: the confidence-gated per-cell report (Finding Engine)
+const FIND_CELL = {};           // route_key -> which cell (build+tune) the Finding Engine is showing
 let TEMP_COURSE = false;   // free-roam course-browser overlay: a picked course's full analysis while parked, released by context
 let CARMAP = {};   // ordinal -> {name, short} from cars.json, for naming the car that drove a lap
 // A lap's cid is "ordinal|..|cyl|pi"; name the car from cars.json (carOf() only resolves LIVE cars).
@@ -273,8 +275,8 @@ async function panelBoot() {
   BROWSE_FILTER = vg("browseFilter", "all"); BROWSE_PICK = vg("browsePick", null); BROWSE_DEV = vg("browseDev", false);
   BROWSE_SORT = vg("browseSort", "name"); BROWSE_SORT_REV = vg("browseSortRev", false) === true;
   TRACE_MODE = vg("traceMode", TRACE_MODE); TRACE_ALL = !!vg("traceAll", TRACE_ALL); RACING_ONLY = vg("racingOnly", RACING_ONLY) !== false;
-  const [w, d, c, cars] = await Promise.all([get("world.json"), get("diag.json"), get("courses.json"), get("cars.json").catch(() => null)]);
-  WORLD = w; DIAG = d; COURSES = c;
+  const [w, d, c, cars, fnd] = await Promise.all([get("world.json"), get("diag.json"), get("courses.json"), get("cars.json").catch(() => null), get("findings.json").catch(() => null)]);
+  WORLD = w; DIAG = d; COURSES = c; FINDINGS = fnd;
   // ordinal -> car name, so a lap (its cid carries the ordinal) can be attributed to a car in the
   // turn leaderboard and the class stats. short = model without the year, for the dense table cell.
   const carRows = Array.isArray(cars) ? cars : (cars && cars.cars) || [];
@@ -3886,6 +3888,8 @@ function paintRight() {
     if (!COURSE) return; const cls = b.dataset.clsfocus, vc = traceSel(COURSE);
     if (vc.filters.class === cls) delete vc.filters.class; else vc.filters.class = cls;   // toggle the class focus (= the filter bar's class pick)
     viewSave(); repaintFiltered(); });
+  if (cur === "stats") body.querySelectorAll("[data-fcell]").forEach((b) => b.onclick = () => {   // Finding Engine: switch build+tune cell
+    if (COURSE) FIND_CELL[COURSE.key] = +b.dataset.fcell; paintRight(); });
   const courseStats = cur === "stats" && MODE.suggest === "course" && COURSE;   // its sections manage their own overflow; do not row-clip them
   if (cur !== "matrix" && cur !== "browser" && !courseStats) fitRows(body, cur === "corners" ? "corners" : cur === "build" ? "rows" : "findings", 1);
   body.querySelectorAll('[data-pickts]').forEach((b) => b.onclick = () => {
@@ -5190,6 +5194,71 @@ function courseGearingHTML() {
   return `<div class="grp"><div class="gh">Gearing for this course
     <span class="why">· does the ladder fit the lap · ${scoped ? "this build" : "every build driven here"} · read from laps already driven, never a top-speed pull</span></div>${body}</div>`;
 }
+
+// THE FINDING ENGINE (2026-09-20): the confidence gate brought to the per-TURN faults. build_web runs
+// findings.assess_cell per CELL (route × car × hw × tune) and ships the verdict; this only renders it.
+// The gate is never re-derived in JS -- a second implementation would drift and end up recommending a
+// change the analysis refused. A finding that did not clear the gate is never drawn as advice: WATCHING
+// and "need more laps" say so in as many words, only a REPORT carries its fix, and the interval is drawn
+// (distribution + frequency), never a bare point estimate. One cell is the subject at a time, never pooled.
+function findingsHTML() {
+  if (!FINDINGS || !FINDINGS.routes || !COURSE) return "";
+  const R = FINDINGS.routes[COURSE.key];
+  if (!R || !R.cells || !R.cells.length) {
+    return `<div class="grp"><div class="gh">Findings <span class="why">· what this build keeps doing — only where it earned the right to say so</span></div>
+      <div class="why" style="padding:4px 6px">no gated findings on this course yet — a cell needs ≥8 whole clean laps on one build and one tune (a scanned <code>deterministic</code> + <code>diagnosis</code> pass)</div></div>`;
+  }
+  const cells = R.cells;                       // densest first (build_web order)
+  let idx = FIND_CELL[COURSE.key];
+  if (idx == null || idx >= cells.length) idx = 0;
+  const cell = cells[idx];
+  const sw = cells.length > 1 ? `<div class="fcells">${cells.map((c, i) => {
+    const rr = (c.tally && c.tally.report) || 0;
+    return `<button class="fcell ${i === idx ? "on" : ""}" data-fcell="${i}" title="${esc(c.car || c.cid)} · ${c.laps} whole laps">${esc(carShort(c.cid))} <span class="mono dim">${c.laps}L</span>${rr ? ` <span class="fdot">${rr}</span>` : ""}</button>`;
+  }).join("")}</div>` : "";
+  const ORD = { report: 0, watching: 1, insufficient: 2, not_recurrent: 3 };
+  const badge = (v) => v === "report" ? `<span class="chip b">recommended</span>`
+    : v === "watching" ? `<span class="chip w">watching</span>`
+    : v === "not_recurrent" ? `<span class="chip on">ruled out</span>`
+    : `<span class="chip w">need more laps</span>`;
+  const t = cell.tally || {};
+  const tally = `<div class="ftally">
+    <span class="chip b">${t.report || 0} recommended</span>
+    <span class="chip w">${t.watching || 0} watching</span>
+    <span class="chip w">${t.insufficient || 0} need laps</span>
+    <span class="chip on">${t.not_recurrent || 0} ruled out</span></div>`;
+  const turnLbl = (tid) => tid == null ? `<span class="chip fdim">whole lap</span>` : `<span class="chip">${esc(String(tid))}</span>`;
+  const bar = (f) => {                          // Wilson interval on a 0–100% track, floor marked at 20%
+    const lo = Math.max(0, Math.min(100, f.lo * 100)), hi = Math.max(0, Math.min(100, f.hi * 100)), rate = Math.max(0, Math.min(100, (f.rate || 0) * 100));
+    const col = f.verdict === "report" ? "var(--acc)" : f.verdict === "watching" ? "var(--warn)" : "var(--mut)";
+    return `<div class="ivbar" title="${f.k} of ${f.n} passes · ${Math.round(lo)}–${Math.round(hi)}% (95%) · floor 20%">
+      <div class="iv-fill" style="left:${lo}%;width:${Math.max(1.5, hi - lo)}%;background:${col}"></div>
+      <div class="iv-pt" style="left:${rate}%"></div><div class="iv-floor" style="left:20%"></div></div>`;
+  };
+  // Ruled-out faults are settled negatives -- kept in the tally (they mean "known, too rare", NOT
+  // "unknown"), but not listed as 68 rows would bury the 23 that matter. report/watching/insufficient list.
+  const fs = (cell.findings || []).filter((f) => f.verdict !== "not_recurrent").sort((a, b) =>
+    (ORD[a.verdict] - ORD[b.verdict]) || ((b.lo || 0) - (a.lo || 0)) || ((b.rate || 0) - (a.rate || 0)));
+  const body = fs.map((f) => {
+    const right = f.verdict === "report"
+      ? `<span class="chip b">${esc(f.fix || "")}</span>`
+      : `<span class="chip w">${f.needs_laps ? `${f.needs_laps} more lap${f.needs_laps === 1 ? "" : "s"}` : "not a recommendation"}</span>`;
+    const dl = f.driver_linked ? ` <span class="chip fdim">driver-linked</span>` : "";
+    return `<div class="frow">
+      <div class="fl"><b>${esc(f.symptom)}</b> ${turnLbl(f.turn_id)}${dl}
+        <span class="why">${badge(f.verdict)} · ${f.k} of ${f.n} passes${f.verdict === "report" ? ` · ≥${Math.round((f.lo || 0) * 100)}%` : ""}</span>
+        ${bar(f)}
+        <span class="why">${esc(f.why || "")}</span></div>
+      <div class="fr">${right}</div></div>`;
+  }).join("");
+  const built = FINDINGS.built ? ` · diagnosis ${esc(String(FINDINGS.built).slice(0, 10))}` : "";
+  const ruled = t.not_recurrent || 0;
+  const foot = ruled ? `<div class="why" style="padding:2px 6px 4px">${ruled} fault${ruled === 1 ? "" : "s"} ruled out — settled negatives (enough passes, too rare to tune), counted above, not listed</div>` : "";
+  const none = fs.length ? "" : `<div class="why" style="padding:2px 6px 4px">nothing cleared the gate to report yet on this cell</div>`;
+  return `<div class="grp"><div class="gh">Findings
+    <span class="why">· ${esc(cell.car || carShort(cell.cid))} · ${cell.laps} whole laps${built} · only a cleared verdict is advice</span></div>
+    ${sw}${tally}${body}${none}${foot}</div>`;
+}
 function courseStatsHTML() {
   // GENERAL STATISTICS, PER CAR (redesign step 4): scoped to the active lap set, this answers "which car,
   // and how does practice trade for pace" — a most-driven and a quickest headline, a laps×best scatter (one
@@ -5219,7 +5288,8 @@ function courseStatsHTML() {
     <div class="balbar">${bord.map((k) => `<span style="flex:${bt[k]} 0 0;background:${DGRIP[k].col}" title="${DGRIP[k].word}: ${bt[k]}"></span>`).join("")}</div>
     <div class="ballegend">${bord.map((k) => `<span><i style="background:${DGRIP[k].col}"></i>${DGRIP[k].word} · ${bt[k]} (${Math.round(bt[k] / clog.length * 100)}%)</span>`).join("")}</div></div>` : "";
   const gearing = courseGearingHTML();
-  if (!laps.length) return totals + gearing + sbal + `<div class="why" style="padding:4px 6px">${allLaps.length ? `no lap in ${scopeTok(ls)} — ${allLaps.length} on the course; widen the filter to see them` : "no laps recorded on this course yet"}</div>`;
+  const findings = findingsHTML();
+  if (!laps.length) return totals + gearing + findings + sbal + `<div class="why" style="padding:4px 6px">${allLaps.length ? `no lap in ${scopeTok(ls)} — ${allLaps.length} on the course; widen the filter to see them` : "no laps recorded on this course yet"}</div>`;
   // per-CAR aggregation (by ordinal) within scope
   const byCar = {};
   laps.forEach((l) => { const o = ordOf(l.cid);
@@ -5256,7 +5326,7 @@ function courseStatsHTML() {
     <td class="mono dim" style="text-align:right">${c.med != null ? lapTime(c.med) : "—"}</td></tr>`).join("");
   const table = `<div class="grp"><div class="gh">by car <span class="why">· ${cars.length} car${cars.length === 1 ? "" : "s"} in ${scopeTok(ls)} · fastest first</span></div>
     <table class="cstat-tbl"><thead><tr><th>car</th><th>laps</th><th>best</th><th>median</th></tr></thead><tbody>${rows}</tbody></table></div>`;
-  return totals + gearing + sbal + headline + scatter + table;
+  return totals + gearing + findings + sbal + headline + scatter + table;
 }
 
 // ============ SESSION LAPS + SINGLE-LAP ANALYSIS (course v2, 2026-09-16) ============

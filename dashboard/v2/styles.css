@@ -77,6 +77,19 @@ tbody tr.click{cursor:pointer}
 .chip.w{border-color:var(--warn);color:var(--warn)}
 .chip.r{border-color:var(--bad);color:var(--bad)}
 .chip.m{border-color:var(--mag);color:var(--mag)}
+/* Finding Engine — course-mode confidence-gated findings */
+.ftally{display:flex;gap:6px;flex-wrap:wrap;padding:5px 6px 7px}
+.fcells{display:flex;gap:5px;flex-wrap:wrap;padding:5px 6px 0}
+.fcell{font:inherit;font-size:11px;padding:3px 8px;border:1px solid var(--line2);border-radius:7px;
+  background:transparent;color:var(--mut);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.fcell:hover{border-color:var(--mut)}
+.fcell.on{border-color:var(--acc);color:var(--ink)}
+.fcell .fdot{background:var(--acc);color:#04140c;border-radius:9px;padding:0 6px;font:700 10px var(--mono)}
+.chip.fdim{color:var(--dim)}
+.ivbar{position:relative;height:6px;margin:5px 0 3px;border-radius:3px;background:var(--line2)}
+.iv-fill{position:absolute;top:0;bottom:0;border-radius:3px;opacity:.9}
+.iv-pt{position:absolute;top:-3px;width:2px;height:12px;background:var(--ink);border-radius:1px;transform:translateX(-1px)}
+.iv-floor{position:absolute;top:-2px;height:10px;border-left:1px dashed var(--mut)}
 .chips{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
 /* the orphan `.cls` class-badge palette was removed (Jett 2026-09-11): it disagreed with the canonical
    PI_COLORS/.pib-<class> set and nothing emitted it. The ONE class badge is classPill()/.pib / piBadge(). */

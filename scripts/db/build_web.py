@@ -973,6 +973,60 @@ def main(argv=None):
     }
     total += write(os.path.join(out, "diag.json"), diag)
 
+    # ---- findings: the confidence gate brought to the per-TURN faults --------------------
+    # by_turn (above) pools every build and tune into one row -- right for "which corners cost
+    # the most across everything", wrong for a claim about a CAR, because a cell that pooled two
+    # tunes measures a machine that never existed. So the Finding Engine keys on findings.py's own
+    # cell (route x cid x hw_hash x tune_hash) and calls the SAME gate by_course uses. One
+    # implementation of the arithmetic; a second in JS would drift and end up recommending a change
+    # the analysis had already refused. The renderer only displays the verdict decided here.
+    import findings as _find                              # scripts/telemetry already on sys.path (see _conf)
+    # A soft guard, not findings.require_settled()'s sys.exit: build_web emits a whole tree, so a
+    # rebuild in flight skips THIS block (last-good findings.json stays) rather than killing the build.
+    _find_settled = cx.execute(
+        "SELECT 1 FROM import_run WHERE finished_utc IS NULL LIMIT 1").fetchone() is None
+    _nfind = 0
+    if _find_settled:
+        _sym_ref = {r["symptom"]: dict(r) for r in cx.execute(
+            "SELECT symptom, phase, primary_fix, secondary_fix FROM ref_symptom")}
+        _car_nm = {str(r["ordinal"]): r["full_name"]
+                   for r in cx.execute("SELECT ordinal, full_name FROM ref_car")}
+        _dbuilt = cx.execute("""SELECT finished_utc FROM import_run
+                                WHERE kind='diagnosis' AND ok=1
+                                ORDER BY run_id DESC LIMIT 1""").fetchone()
+        _find_cells = cx.execute(
+            """SELECT route_key, cid, hw_hash, tune_hash, COUNT(*) n FROM lap
+               WHERE coalesce(void,0)=0 AND tune_hash IS NOT NULL AND route_key IS NOT NULL
+                 AND coalesce(coverage,0) >= ?
+               GROUP BY 1,2,3,4 HAVING n >= 8 ORDER BY route_key, n DESC""",
+            (_find.WHOLE_LAP,)).fetchall()
+        _froutes = {}
+        for c in _find_cells:
+            rk = c["route_key"]
+            _n, _fs = _find.assess_cell(cx, rk, c["cid"], c["hw_hash"], c["tune_hash"])
+            fl = []
+            for f in _fs:
+                ref = _sym_ref.get(f["symptom"]) or {}
+                fl.append({
+                    "symptom": f["symptom"], "turn_id": f["turn_id"], "verdict": f["verdict"],
+                    "k": f["k"], "n": f["n"], "rate": f["rate"], "lo": f["lo"], "hi": f["hi"],
+                    "width": f["width"], "needs_laps": f["needs_laps"], "why": f["why"],
+                    "driver_linked": f["driver_linked"], "evidence_class": f["evidence_class"],
+                    "severity": f.get("severity"), "phase": ref.get("phase"),
+                    "fix": ref.get("primary_fix"), "fix2": ref.get("secondary_fix"),
+                })
+            tally = {}
+            for f in fl:
+                tally[f["verdict"]] = tally.get(f["verdict"], 0) + 1
+            nm = cx.execute("SELECT name FROM course WHERE route_key=?", (rk,)).fetchone()
+            _froutes.setdefault(rk, {"course": nm["name"] if nm else rk, "cells": []})["cells"].append({
+                "cid": c["cid"], "hw": c["hw_hash"], "tune": c["tune_hash"], "laps": _n,
+                "car": _car_nm.get(str(c["cid"]).split("|")[0]), "tally": tally, "findings": fl,
+            })
+        total += write(os.path.join(out, "findings.json"),
+                       {"built": _dbuilt["finished_utc"] if _dbuilt else None, "routes": _froutes})
+        _nfind = 1
+
     # ---- identity: how a LIVE car on screen is matched to a build we already hold ------
     # The daemon reports the car's 50 decoded part ids. Joining them in slot order gives a
     # hardware fingerprint the browser can compare directly, with no hashing and no guessing:
@@ -1074,7 +1128,7 @@ def main(argv=None):
                 try: os.remove(p); n_pruned += 1
                 except OSError: pass
 
-    print("wrote %d files under %s%s" % (3 + n_build + n_course + 2 + n_opt, out,
+    print("wrote %d files under %s%s" % (3 + _nfind + n_build + n_course + 2 + n_opt, out,
                                          (" (pruned %d stale)" % n_pruned) if n_pruned else ""))
     print("  cars %d   packages %d (%d build files)   courses %d (%d files)   evidence %d"
           % (len(cars), len(packages), n_build, len(courses), n_course, len(ev)))

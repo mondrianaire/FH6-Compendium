@@ -5209,12 +5209,22 @@ function findingsHTML() {
       <div class="why" style="padding:4px 6px">no gated findings on this course yet — a cell needs ≥8 whole clean laps on one build and one tune (a scanned <code>deterministic</code> + <code>diagnosis</code> pass)</div></div>`;
   }
   const cells = R.cells;                       // densest first (build_web order)
+  // Open on the car being DRIVEN, not the densest cell -- the point is "what's wrong with THIS car".
+  // An explicit pick still wins; else the live car's exact build, else any build of the live car, else densest.
+  const liveCid = (typeof CUR !== "undefined" && CUR && CUR.cid) ? CUR.cid : null;
+  const liveOrd = (typeof CUR !== "undefined" && CUR && CUR.ordinal != null) ? String(CUR.ordinal)
+    : (liveCid ? String(liveCid).split("|")[0] : null);
+  const ordOfCid = (cid) => String(cid || "").split("|")[0];
   let idx = FIND_CELL[COURSE.key];
-  if (idx == null || idx >= cells.length) idx = 0;
+  if (idx == null || idx >= cells.length) {
+    let m = liveCid ? cells.findIndex((c) => c.cid === liveCid) : -1;
+    if (m < 0 && liveOrd) m = cells.findIndex((c) => ordOfCid(c.cid) === liveOrd);
+    idx = m >= 0 ? m : 0;
+  }
   const cell = cells[idx];
   const sw = cells.length > 1 ? `<div class="fcells">${cells.map((c, i) => {
-    const rr = (c.tally && c.tally.report) || 0;
-    return `<button class="fcell ${i === idx ? "on" : ""}" data-fcell="${i}" title="${esc(c.car || c.cid)} · ${c.laps} whole laps">${esc(carShort(c.cid))} <span class="mono dim">${c.laps}L</span>${rr ? ` <span class="fdot">${rr}</span>` : ""}</button>`;
+    const rr = (c.tally && c.tally.report) || 0, isLive = liveOrd && ordOfCid(c.cid) === liveOrd;
+    return `<button class="fcell ${i === idx ? "on" : ""}${isLive ? " live" : ""}" data-fcell="${i}" title="${esc(c.car || c.cid)} · ${c.laps} whole laps${isLive ? " · the car you're driving" : ""}">${isLive ? `<span class="livedot"></span>` : ""}${esc(carShort(c.cid))} <span class="mono dim">${c.laps}L</span>${rr ? ` <span class="fdot">${rr}</span>` : ""}</button>`;
   }).join("")}</div>` : "";
   const ORD = { report: 0, watching: 1, insufficient: 2, not_recurrent: 3 };
   const badge = (v) => v === "report" ? `<span class="chip b">recommended</span>`
@@ -5252,11 +5262,12 @@ function findingsHTML() {
       <div class="fr">${right}</div></div>`;
   }).join("");
   const built = FINDINGS.built ? ` · diagnosis ${esc(String(FINDINGS.built).slice(0, 10))}` : "";
+  const shownLive = liveOrd && ordOfCid(cell.cid) === liveOrd ? ` · <b style="color:var(--acc)">driving now</b>` : "";
   const ruled = t.not_recurrent || 0;
   const foot = ruled ? `<div class="why" style="padding:2px 6px 4px">${ruled} fault${ruled === 1 ? "" : "s"} ruled out — settled negatives (enough passes, too rare to tune), counted above, not listed</div>` : "";
   const none = fs.length ? "" : `<div class="why" style="padding:2px 6px 4px">nothing cleared the gate to report yet on this cell</div>`;
   return `<div class="grp"><div class="gh">Findings
-    <span class="why">· ${esc(cell.car || carShort(cell.cid))} · ${cell.laps} whole laps${built} · only a cleared verdict is advice</span></div>
+    <span class="why">· ${esc(cell.car || carShort(cell.cid))} · ${cell.laps} whole laps${built}${shownLive} · only a cleared verdict is advice</span></div>
     ${sw}${tally}${body}${none}${foot}</div>`;
 }
 function courseStatsHTML() {

@@ -432,6 +432,10 @@ medium · fast · crest · wiggle), reported as progress against what each test 
 
 ## 6. The specifications and audits
 
+Curated, not exhaustive — the docs that SETTLE something, so a question does not get re-litigated. A
+doc that merely records a session's state belongs in the handoff list in `CLAUDE.md`, not here.
+
+
 | doc | what it settles |
 |---|---|
 | `docs/course-identity-and-names.md` | THE workflow for course id → geometry → common name (settled 2026-09-05): the three ids, the chain, the stages, the verification queries, the never-again list. Read before naming anything or asking for a capture. |
@@ -439,48 +443,99 @@ medium · fast · crest · wiggle), reported as progress against what each test 
 | `docs/v1-lessons-audit.md` | 40 ranked regressions from v1 → v2 with fixes and status. |
 | `docs/dashboard-states.md` | the panel's regions, modes and status machine. |
 | `docs/telemetry-lab-status.md`, `docs/tuning-page-refresh-plan.md` | earlier status and plan. |
+| `docs/handoff-data-structures.md` | every store, table, VIEW and field VALUE with its meaning — the written companion to the *FH6 Lab Database ERD*. What a coded value means lives here and nowhere else. |
+| `docs/formats/` (README + 8 `.bt`) | the byte layout of every BINARY source, as runnable 010 Editor templates, each verified against the real corpus. `kaitai-assessment.md` records why Kaitai was evaluated and declined. |
+| `docs/game-data-refresh.md` | every game-data refresh routine — decrypt, extract, rebuild, sync — with its utility, reason and frequency. Run its checklist after any FH6 title update. |
+| `docs/format-c-profiledata.md`, `docs/format-c-profiledata-fields.md` | the profile save's full structure and its 714-property field inventory. |
+| `docs/fh6-profile-crypto-mimicry.md` | how the CryptoContainer works and why an offline decrypt was possible — the algorithm is public, only key bytes are withheld. |
+| `docs/plan-grip-envelope.md`, `docs/handoff-grip-envelope.md` | the radius envelope: the audited plan with its gates, and what was built, measured, failed and fixed. Read §5 before touching `bias_g`. |
+| `docs/data-availability.md` | provenance and value-type of every source, for onboarding — the "sanitized branch" lens. |
 
 ## 7. Scripts
 
-| script | lines | role |
-|---|---|---|
-| `scripts/db/build_web.py` | 348 lines | the database → the dashboard API. |
-| `scripts/db/export_options.py` | 678 lines | per-car option lists → api/options/<ordinal>.json. |
-| `scripts/db/fh6db.py` | 660 lines |  |
-| `scripts/db/import_containers.py` | 355 lines |  |
-| `scripts/db/import_anchors.py` | 70 lines | the race-activation spheres → `route_anchor`, `ref_route.is_race`. |
-| `scripts/db/import_objectmodel.py` | 260 lines | the game's event catalogue out of ObjectModelGame.zip -> `ref_track_info`, `ref_race_collection`, `ref_career_race`, `ref_rivals_event`, `ref_car_restriction`. |
-| `scripts/db/import_course_match.py` | 220 lines | how our courses map onto the game's routes — from the DB, no game files; corroborated and tie-broken by the spheres. |
-| `scripts/db/import_diagnosis.py` | 325 lines |  |
-| `scripts/db/import_events.py` | 165 lines | the Rivals catalogue as displayed: names, lengths, guids → ref_event. |
-| `scripts/db/import_gamedb.py` | 716 lines |  |
-| `scripts/db/import_observations.py` | 275 lines |  |
-| `scripts/db/import_route_names.py` | 325 lines | derive course and route names from map identity + catalogue length; evidence in course_event. |
-| `scripts/db/import_surface.py` | 383 lines |  |
-| `scripts/db/import_telemetry.py` | 270 lines |  |
-| `scripts/db/rebuild.py` | 101 lines | the whole import, stage by stage. |
-| `scripts/telemetry/analyze_session.py` | 2985 lines | the session analyzer. |
-| `scripts/telemetry/audit_models.py` | 465 lines |  |
-| `scripts/telemetry/backfill_laps.py` | 296 lines |  |
-| `scripts/telemetry/clone_parts.py` | 1534 lines | how a slot's tile grid is named and ordered — the clone route's authority. |
-| `scripts/telemetry/fh6_live_daemon.py` | 2317 lines | the live daemon: telemetry, identity, deliverable, the ladder matcher. |
-| `scripts/telemetry/fh6_manifest.py` | 263 lines | Manifest.xml option lists. |
-| `scripts/telemetry/fh6_nav.py` | 430 lines | the nav mesh parser. |
-| `scripts/telemetry/fh6_anchors.py` | 90 lines | the `race_triggers.tz` reader: parse / load / nearest / inside. |
-| `scripts/telemetry/fh6_bxml.py` | 160 lines | Forza binary XML (BXML) <-> ElementTree, from Nenkai's MIT reference; `python scripts/telemetry/fh6_bxml.py <file.om.xml> [out.xml]`. |
-| `scripts/telemetry/fh6_owt.py` | 306 lines | the route file parser. |
-| `scripts/telemetry/fh6_pi_solve.py` | 299 lines | the per-part PI solver. |
-| `scripts/telemetry/fh6_swatchbin.py` | 655 lines |  |
-| `scripts/telemetry/fh6_tune_decode.py` | 1279 lines | the save-file parser. |
-| `scripts/telemetry/fh6_turns.py` | 234 lines | geometry turns from a route. |
-| `scripts/telemetry/merge_courses.py` | 504 lines |  |
-| `scripts/telemetry/repair_persisted_state.py` | 329 lines |  |
-| `scripts/telemetry/turn_lab.py` | 307 lines |  |
-| `scripts/telemetry/turn_stats.py` | 398 lines |  |
-| `scripts/telemetry/verify_workflow.py` | 476 lines | the assertion harness. |
-| `scripts/rebuild_service.py` | 200 lines | the import + regenerate service and the live-reload channel (8001). |
+Roles are each script's own docstring line, so this table cannot drift from what the script says it does.
+**The line counts that used to sit here are gone on purpose:** 23 of 35 had drifted, several by more than
+2x (`build_web.py` was listed at 348 lines against a real 1,060), and a line count says almost nothing a
+reader needs. What matters is the role and whether the script exists at all.
 
-`tests/` — the pipeline's test suite (`python -m unittest discover -s tests -t .`): the naming rule and its game tier, the events import, the object-model import, the cascade, course_route surviving telemetry, the anchors layer. 47 tests as of 2026-09-05.
+### The import pipeline — `scripts/db/` (complete; `check_db_docs.py scripts` enforces it)
+
+Run it with `rebuild.py`, never a stage standalone: standalone skips `course_match` / `route_names` and
+courses lose their names.
+
+| script | role |
+|---|---|
+| `scripts/db/build_web.py` | Generate the new dashboard's data files from data/fh6.db. |
+| `scripts/db/canon_routes.py` | Collapse the game's duplicate route ids onto one canonical road. |
+| `scripts/db/export_icons.py` | The game's own upgrade tile art, decoded once for the dashboard. |
+| `scripts/db/export_options.py` | Write dashboard/v2/api/options/<ordinal>.json: the WHOLE Upgrade Shop for |
+| `scripts/db/fh6db.py` | The one accessor for data/fh6.db. Every importer and consumer imports this. |
+| `scripts/db/import_anchors.py` | The game's race-activation spheres -> route_anchor, ref_route.is_race. |
+| `scripts/db/import_consolidate.py` | Collapse duplicate-road courses onto one canonical identity. |
+| `scripts/db/import_containers.py` | The tune_ and hw_ layers, from the game's save containers. |
+| `scripts/db/import_corners.py` | What every lap did at every turn, with the turn's own geometry beside it. |
+| `scripts/db/import_course_match.py` | How our courses map onto the game's routes, from the DB alone. |
+| `scripts/db/import_curves.py` | The two sampled curves the game ships and the lab never read. |
+| `scripts/db/import_deterministic.py` | Refresh the per-session deterministic sidecars, incrementally. |
+| `scripts/db/import_diagnosis.py` | Join the failure catalogue to the detectors, and place each on a turn. |
+| `scripts/db/import_events.py` | The Rivals catalogue as displayed: names, lengths, guids -> ref_event. |
+| `scripts/db/import_field_catalog.py` | The field-level knowledge catalogue, as data. |
+| `scripts/db/import_gamedb.py` | Populate the whole ref_ layer from the game's own data. |
+| `scripts/db/import_garage.py` | SCAFFOLD (not wired into rebuild.py yet) — ingest the decrypted profile's Career_Garage into garage_* tables. |
+| `scripts/db/import_objectmodel.py` | The game's own event catalogue: where a NAME meets a ROUTE ID. |
+| `scripts/db/import_observations.py` | The obs_ layer and the plan_ deliverables. |
+| `scripts/db/import_parts_extra.py` | The three "part facts" tables the coverage sweep left untouched. |
+| `scripts/db/import_route_names.py` | Derive course and ref_route names from map identity + catalogue length. |
+| `scripts/db/import_routes.py` | The game's own route centre-lines, and how our courses map onto them. |
+| `scripts/db/import_surface.py` | What the road at every turn is MADE of. |
+| `scripts/db/import_telemetry.py` | The session / course / lap layers. |
+| `scripts/db/rebuild.py` | Rebuild data/fh6.db from every source, in order. |
+| `scripts/db/strparse.py` | Parse Forza Horizon 6 binary ``.str`` string tables (stdlib only). |
+| `scripts/db/sync_car_names.py` | Project authoritative car names from ref_car (the decrypted game DB) into |
+
+### The gates — `scripts/tools/` (complete; enforced)
+
+| script | role |
+|---|---|
+| `scripts/tools/check_bt_template.py` | Prove a 010 Editor .bt template still describes the real bytes. |
+| `scripts/tools/check_db_docs.py` | Prove the database documentation still describes the database. |
+
+### Telemetry readers, decoders and services
+
+| script | role |
+|---|---|
+| `scripts/telemetry/analyze_session.py` | Session analyzer v0.2 — turns a Data Out capture CSV (from fh6_dataout_capture.py / fh6_live_daemon.py) |
+| `scripts/telemetry/fh6_live_daemon.py` | FH6 live telemetry daemon — receives Data Out UDP, records the CSV, and streams live state to the |
+| `scripts/telemetry/clone_parts.py` | Clone shopping list: the PARTS diff between a target tune and a stock (or part-built) car. |
+| `scripts/telemetry/fh6_tune_decode.py` | Read FH6 tunes straight off disk. |
+| `scripts/telemetry/fh6_profile.py` | FH6 profile-save (C_ProfileData) decode primitive. |
+| `scripts/telemetry/fh6_owt.py` | Read Forza Horizon 6 route centre-lines (.owt) and match our learned courses. |
+| `scripts/telemetry/fh6_nav.py` | Reader for ForzaTech FH6 'NAVW' navigation files (Route<id>.nav, |
+| `scripts/telemetry/fh6_bxml.py` | Forza's binary XML (BXML), read into ElementTree. |
+| `scripts/telemetry/fh6_strings.py` | Forza Horizon 6 .str string tables -- the game's own ID -> name layer. |
+| `scripts/telemetry/fh6_anchors.py` | The game's race-activation spheres: a ROUTE ID pinned to a world position. |
+| `scripts/telemetry/fh6_swatchbin.py` | Decode Forza Horizon 6 ``.swatchbin`` UI textures to PNG. |
+| `scripts/telemetry/fh6_dataout_capture.py` | FH6 Data Out capture — records the game's UDP telemetry stream to CSV and prints a |
+| `scripts/telemetry/fh6_turns.py` | Turns computed from the game's own centre-line, not from how anyone drove. |
+| `scripts/telemetry/fh6_manifest.py` | Forza Horizon 6 car archives -> per-car upgrade OPTION LISTS (the game's own table). |
+| `scripts/telemetry/fh6_pi_solve.py` | Self-building per-part PI cost model, from ZERO capture. |
+| `scripts/telemetry/lap_store.py` | LAP TRACE STORE — every lap you drive, kept. |
+| `scripts/telemetry/backfill_laps.py` | LAP-STORE BACKFILL — replay old captures so the lap history is as old as the driving, not as old as the store. |
+| `scripts/telemetry/clone_coverage.py` | Coverage audit: for every stored tune container, can clone_parts name every populated slot? |
+| `scripts/telemetry/deterministic.py` | The faults a single lap can prove: gearing, brake lock, bottoming. |
+| `scripts/telemetry/verify_workflow.py` | Multi-attribute WORKFLOW VERIFICATION checklist — probes the LIVE system end-to-end and reports PASS/WARN/FAIL |
+| `scripts/rebuild_service.py` | The import-and-regenerate service: one local HTTP endpoint the dashboard can call. |
+| `scripts/serve_dashboard.py` | Serve the dashboard with cache headers that actually work. |
+| `scripts/lab_root.py` | Which checkout is this process serving -- and is it allowed to? |
+
+**Not enumerated, deliberately:** one-off probes and migrations under `scripts/analysis/`, `scripts/sim/`
+and the `migrate_*` / `repair_*` / `transcribe_*` scripts in `scripts/telemetry/`. They are run once
+against a question and kept for provenance; listing each would age badly and hide the pipeline above.
+52 of 81 scripts are listed here.
+
+`tests/` — the pipeline's test suite (`python -m unittest discover -s tests -t .`): the naming rule and
+its game tier, the events import, the object-model import, the cascade, `course_route` surviving
+telemetry, the anchors layer.
 
 ## 8. Two rules this file exists to enforce
 

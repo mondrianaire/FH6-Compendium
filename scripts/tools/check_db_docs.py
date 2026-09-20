@@ -30,7 +30,9 @@ What it checks:
   8. Every committed data/*.json parses and declares a version or its
      provenance -- so a consumer knows which shape it reads, and a stale copy
      is distinguishable from a fresh one.
-  9. Two-way store reconciliation: every store tracked under data/ is
+  9. The import pipeline (scripts/db/) and the gates (scripts/tools/) are all
+     listed in DATA-INVENTORY §7, and every docs//scripts path it names exists.
+ 10. Two-way store reconciliation: every store tracked under data/ is
      documented here, which is the rule this inventory exists to enforce
      ("when a store is added, add it here in the same commit") and which
      nothing checked until now. It found three on its first run.
@@ -491,9 +493,39 @@ def check_json():
     return fails
 
 
+def check_scripts():
+    """The pipeline and the gates are listed in DATA-INVENTORY §7, and every path it names exists.
+
+    Enforced only where an omission actually hurts: scripts/db/ (the import cascade) and
+    scripts/tools/ (the gates). A stage nobody knows about is how import_corners.py came to own the
+    grip envelope while appearing in no inventory at all. One-off probes and migrations under
+    scripts/analysis/ and scripts/sim/ are deliberately NOT enumerated -- see the section.
+
+    Also checks every docs/ and scripts/ path named anywhere in the file resolves, because a doc that
+    points at a file that moved is worse than one that says nothing.
+    """
+    fails = []
+    text = io.open(INVENTORY, encoding="utf-8").read()
+    for label, pattern in (("scripts/db", os.path.join(ROOT, "scripts", "db", "*.py")),
+                           ("scripts/tools", os.path.join(ROOT, "scripts", "tools", "*.py"))):
+        on_disk = sorted(os.path.basename(p) for p in glob.glob(pattern))
+        missing = [n for n in on_disk if "`%s/%s`" % (label, n) not in text]
+        print("  %-14s %d on disk, %d listed" % (label, len(on_disk), len(on_disk) - len(missing)))
+        if missing:
+            fails.append("%s not listed in DATA-INVENTORY §7: %s" % (label, ", ".join(missing)))
+
+    # every path the inventory names must resolve
+    named = set(re.findall(r"`((?:docs|scripts)/[A-Za-z0-9_./-]+\.(?:md|py))`", text))
+    gone = sorted(p for p in named if not os.path.exists(os.path.join(ROOT, p)))
+    print("  %d docs/scripts paths named; %d do not resolve" % (len(named), len(gone)))
+    if gone:
+        fails.append("DATA-INVENTORY names paths that do not exist: %s" % ", ".join(gone))
+    return fails
+
+
 CHECKS = {"schema": check_schema, "handoff": check_handoff, "counts": check_counts,
-          "values": check_values, "json": check_json, "sources": check_sources,
-          "stores": check_stores}
+          "values": check_values, "json": check_json, "scripts": check_scripts,
+          "sources": check_sources, "stores": check_stores}
 
 if __name__ == "__main__":
     argv = sys.argv[1:]

@@ -448,6 +448,7 @@ doc that merely records a session's state belongs in the handoff list in `CLAUDE
 | `docs/game-data-refresh.md` | every game-data refresh routine — decrypt, extract, rebuild, sync — with its utility, reason and frequency. Run its checklist after any FH6 title update. |
 | `docs/format-c-profiledata.md`, `docs/format-c-profiledata-fields.md` | the profile save's full structure and its 714-property field inventory. |
 | `docs/fh6-profile-crypto-mimicry.md` | how the CryptoContainer works and why an offline decrypt was possible — the algorithm is public, only key bytes are withheld. |
+| `docs/handoff-2026-09-20-envelope-and-gates.md` | the session that built the envelope end to end and the two gate scripts: what the gates found, the three decisions that keep them usable (PENDING vs BROKEN, counts reported not failed, --refresh refuses mid-rebuild), and what is open. |
 | `docs/plan-grip-envelope.md`, `docs/handoff-grip-envelope.md` | the radius envelope: the audited plan with its gates, and what was built, measured, failed and fixed. Read §5 before touching `bias_g`. |
 | `docs/data-availability.md` | provenance and value-type of every source, for onboarding — the "sanitized branch" lens. |
 

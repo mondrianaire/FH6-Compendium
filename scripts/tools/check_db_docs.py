@@ -27,7 +27,10 @@ What it checks:
   7. Every value that EXISTS in a catalogued enum column is documented in the
      §3 value catalogue -- the only place that says what a coded value MEANS.
      The value SET is failed on; the counts beside it are only reported.
-  8. Two-way store reconciliation: every store tracked under data/ is
+  8. Every committed data/*.json parses and declares a version or its
+     provenance -- so a consumer knows which shape it reads, and a stale copy
+     is distinguishable from a fresh one.
+  9. Two-way store reconciliation: every store tracked under data/ is
      documented here, which is the rule this inventory exists to enforce
      ("when a store is added, add it here in the same commit") and which
      nothing checked until now. It found three on its first run.
@@ -441,8 +444,56 @@ def check_values():
     return fails
 
 
+#: A committed JSON store must say what it IS. Either a version key -- so a consumer knows which
+#: shape it is reading -- or provenance, for a store that is a capture rather than a format.
+JSON_VERSION_KEYS = ("schema_version", "schema", "version")
+JSON_PROVENANCE_KEYS = ("captured", "source", "sources", "generated", "note", "_note", "_summary")
+#: field-catalog.json's top level is a LIST, so it can carry neither. It is the source for the three
+#: ref_field* tables; if its shape ever changes, nothing in the file will say so. Recorded, not excused.
+JSON_SHAPE_EXEMPT = {"field-catalog.json"}
+
+
+def check_json():
+    """Every committed JSON store parses, and declares a version or its provenance."""
+    fails = []
+    import json as _json
+    files = sorted(glob.glob(os.path.join(ROOT, "data", "*.json")))
+    if not files:
+        print("  NOTE: no data/*.json here; skipped")
+        return fails
+    bad, versioned, prov, exempt = [], 0, [], []
+    for f in files:
+        name = os.path.basename(f)
+        try:
+            d = _json.load(io.open(f, encoding="utf-8"))
+        except Exception as e:                                   # noqa: BLE001
+            bad.append((name, str(e)[:60]))
+            continue
+        if name in JSON_SHAPE_EXEMPT or not isinstance(d, dict):
+            exempt.append(name)
+            continue
+        keys = set(d)
+        if keys & set(JSON_VERSION_KEYS):
+            versioned += 1
+        elif keys & set(JSON_PROVENANCE_KEYS):
+            prov.append(name)
+        else:
+            fails.append("%s declares neither a version nor provenance -- a stale copy is "
+                         "indistinguishable from a fresh one" % name)
+    print("  %d stores: %d versioned, %d carry provenance instead, %d cannot declare either"
+          % (len(files), versioned, len(prov), len(exempt)))
+    if prov:
+        print("      provenance-only: %s" % ", ".join(sorted(prov)))
+    if exempt:
+        print("      shape-exempt (top level is a list): %s" % ", ".join(sorted(exempt)))
+    for name, err in bad:
+        fails.append("%s does not parse: %s" % (name, err))
+    return fails
+
+
 CHECKS = {"schema": check_schema, "handoff": check_handoff, "counts": check_counts,
-          "values": check_values, "sources": check_sources, "stores": check_stores}
+          "values": check_values, "json": check_json, "sources": check_sources,
+          "stores": check_stores}
 
 if __name__ == "__main__":
     argv = sys.argv[1:]

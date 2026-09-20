@@ -283,6 +283,18 @@ Views (**10**, was listed as 6 — `v_diag_by_course`, `v_friction_point`, `v_ri
 
 ## 2. Data files under `data/`
 
+**Every committed store says what it IS** — checked by `check_db_docs.py json`. Either a version key
+(`schema_version`, 40 of 50) so a consumer knows which shape it is reading, or PROVENANCE (`captured` /
+`source` / `generated`, 8 stores) for a file that is a capture rather than a format. A store with
+neither cannot be told stale from fresh, which is why `clone-coverage.json` — a GENERATED report that
+carried no version and no timestamp — now stamps `schema_version` and `generated` at write time
+(`scripts/telemetry/clone_coverage.py`, 2026-09-20).
+
+One store can declare neither: **`field-catalog.json`**'s top level is a LIST. It is the 2,007-row
+source for the three `ref_field*` tables, so if its shape ever changes nothing in the file will say so.
+Recorded here rather than excused; wrapping it in an object would fix it and would break its readers.
+
+
 | file | size | what it is |
 |---|---|---|
 | `build-letters.json` | 5kB |  |

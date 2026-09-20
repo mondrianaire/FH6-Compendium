@@ -14,6 +14,7 @@ ladders), or is set by the kit (hood, skirts, rear bumper), or is a rim (weight 
 car), or is a catalogue-derived name on a base tier 0-3 (19/19 record). Late-added catalogue rows and
 unknown indices are the only blockers. Writes data/clone-coverage.json and prints a summary.
 """
+import datetime as _dt
 import io, os, sys, glob, json, struct, collections
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import fh6_tune_decode as T
@@ -105,7 +106,12 @@ for slot, m in gaps.items():
 gap_rows.sort(key=lambda r: -r['builds'])
 for r in gap_rows[:60]:
     print('  %-26s %-8s %4d builds %3d cars  %s' % (r['slot'], r['key'], r['builds'], r['cars'], r['top']), file=out)
-json.dump({'containers': len(builds), 'clone_ready': len(ready), 'by_blocker_kind': dict(by_reason), 'per_slot': {k: dict(v) for k, v in per_slot.items()},
+# schema_version + generated: this is a GENERATED report, and it carried neither, so a stale copy
+# was indistinguishable from a fresh one and no consumer could tell which shape it was reading.
+# Every other committed store under data/ declares one or the other (see DATA-INVENTORY.md §2).
+json.dump({'schema_version': '1.0.0',
+           'generated': _dt.datetime.now(_dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+           'containers': len(builds), 'clone_ready': len(ready), 'by_blocker_kind': dict(by_reason), 'per_slot': {k: dict(v) for k, v in per_slot.items()},
            'gaps': gap_rows, 'ready_examples': [x['car'] for x in ready[:20]]},
           open(os.path.join(C.DATA, 'clone-coverage.json'), 'w', encoding='utf-8'), indent=1, ensure_ascii=False)
 print('  wrote data/clone-coverage.json (%d gap rows)' % len(gap_rows), file=out)

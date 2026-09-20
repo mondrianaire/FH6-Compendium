@@ -483,10 +483,15 @@ def _catalogue_match(sx, sz, sample):
         ov = sum(1 for x, z in sample if near(x, z, cells)) / len(sample)
         if ov < 0.70: continue                       # the drive must LIE ON this road to be it
         d0 = math.hypot(sx - cx0, sz - cz0)
-        if d0 <= 500:
-            cand = (-round(ov, 2), round(d0), name, "route:%s" % key.split(":", 1)[-1])
+        # ON-ROAD START (2026-09-20): a point-to-point Rivals begins PARTWAY along its catalogued road, so its start
+        # sits far from the catalogued point-0 (Hokubu Trail: 717 m) yet ON the road (3 m). Treat "started on this
+        # route's own path" as start-anchored -- ov alone confirms it -- so it names at the start without needing
+        # 60% of a catalogued path that is LONGER than the event (7277 m road vs 5794 m Rivals; a partial run then
+        # never cleared that gate). The point-0 distance stays the tiebreak; an on-road start ranks with the closest.
+        if d0 <= 500 or near(sx, sz, cells):
+            cand = (-round(ov, 2), round(d0 if d0 <= 500 else 0), name, "route:%s" % key.split(":", 1)[-1])
             if best_start is None or cand < best_start: best_start = cand
-        else:                                        # offset start: needs coverage as the guard against a shared-tarmac sliver
+        else:                                        # offset start OFF the road: coverage guards against a shared-tarmac sliver
             scells = {}
             for x, z in sample: scells.setdefault((int(x // 30), int(z // 30)), []).append((x, z))
             cov = sum(1 for x, z in cp if near(x, z, scells)) / max(1, len(cp))

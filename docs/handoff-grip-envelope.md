@@ -188,6 +188,22 @@ error Stage A exists to avoid. The bound is quoted at the band midpoint and proj
 cannot answer — unit-tested on all seven: mixed scope, unknown class, dirt (no publishable rows), mixed
 road, radius outside 15–200 m, no driven radius, and the normal case.
 
+## 5d. Checked against the 2026-09-20 lap guards
+
+Another session's drag-strip work re-analysed all 442 captures and added guards that strike
+impossible lap times (`SHORT_LAP_VMAX` / `LAP_VMAX_MPS`, 150 m/s). The envelope consumes the same
+traces, so it was checked for the same artifacts rather than assumed clean:
+
+- **`void` laps contribute ZERO samples.** Excluding them changes nothing — S1 50–80 m reads
+  n=2,815 / p90 106.7 mph either way.
+- **603 samples (2.2 %) come from laps whose TIME was struck to `NULL`.** That is correct and should
+  stay: a rewind-corrupted lap clock does not make the trace wrong, and the lap-canon rule keeps the
+  trace of an untimed lap. The envelope reads speed and `lat_g` per sample and never reads `lap_s`.
+- **3,222 (11.6 %) come from laps with `rewinds > 0`** — same reasoning.
+- **124 drag runs do not distort it.** A straight reads as a huge radius (drag p50 = 260 m,
+  p90 = 992 m), so only **8** of their samples fall inside the 15–200 m scope. The radius banding
+  excludes straights on its own, which is a small independent check that `r = v/ω` behaves.
+
 ## 6. What a future agent must know
 
 - **The envelope sample definition keeps only 4% of samples** (7,240 of 182,343): no brake, throttle ≤ 50,

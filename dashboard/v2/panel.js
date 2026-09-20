@@ -66,7 +66,7 @@ function vcourse(key) {
 // course you were standing on. `held` = seeded from the previous page, not yet confirmed.
 let MODE = { suggest: null, reason: "waiting for the daemon", kind: null, game: null, known: false, held: false };
 const liveKnown = () => LIVE.frame != null || LIVE.receiving === false;
-let PENDING_FREE = null, FREE_TIMER = 0;
+let PENDING_FREE = null, FREE_TIMER = 0, EXIT_PROMPT = null;
 function adoptMode(m) {
   if (!m) return;
   // TEMPORARY COURSE BROWSER holds the view on a hand-picked course while you are parked in free roam. It is
@@ -91,6 +91,7 @@ function adoptMode(m) {
   // genuine move to free roam (free still suggested after the window, not in a menu) switches as before.
   if (m.suggest === "free" && MODE.suggest === "course" && COURSE) {
     if (m.game !== undefined) MODE.game = m.game;
+    if (EXIT_PROMPT) return;   // the stay-or-leave prompt is already up -- hold; its buttons / 5 s timer decide
     // DON'T RESTART THE SETTLE TIMER ON EVERY STREAMED "free" (bug 2026-09-10): the periodic status
     // event calls adoptMode(d.mode) continuously, so free roam streams "free" every second. Re-arming
     // the 6 s timer each time meant it never elapsed and the dashboard stayed stuck in course mode. Arm
@@ -102,14 +103,13 @@ function adoptMode(m) {
     FREE_TIMER = setTimeout(() => {
       if (!PENDING_FREE || LIVE.inMenu || MODE.suggest !== "course") { PENDING_FREE = null; return; }
       const mm = PENDING_FREE; PENDING_FREE = null;
-      const prev = { suggest: MODE.suggest, game: MODE.game };
-      MODE.suggest = "free"; MODE.reason = mm.reason || MODE.reason; MODE.known = true; MODE.held = false;
-      if (mm.game !== undefined) MODE.game = mm.game;
-      onModeChange(prev, MODE);
+      // Course persisted "free" past the settle window: offer to stay on the just-completed course for
+      // analysis, or continue to free roam. No answer in 5 s -> free roam (courseExitPrompt -> commitFree).
+      courseExitPrompt(mm);
     }, 6000);
     return;
   }
-  PENDING_FREE = null; clearTimeout(FREE_TIMER);   // a real course/event/decode suggestion supersedes a pending free
+  PENDING_FREE = null; clearTimeout(FREE_TIMER); dismissExitPrompt();   // a real course/event/decode suggestion supersedes a pending free / the exit prompt
   const prev = { suggest: MODE.suggest, game: MODE.game };
   if (m.game !== undefined) MODE.game = m.game;
   if (m.kind !== undefined) MODE.kind = m.kind;
@@ -348,6 +348,52 @@ function onModeChange(prev, cur) {
   TRACE_KEY = null;
   ctxSave({ mode: { suggest: cur.suggest, game: cur.game } });
   paintLeft(); paintTrace(); paintRight(); paintFooter();
+}
+// LEAVING A COURSE (2026-09-20): when the live context genuinely returns to free roam after a course, offer a
+// 5 s window to STAY on the just-completed course for analysis instead of dropping straight to the world map.
+// "Stay" pins it via TEMP_COURSE (held until you actually drive away or a real course/event is suggested);
+// "Free roam" or a 5 s timeout commits to free. The 6 s settle upstream already rejects resume transients, so
+// this only fires on a real exit.
+function commitFree(mm) {
+  const prev = { suggest: MODE.suggest, game: MODE.game };
+  MODE.suggest = "free"; MODE.reason = (mm && mm.reason) || MODE.reason; MODE.known = true; MODE.held = false;
+  if (mm && mm.game !== undefined) MODE.game = mm.game;
+  onModeChange(prev, MODE);
+}
+function dismissExitPrompt() {
+  if (!EXIT_PROMPT) return;
+  clearTimeout(EXIT_PROMPT.timer); clearInterval(EXIT_PROMPT.tick);
+  const el = document.getElementById("courseExit"); if (el) el.remove();
+  EXIT_PROMPT = null;
+}
+function stayOnCourse(mm) {
+  if (!COURSE) { commitFree(mm); return; }
+  TEMP_COURSE = true;                       // hold the completed course while parked; released on drive-away / a real course
+  MODE.suggest = "course"; MODE.known = true; MODE.held = false;
+  if (mm && mm.game !== undefined) MODE.game = mm.game;
+  paintLeft(); paintTrace(); paintRight(); paintFooter();
+}
+function courseExitPrompt(mm) {
+  if (!COURSE || MODE.suggest !== "course") { commitFree(mm); return; }   // nothing to stay on
+  if (EXIT_PROMPT) return;                                                // one prompt at a time
+  const name = COURSE.name || COURSE.key || "this course";
+  const el = document.createElement("div");
+  el.id = "courseExit"; el.className = "cexit-wrap";
+  el.innerHTML = `<div class="cexit" role="dialog" aria-label="Leaving course">
+    <div class="cexit-t">Leaving <b>${esc(name)}</b></div>
+    <div class="cexit-s">Stay in course mode to analyze the lap you just completed, or continue to free roam.</div>
+    <div class="cexit-btns">
+      <button class="cexit-stay" data-cexit="stay">Stay in course mode</button>
+      <button class="cexit-go" data-cexit="go">Free roam <span class="cexit-count">5</span></button>
+    </div></div>`;
+  document.body.appendChild(el);
+  let left = 5; const countEl = el.querySelector(".cexit-count");
+  EXIT_PROMPT = { mm,
+    tick: setInterval(() => { left -= 1; if (countEl) countEl.textContent = String(Math.max(0, left)); }, 1000),
+    timer: setTimeout(() => { const m = EXIT_PROMPT && EXIT_PROMPT.mm; dismissExitPrompt(); commitFree(m); }, 5000) };
+  el.querySelector('[data-cexit="stay"]').onclick = () => { const m = EXIT_PROMPT && EXIT_PROMPT.mm; dismissExitPrompt(); stayOnCourse(m); };
+  el.querySelector('[data-cexit="go"]').onclick = () => { const m = EXIT_PROMPT && EXIT_PROMPT.mm; dismissExitPrompt(); commitFree(m); };
+  try { el.querySelector(".cexit-stay").focus(); } catch (e) {}
 }
 function onCarChange() {
   if (!CUR) return;

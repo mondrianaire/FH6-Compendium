@@ -1531,6 +1531,21 @@ body.fixed .trace .lchip.livenow.last{box-shadow:none}
 .lap-finding.rep,.lap-finding.rep b{color:var(--acc)}
 .lap-finding.watch{color:var(--mut)}
 .lap-finding em{font-style:normal;color:var(--dim);font:500 9.5px var(--mono)}
+/* Leaving-a-course prompt: stay in course mode for analysis, or continue to free roam (5 s auto) */
+.cexit-wrap{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:rgba(3,6,10,.55);padding:16px}
+.cexit{background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:18px 20px;max-width:400px;width:100%;box-shadow:0 18px 60px rgba(0,0,0,.5);animation:cexitIn .16s ease-out}
+@keyframes cexitIn{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+.cexit-t{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.cexit-t b{color:var(--acc)}
+.cexit-s{font-size:12px;color:var(--mut);line-height:1.45;margin-bottom:16px}
+.cexit-btns{display:flex;gap:10px}
+.cexit-btns button{font:600 12.5px var(--sans);padding:9px 14px;border-radius:8px;cursor:pointer;border:1px solid var(--line2);flex:1}
+.cexit-stay{background:var(--acc);border-color:var(--acc);color:#04140c}
+.cexit-stay:hover{filter:brightness(1.08)}
+.cexit-go{background:transparent;color:var(--mut)}
+.cexit-go:hover{border-color:var(--mut);color:var(--ink)}
+.cexit-count{font-family:var(--mono);opacity:.85}
+@media (prefers-reduced-motion:reduce){.cexit{animation:none}}
 .lap-incorner{display:inline-flex;align-items:center;gap:4px;font:700 9px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--warn);margin-left:6px}
 /* the session lap list — LEFT pane, under the map (2026-09-16 restructure) */
 .sesl{display:flex;flex-direction:column;gap:3px;padding:5px 2px 2px;border-top:1px solid var(--line)}

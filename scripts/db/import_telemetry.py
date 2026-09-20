@@ -36,6 +36,7 @@ import fh6db                                            # noqa: E402
 DATA = os.path.join(ROOT, "data")
 PARTIAL_BELOW = 0.9          # arc coverage under this is a fragment, not a lap
 LAP_VMAX_MPS = 150.0         # ~540 km/h; a lap time implying a faster average is a rewind-corrupted clock, not a time
+PAUSE_MAX_S = 3.0            # a mid-lap pause longer than this corrupts a NON-OFFICIAL lap clock; strike the time, keep the trace
 
 
 def jload(path):
@@ -204,6 +205,13 @@ def run(cx, verbose=False, data_dir=None):
         # can put an impossible lap time in front of the dashboard.
         if lap_s and arc and arc / lap_s > LAP_VMAX_MPS:
             lap_s, _official = None, 0
+        # A PAUSE corrupts a non-official lap clock the way a rewind does: the arc still covers the whole
+        # course, but the derived time is a fragment (measured 21.09 s on Edamame where the un-paused best
+        # is 26.82) or pause-inflated (up to 942 s). The game's OWN published time (official) rides the pause
+        # correctly, so it is exempt; a lab-derived time on a paused lap is not a time. Strike it, keep the
+        # trace and the pause_s so the lap stays a valid (untimed) course pass -- exactly the lap canon.
+        if lap_s and not _official and (meta.get("pause_s") or 0.0) > PAUSE_MAX_S:
+            lap_s = None
         lap_id += 1
         lrows.append((lap_id, rk, sid, cid, meta.get("container"), meta.get("hw_hash"),
                       t0, lap_s, arc, cov,

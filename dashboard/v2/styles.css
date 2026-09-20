@@ -1527,6 +1527,10 @@ body.fixed .trace .lchip.livenow.last{box-shadow:none}
 .tsum-ph .tph i{width:8px;height:8px;border-radius:2px;display:inline-block}
 .tsum-ph .tph b{color:var(--ink)}
 .lap-row .lap-cdet{grid-column:1/-1;font:500 10px var(--mono);color:var(--dim);padding:1px 0 2px;white-space:normal;line-height:1.3}
+.lap-row .lap-finding{grid-column:1/-1;font-size:10.5px;line-height:1.35;padding:1px 0 2px;white-space:normal}
+.lap-finding.rep,.lap-finding.rep b{color:var(--acc)}
+.lap-finding.watch{color:var(--mut)}
+.lap-finding em{font-style:normal;color:var(--dim);font:500 9.5px var(--mono)}
 .lap-incorner{display:inline-flex;align-items:center;gap:4px;font:700 9px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--warn);margin-left:6px}
 /* the session lap list — LEFT pane, under the map (2026-09-16 restructure) */
 .sesl{display:flex;flex-direction:column;gap:3px;padding:5px 2px 2px;border-top:1px solid var(--line)}

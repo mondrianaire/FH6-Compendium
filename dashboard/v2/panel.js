@@ -3955,6 +3955,10 @@ function lapHTML() {
   }).join("");
   const live = !!(LIVE.frame && LIVE.frame.on && LIVE.frame.ev);
   const courseTurns = (COURSE.turns || []).filter((t) => t.seq != null);
+  const fBySeq = liveFindingBySeq();   // per-turn gated finding for the car being driven — live coaching
+  const findingLine = (t) => { const f = fBySeq[t.seq]; if (!f) return "";
+    const rep = f.verdict === "report";
+    return `<span class="lap-finding ${rep ? "rep" : "watch"}"><b>${rep ? "▸" : "◦"} ${esc(f.symptom)}</b>${rep && f.fix ? ` → <b>${esc(f.fix)}</b>` : ""}<em> ${f.k}/${f.n}${rep ? " · ≥" + Math.round((f.lo || 0) * 100) + "%" : " · watching, not advice"}</em></span>`; };
   // "IN A CORNER NOW" live chip (2026-09-16): restored from the retired Live-corners tab (audit LOST list) —
   // the live lateral-g state readout while you're loaded on the corner. From the live frame, not a detection.
   const _f = LIVE.frame || {}, inCorner = !!(_f.on && Math.abs(_f.lat || 0) > 0.4);
@@ -4035,7 +4039,7 @@ function lapHTML() {
       <span class="lap-turn">${esc(turnLabel(q.t))}<em>${esc(cap1(q.t.kind || ""))}</em></span>
       <span class="lap-spd mono"${q.peak}>${Math.round(q.c.mph_in)}<i>→</i><b>${Math.round(q.apex)}</b><i>→</i>${Math.round(q.c.mph_out)}<em> mph</em></span>
       <span class="lap-rank mono lap-v-${q.v.kind}${q.v.thin ? " thin" : ""}" style="color:${q.tone}"><b>${q.v.text}${q.v.d != null && !q.v.isBest ? ` · ${mphD(q.v.d)}` : ""}</b><em>${esc(q.v.basis)}</em></span>
-      ${q.gr.cell}${cornerDetail(q.c)}</div>`;
+      ${q.gr.cell}${cornerDetail(q.c)}${findingLine(q.t)}</div>`;
   // A DRIVEN row is now a rated pass: min speed + its rank against the pool, the same verdict a taken row shows.
   // It carries no per-phase grip (no live corner fired), so the grip cell is left empty — speed is measured, grip
   // is not claimed ([[fh6-grip-loss-is-priced-not-flagged]]). An AWAITING row is the turn not yet reached this lap.
@@ -4046,13 +4050,13 @@ function lapHTML() {
         <span class="lap-turn">${esc(turnLabel(e.t))}<em>${esc(cap1(e.t.kind || ""))}</em></span>
         <span class="lap-spd mono">${e.min != null ? `min <b>${e.min}</b><em> mph</em>` : "<em>—</em>"}</span>
         <span class="lap-rank mono lap-v-${v ? v.kind : "nolap"}${v && v.thin ? " thin" : ""}" style="color:${tone}"><b>${v ? v.text : "driven"}${v && v.d != null && !v.isBest ? ` · ${mphD(v.d)}` : ""}</b><em>${v ? esc(v.basis) : "position"}</em></span>
-        <span></span></div>`;
+        <span></span>${findingLine(e.t)}</div>`;
     }
     return `<div class="lap-row lap-await" data-turn="${e.t.seq}" title="not taken yet this lap — open its analysis">
       <span class="lap-turn">${esc(turnLabel(e.t))}<em>${esc(cap1(e.t.kind || ""))}</em></span>
       <span class="lap-spd mono"><em>—</em></span>
       <span class="lap-rank mono"><b class="lap-cov lap-cov-await">not yet</b><em>awaiting this lap</em></span>
-      <span></span></div>`; };
+      <span></span>${findingLine(e.t)}</div>`; };
   const rows = ordered.map((e) => e.state === "taken" ? takenRow(e.q) : covRow(e)).join("");
   const sortH = (k, lbl) => `<button class="${LAP_SORT === k ? "on" : ""}" data-lapsort="${k}" title="sort by ${lbl}">${lbl}${LAP_SORT === k ? " ▾" : " ⇅"}</button>`;
   // the summary counts only turns that COULD be ranked: an only-lap or level pool is excluded, never a win
@@ -5281,6 +5285,33 @@ function findingsHTML() {
   return `<div class="grp"><div class="gh">Findings
     <span class="why">· ${esc(cell.car || carShort(cell.cid))} · ${cell.laps} whole laps${built}${shownLive} · only a cleared verdict is advice</span></div>
     ${sw}${tally}${body}${none}${foot}</div>`;
+}
+
+// LIVE PER-CORNER COACHING (2026-09-20): the gated verdict for each turn, for the CAR BEING DRIVEN, keyed by
+// the map's display seq so the current-lap spine can annotate each corner as you take it. Only REPORT and
+// WATCHING surface -- the two worth saying while driving; insufficient/ruled-out are not live coaching. If the
+// live car has no cell yet (too few laps on this build), nothing surfaces -- a finding is never borrowed from
+// another build, because a claim about a car it never drove is exactly what the gate exists to prevent.
+function liveFindingBySeq() {
+  if (!FINDINGS || !FINDINGS.routes || !COURSE) return {};
+  const R = FINDINGS.routes[COURSE.key]; if (!R || !R.cells || !R.cells.length) return {};
+  const liveCid = (typeof CUR !== "undefined" && CUR && CUR.cid) ? CUR.cid : null;
+  const liveOrd = (typeof CUR !== "undefined" && CUR && CUR.ordinal != null) ? String(CUR.ordinal)
+    : (liveCid ? String(liveCid).split("|")[0] : null);
+  const ordOf = (cid) => String(cid || "").split("|")[0];
+  let cell = liveCid ? R.cells.find((c) => c.cid === liveCid) : null;
+  if (!cell && liveOrd) cell = R.cells.find((c) => ordOf(c.cid) === liveOrd);
+  if (!cell) return {};
+  const seqOf = {}; (COURSE.turns || []).forEach((t) => {
+    if (t.turn_id != null) seqOf[t.turn_id] = t.seq; if (t.id != null) seqOf[t.id] = t.seq; });
+  const rk = { report: 0, watching: 1 }, out = {};
+  (cell.findings || []).forEach((f) => {
+    if (f.turn_id == null || !(f.verdict in rk)) return;
+    const sq = seqOf[f.turn_id]; if (sq == null) return;
+    const cur = out[sq];
+    if (!cur || rk[f.verdict] < rk[cur.verdict] || (rk[f.verdict] === rk[cur.verdict] && (f.lo || 0) > (cur.lo || 0))) out[sq] = f;
+  });
+  return out;
 }
 function courseStatsHTML() {
   // GENERAL STATISTICS, PER CAR (redesign step 4): scoped to the active lap set, this answers "which car,

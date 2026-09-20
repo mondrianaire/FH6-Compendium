@@ -278,7 +278,7 @@ async function panelBoot() {
   // ordinal -> car name, so a lap (its cid carries the ordinal) can be attributed to a car in the
   // turn leaderboard and the class stats. short = model without the year, for the dense table cell.
   const carRows = Array.isArray(cars) ? cars : (cars && cars.cars) || [];
-  carRows.forEach((cr) => { if (cr && cr.ordinal != null) CARMAP[cr.ordinal] = { name: cr.name, short: shedName(cr.model || String(cr.name || "").replace(/^(19|20)\d\d\s+/, ""), 15) }; });
+  carRows.forEach((cr) => { if (cr && cr.ordinal != null) CARMAP[cr.ordinal] = { name: cr.name, short: shedName(cr.model || String(cr.name || "").replace(/^(19|20)\d\d\s+/, ""), 15), wb: cr.wb }; });
   // LEVEL OF DETAIL (2026-09-07, Jett: "point-to-point data ... paths should scale up gracefully on all
   // zoom"). world.json now ships the FULL native centre-line (~4 m, 0.1 m precision). But animating the SVG
   // viewBox re-rasterises EVERY drawn point each frame, and 275 k points measured ~20 fps at 4K -- so we can't
@@ -1648,6 +1648,66 @@ function slipTile(f) {
     `<em class="slipcue" style="color:${col}">${cue}${r_m ? ` <span>${Math.round(r_m)}m</span>` : ""}</em>` +
     `<em class="slipprog">${prog}</em></div>`;
 }
+// THE UNDERSTEER GRADIENT, LIVE (Jett 2026-09-20: "dont we have the ability to build this into the live
+// screen to give live feedback like before?"). Same idea as the skidpad tile, different test: this one
+// wants the STEERING LOCK HELD while the lateral g sweeps, and the radius free to grow. It mirrors
+// scripts/analysis/understeer.py's gates exactly, so what the dock says will score is what scores.
+//
+//     K = -L * d(1/R)/d(a_y)
+//
+// the unknown road-wheel angle cancelling because the lock is held. The regression runs incrementally on
+// sums, so a sixty-second sweep costs nothing to keep updating.
+let UST = null;
+const UST_SWEEP = 0.45, UST_R2 = 0.70, UST_MIN_S = 5.0;
+function ustReset(dir) { UST = { dir, t0: null, n: 0, sx: 0, sy: 0, sxx: 0, sxy: 0, syy: 0, ss: 0, sss: 0, lo: 9, hi: -9 }; }
+function ustTile(f) {
+  const mph = +f.mph || 0, yaw = +f.yaw || 0, lat = Math.abs(+f.lat || 0), lon = Math.abs(+f.lon || 0);
+  const steer = Math.abs(+f.steer || 0), t = +f.t, dir = yaw > 0 ? "L" : "R";
+  const ord = CUR && CUR.ordinal, L = ((CARMAP[ord] || {}).wb) || null;
+  // the same gates understeer.py applies, frame for frame
+  const sat = steer > 120;                      // a pinned axis reads "held" however the hands move
+  const ok = mph >= 15 && Math.abs(yaw) >= 6 && steer >= 12 && !sat && lat <= 3
+             && (f.brk | 0) <= 5 && lon <= Math.max(0.30, 0.25 * lat);
+  if (!UST || UST.dir !== dir || !ok || UST.tLast == null || t - UST.tLast > 0.5) {
+    if (!ok) { if (UST) UST.tLast = null; }
+    else { ustReset(dir); }
+  }
+  if (ok && UST) {
+    if (UST.t0 == null) UST.t0 = t;
+    UST.tLast = t;
+    const ay = lat * 9.80665, iv = 1 / ((mph * 0.44704) / (Math.abs(yaw) * Math.PI / 180));
+    UST.n++; UST.sx += ay; UST.sy += iv; UST.sxx += ay * ay; UST.sxy += ay * iv; UST.syy += iv * iv;
+    UST.ss += steer; UST.sss += steer * steer;
+    UST.lo = Math.min(UST.lo, lat); UST.hi = Math.max(UST.hi, lat);
+  }
+  let cue = "not cornering", col = "var(--dim)", sub = "";
+  if (sat) { cue = "FULL LOCK — EASE OFF"; col = "var(--bad)"; sub = "a pinned wheel cannot be measured"; }
+  else if (ok && UST && UST.n > 20) {
+    const n = UST.n, held = t - UST.t0;
+    const sd = Math.sqrt(Math.max(0, UST.sss / n - (UST.ss / n) ** 2)), lockCov = sd / (UST.ss / n || 1);
+    const den = UST.sxx - UST.sx * UST.sx / n;
+    const slope = den > 0 ? (UST.sxy - UST.sx * UST.sy / n) / den : 0;
+    const sstot = UST.syy - UST.sy * UST.sy / n;
+    const r2 = sstot > 0 ? Math.max(0, 1 - (sstot - slope * (UST.sxy - UST.sx * UST.sy / n)) / sstot) : 0;
+    const sweep = UST.hi - UST.lo;
+    if (lockCov > 0.10) { cue = "LOCK MOVED"; col = "#e3b341"; sub = "freeze the wheel and start again"; }
+    else if (sweep < UST_SWEEP) { cue = `SWEEP ${sweep.toFixed(2)} / ${UST_SWEEP} g`; col = "var(--acc2)"; sub = "wind the speed up, do not steer"; }
+    else if (held < UST_MIN_S) { cue = `HOLD ${held.toFixed(1)} / ${UST_MIN_S.toFixed(0)}s`; col = "var(--acc)"; sub = "lock held, sweep good"; }
+    else if (r2 < UST_R2) { cue = `NOISY r² ${r2.toFixed(2)}`; col = "#e3b341"; sub = "smoother throttle, steadier hands"; }
+    else if (L) {
+      const K = -L * slope * (180 / Math.PI) * 9.80665;
+      const word = K > 0.15 ? "understeer" : K < -0.15 ? "oversteer" : "neutral";
+      cue = `✓ K ${K >= 0 ? "+" : ""}${K.toFixed(2)} deg/g`; col = "var(--acc)";
+      sub = `${word} · r² ${r2.toFixed(2)} · ${dir}`;
+    } else { cue = `✓ r² ${r2.toFixed(2)}`; col = "var(--acc)"; sub = "no wheelbase for this car — rebuild"; }
+  }
+  return `<div class="dt slip ust" title="CONSTANT-STEER test (SAE J670 / ISO 8855). Hold a moderate lock — never ` +
+    `full — and squeeze the speed up while letting the line run wide. K = -L*d(1/R)/d(a_y); the steering angle ` +
+    `cancels because it is held, so only its CONSTANCY matters. Needs ${UST_SWEEP} g of lateral sweep, ` +
+    `${UST_MIN_S} s, and a fit of r² ${UST_R2}.">` +
+    `<em class="slipcue" style="color:${col}">${cue}</em>` +
+    `<em class="slipprog">${esc(sub || "constant-steer · understeer gradient")}</em></div>`;
+}
 function dockTiles(f) {
   if (!f) return `<span class="why">waiting for telemetry…</span>`;
   const g = f.gear === 0 ? "R/N" : f.gear === 11 ? "⇅" : f.gear;
@@ -1662,6 +1722,7 @@ function dockTiles(f) {
     + `<div class="dt bars">${bars.map(([l, p, c]) => `<div><span>${l}</span><i style="width:${Math.max(0, Math.min(100, p * 100)).toFixed(0)}%;background:${c}"></i></div>`).join("")}</div>`
     + `<div class="dt susp">${susp}</div>`
     + slipTile(f)
+    + ustTile(f)
     + `<div class="dt wide"><b>${esc(mode)}</b><span>${esc(sub)}</span></div>`;
 }
 function paintDockTiles(force) {

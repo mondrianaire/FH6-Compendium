@@ -209,6 +209,9 @@ def main(argv=None):
                c.rating_handling AS h, c.rating_speed AS sp, c.rating_accel AS ac,
                c.rating_braking AS br, c.rating_launch AS la, c.rating_offroad AS orr,
                c.stock_wheel_level AS swl, c.base_cost AS cost, c.in_autoshow AS shop,
+               -- WHEELBASE, for the understeer gradient. K = -L * d(1/R)/d(a_y) needs L on the CLIENT,
+               -- live, while the driver is mid-sweep; it was only ever in ref_car_body server-side.
+               (SELECT b.wheelbase_m FROM ref_car_body b WHERE b.carbody_id = c.stock_carbody_id) AS wb,
                (SELECT COUNT(*) FROM tune_container t WHERE t.ordinal = c.ordinal) AS builds,
                (SELECT COUNT(*) FROM lap l WHERE l.cid LIKE c.ordinal || '|%') AS laps
         FROM ref_car c ORDER BY c.ordinal""")

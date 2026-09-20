@@ -438,8 +438,8 @@ function courseMap(c, opts) {
   // carries its own halo.
   // TURN BADGES sit OUTSIDE the bend, off the racing line (Jett 2026-09-20): a numbered disc set beside each
   // corner, in the clear area on its outside, never over the road, the traces or the hit markers.
-  //   · a small dot marks the exact apex ON the line (it reads at a glance where the corner is);
-  //   · a short leader ties the apex to the disc;
+  //   · a small ARROWHEAD points at the apex (the circuit-map convention), so the exact corner reads at a glance;
+  //   · a short leader ties the arrowhead to the disc;
   //   · the number rides in a ring (T12 in a circle); the turn's radius and driven length are on hover.
   // "Outside" is apex → the corner's chord midpoint: the apex is pulled to the inside of the bend, its chord
   // midpoint sits on the outside, so that direction is always the side clear of the track. The stand-off is sized
@@ -487,17 +487,25 @@ function courseMap(c, opts) {
       else if (rd < minR && rd > 0.01) { a.Bx = a.ax + rx / rd * minR; a.By = a.ay + ry / rd * minR; }
     }
   }
-  // Phase 3 — render in the apex-local frame (held at constant screen size + stand-off by cmapScaleMarks): the apex
-  // dot on the line, a leader out to the (possibly nudged) numbered ring.
+  // Phase 3 — render in the apex-local frame (held at constant screen size + stand-off by cmapScaleMarks). Follows
+  // the circuit-map convention (cf. the Wikipedia track diagrams): a numbered disc out in clear space, and a small
+  // ARROWHEAD at the apex POINTING AT the corner -- not a dot on the line -- with a thin leader tying the two so
+  // the disc is unambiguous on a wound course.
   const turns = TA.map((a) => {
     const { t, ax, ay, cornPx, on, rB } = a;
     const dim = tp != null && !on;
     const blx = a.Bx - ax, bly = a.By - ay;                       // ring centre, apex-local
+    const D = Math.hypot(blx, bly) || 1, ux = blx / D, uy = bly / D;   // apex -> disc unit vector
+    const aL = 7, aW = 3.4;                                            // arrowhead: tip AT the apex, opening toward the disc -> points into the corner
+    const t1x = (ux * aL - uy * aW).toFixed(1), t1y = (uy * aL + ux * aW).toFixed(1);
+    const t2x = (ux * aL + uy * aW).toFixed(1), t2y = (uy * aL - ux * aW).toFixed(1);
+    const lsx = (ux * aL).toFixed(1), lsy = (uy * aL).toFixed(1);                       // leader: from the arrow base...
+    const lex = (blx - ux * rB).toFixed(1), ley = (bly - uy * rB).toFixed(1);           // ...to the disc edge
     const lbl = turnLabel(t), col = on ? "#fff" : "var(--acc2)";
     return `<g class="cturn" data-turn="${t.seq}" data-cx="${ax.toFixed(1)}" data-cy="${ay.toFixed(1)}"
         transform="translate(${ax.toFixed(1)},${ay.toFixed(1)})" style="cursor:pointer" opacity="${dim ? 0.5 : 1}">
-      <line x1="0" y1="0" x2="${blx.toFixed(1)}" y2="${bly.toFixed(1)}" stroke="var(--acc2)" stroke-width="1" opacity="0.5"/>
-      <circle r="2.2" fill="var(--acc2)" stroke="#0b0e12" stroke-width="0.75"/>
+      <line x1="${lsx}" y1="${lsy}" x2="${lex}" y2="${ley}" stroke="var(--acc2)" stroke-width="1" opacity="0.45"/>
+      <path d="M 0 0 L ${t1x} ${t1y} L ${t2x} ${t2y} Z" fill="${col}" stroke="#0b0e12" stroke-width="0.5"/>
       <g transform="translate(${blx.toFixed(1)},${bly.toFixed(1)})">
         <circle r="${rB.toFixed(1)}" fill="#0b0e12" stroke="${col}" stroke-width="${on ? 1.8 : 1.3}"/>
         <text text-anchor="middle" dominant-baseline="central" font-size="${on ? 9.5 : 8.5}" font-weight="700"

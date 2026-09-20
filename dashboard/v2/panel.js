@@ -3890,6 +3890,7 @@ function paintRight() {
     viewSave(); repaintFiltered(); });
   if (cur === "stats") body.querySelectorAll("[data-fcell]").forEach((b) => b.onclick = () => {   // Finding Engine: switch build+tune cell
     if (COURSE) FIND_CELL[COURSE.key] = +b.dataset.fcell; paintRight(); });
+  if (cur === "stats") body.querySelectorAll("[data-turnseq]").forEach((b) => b.onclick = () => pickTurn(+b.dataset.turnseq));   // Finding Engine: click a turn -> highlight it on the map (Turn analysis)
   const courseStats = cur === "stats" && MODE.suggest === "course" && COURSE;   // its sections manage their own overflow; do not row-clip them
   if (cur !== "matrix" && cur !== "browser" && !courseStats) fitRows(body, cur === "corners" ? "corners" : cur === "build" ? "rows" : "findings", 1);
   body.querySelectorAll('[data-pickts]').forEach((b) => b.onclick = () => {
@@ -5237,7 +5238,18 @@ function findingsHTML() {
     <span class="chip w">${t.watching || 0} watching</span>
     <span class="chip w">${t.insufficient || 0} need laps</span>
     <span class="chip on">${t.not_recurrent || 0} ruled out</span></div>`;
-  const turnLbl = (tid) => tid == null ? `<span class="chip fdim">whole lap</span>` : `<span class="chip">${esc(String(tid))}</span>`;
+  // The detector's turn_id (e.g. "T102") is the raw ref_route_turn id, not the tidy display number the
+  // map shows. Resolve it to the course turn's seq so the chip reads the SAME "T8" the map draws, and a
+  // click highlights that turn (pickTurn takes a seq). An unmapped id shows raw and is not clickable.
+  const turnSeq = (tid) => { if (tid == null) return null;
+    const t = (COURSE && COURSE.turns || []).find((u) => u.turn_id === tid || u.id === tid); return t ? t.seq : null; };
+  const turnLbl = (tid) => {
+    if (tid == null) return `<span class="chip fdim">whole lap</span>`;
+    const sq = turnSeq(tid);
+    return sq != null
+      ? `<button class="chip lnk" data-turnseq="${sq}" title="highlight T${sq} on the map">T${sq}</button>`
+      : `<span class="chip">${esc(String(tid))}</span>`;
+  };
   const bar = (f) => {                          // Wilson interval on a 0–100% track, floor marked at 20%
     const lo = Math.max(0, Math.min(100, f.lo * 100)), hi = Math.max(0, Math.min(100, f.hi * 100)), rate = Math.max(0, Math.min(100, (f.rate || 0) * 100));
     const col = f.verdict === "report" ? "var(--acc)" : f.verdict === "watching" ? "var(--warn)" : "var(--mut)";

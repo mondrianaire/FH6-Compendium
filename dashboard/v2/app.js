@@ -436,34 +436,73 @@ function courseMap(c, opts) {
   // a glance -- a legible, bold label with a dark halo (paint-order:stroke) so it stays sharp over the
   // trace lines and the road, never a faint 9px tick. Clustered turns still separate because each number
   // carries its own halo.
-  // Each turn is a numbered badge set BESIDE its apex, not on top of the racing line: a small dot marks the exact
-  // apex, a short leader ties the badge to it, and the number rides INSIDE a ring (T12 in a circle). Badges sit
-  // radially OUTWARD from the course centroid so they clear the road and separate from each other. Drawn as an
-  // origin-anchored translate() group like the hit markers, so cmapScaleMarks holds the whole badge -- dot, leader
-  // and ring -- at a constant screen size, anchored to the apex, on a course-map zoom.
+  // TURN BADGES sit OUTSIDE the bend, off the racing line (Jett 2026-09-20): a numbered disc set beside each
+  // corner, in the clear area on its outside, never over the road, the traces or the hit markers.
+  //   · a small dot marks the exact apex ON the line (it reads at a glance where the corner is);
+  //   · a short leader ties the apex to the disc;
+  //   · the number rides in a ring (T12 in a circle); the turn's radius and driven length are on hover.
+  // "Outside" is apex → the corner's chord midpoint: the apex is pulled to the inside of the bend, its chord
+  // midpoint sits on the outside, so that direction is always the side clear of the track. The stand-off is sized
+  // to the road's own width so the disc clears the tarmac, not just the centre-line. A relaxation pass then pushes
+  // colliding discs apart on wound courses. Everything is in the apex-local frame of an origin-anchored translate()
+  // group, so cmapScaleMarks holds it at a constant screen size and stand-off on zoom (like the 🔧/💥 hit markers).
+  // (Length was drawn as a bar beside each disc, but 28 bars on a wound course read as clutter over the map, so it
+  //  moved to the hover tooltip -- Jett 2026-09-20.)
   const tPts = (c.turns || []).filter((t) => t.x != null);
   let ctx0 = 0, cty0 = 0;
   tPts.forEach((t) => { ctx0 += px(t.x); cty0 += py(t.z); });
   if (tPts.length) { ctx0 /= tPts.length; cty0 /= tPts.length; }
-  const T_OFF = 16;   // badge stand-off from the apex, in fit-view screen px (held on zoom by cmapScaleMarks)
-  const turns = tPts.map((t) => {
-    const on = tp != null && t.seq === tp;
-    const dim = tp != null && !on;
+  const segLenPx = (pp) => { let L = 0; for (let i = 1; i < pp.length; i++) L += Math.hypot(px(pp[i][0]) - px(pp[i - 1][0]), py(pp[i][1]) - py(pp[i - 1][1])); return L; };
+  // Phase 1 — geometry per turn (fit-view screen px): apex, OUTWARD unit vector (apex -> corner chord midpoint =
+  // the outside of the bend, always clear of the track), and the ideal disc centre out beyond the road width.
+  const TA = tPts.map((t) => {
     const ax = px(t.x), ay = py(t.z);
-    let ux = ax - ctx0, uy = ay - cty0; const ul = Math.hypot(ux, uy) || 1; ux /= ul; uy /= ul;   // outward unit vector
-    const bx = (ux * T_OFF).toFixed(1), by = (uy * T_OFF).toFixed(1);   // badge centre, offset outward from the apex
-    const lbl = turnLabel(t);
-    const rB = ((lbl.length >= 3 ? 9 : 8) + (on ? 1.5 : 0)).toFixed(1);   // ring wide enough for "T13"
-    const ring = on ? "#fff" : "var(--acc2)";
+    const sg = t.seg || {};
+    const corner = [].concat(sg.turn_in || [], sg.mid || [], sg.exit || []);
+    let ux, uy;
+    if (corner.length > 1) { const E = corner[0], X = corner[corner.length - 1]; ux = (px(E[0]) + px(X[0])) / 2 - ax; uy = (py(E[1]) + py(X[1])) / 2 - ay; }
+    else { ux = ax - ctx0; uy = ay - cty0; }
+    let ul = Math.hypot(ux, uy); if (ul < 3) { ux = ax - ctx0; uy = ay - cty0; ul = Math.hypot(ux, uy) || 1; }
+    ux /= ul; uy /= ul;
+    const cornPx = corner.length > 1 ? segLenPx(corner) : (t.r ? t.r * Math.abs((t.deg || 60) * Math.PI / 180) * s : 40);   // hover tooltip only
+    const on = tp != null && t.seq === tp;
+    const rB = (String(turnLabel(t)).length >= 3 ? 8.5 : 7.5) + (on ? 1.5 : 0);
+    const OFF = Math.max(13, Math.min(42, (t.width || 18) * s * 0.6 + 10));   // clear the ROAD width, not just the centre-line
+    const ix = ax + ux * (OFF + rB + 3), iy = ay + uy * (OFF + rB + 3);       // ideal disc centre, absolute
+    return { t, ax, ay, cornPx, on, rB, OFF, ix, iy, Bx: ix, By: iy };
+  });
+  // Phase 2 — LABEL RELAXATION so the numbers never pile on each other on a wound course (hairpins point their
+  // "outside" the same way, so the ideal centres collide). Repel any two disc centres closer than they are wide,
+  // spring each weakly back to its ideal, and clamp it within reach of its own apex so it never drifts across the map.
+  for (let it = 0; it < 60; it++) {
+    for (let i = 0; i < TA.length; i++) {
+      const a = TA[i];
+      for (let j = i + 1; j < TA.length; j++) {
+        const b = TA[j]; const dx = b.Bx - a.Bx, dy = b.By - a.By, d = Math.hypot(dx, dy), sep = a.rB + b.rB + 4;
+        if (d > 0.01 && d < sep) { const p = (sep - d) / 2 / d; a.Bx -= dx * p; a.By -= dy * p; b.Bx += dx * p; b.By += dy * p; }
+      }
+      a.Bx += (a.ix - a.Bx) * 0.05; a.By += (a.iy - a.By) * 0.05;   // weak pull to the ideal outside-the-bend spot
+      let rx = a.Bx - a.ax, ry = a.By - a.ay, rd = Math.hypot(rx, ry); const maxR = a.OFF + a.rB + 24, minR = a.OFF * 0.6 + a.rB;
+      if (rd > maxR) { a.Bx = a.ax + rx / rd * maxR; a.By = a.ay + ry / rd * maxR; }
+      else if (rd < minR && rd > 0.01) { a.Bx = a.ax + rx / rd * minR; a.By = a.ay + ry / rd * minR; }
+    }
+  }
+  // Phase 3 — render in the apex-local frame (held at constant screen size + stand-off by cmapScaleMarks): the apex
+  // dot on the line, a leader out to the (possibly nudged) numbered ring.
+  const turns = TA.map((a) => {
+    const { t, ax, ay, cornPx, on, rB } = a;
+    const dim = tp != null && !on;
+    const blx = a.Bx - ax, bly = a.By - ay;                       // ring centre, apex-local
+    const lbl = turnLabel(t), col = on ? "#fff" : "var(--acc2)";
     return `<g class="cturn" data-turn="${t.seq}" data-cx="${ax.toFixed(1)}" data-cy="${ay.toFixed(1)}"
         transform="translate(${ax.toFixed(1)},${ay.toFixed(1)})" style="cursor:pointer" opacity="${dim ? 0.5 : 1}">
-      <line x1="0" y1="0" x2="${bx}" y2="${by}" stroke="var(--acc2)" stroke-width="1" opacity="0.55"/>
+      <line x1="0" y1="0" x2="${blx.toFixed(1)}" y2="${bly.toFixed(1)}" stroke="var(--acc2)" stroke-width="1" opacity="0.5"/>
       <circle r="2.2" fill="var(--acc2)" stroke="#0b0e12" stroke-width="0.75"/>
-      <g transform="translate(${bx},${by})">
-        <circle r="${rB}" fill="#0b0e12" stroke="${ring}" stroke-width="${on ? 1.8 : 1.3}"/>
-        <text text-anchor="middle" dominant-baseline="central" font-size="${on ? 10 : 9}" font-weight="700"
+      <g transform="translate(${blx.toFixed(1)},${bly.toFixed(1)})">
+        <circle r="${rB.toFixed(1)}" fill="#0b0e12" stroke="${col}" stroke-width="${on ? 1.8 : 1.3}"/>
+        <text text-anchor="middle" dominant-baseline="central" font-size="${on ? 9.5 : 8.5}" font-weight="700"
           fill="${on ? "#fff" : "#e8edf3"}">${esc(lbl)}</text></g>
-      <title>${esc(lbl)} · ${n0(t.r)} m radius</title></g>`;
+      <title>${esc(lbl)} · ${n0(t.r)} m radius · ${n0(cornPx / s)} m long</title></g>`;
   }).join("");
   // BOTTOMING / BARRIER MARKERS (Jett 2026-09-18): 🔧 where the car bottomed out, 💥 where it hit a barrier /
   // terrain — clustered located spots from build_web (course.hits), sized by how often it happens across the

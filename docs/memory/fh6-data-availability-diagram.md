@@ -1,0 +1,24 @@
+---
+name: fh6-data-availability-diagram
+description: "Eraser 'FH6 Data Availability Map' — team-shared agent-onboarding diagram of every data source (car ID, live telemetry, lap/trace, course, decoded game data, stores); grounded in DATA-INVENTORY + the real 324-byte packet, not the structural schema ERD"
+metadata: 
+  node_type: memory
+  type: reference
+  originSessionId: 6df3e83b-72ec-4c37-9c9f-0b4b3817f1f4
+  modified: 2026-09-13T00:28:22.146Z
+---
+
+Built 2026-09-12 for Jett to hand to NEW agents (the drift-scoring agent first) so they see what data exists and where, and build infrastructure against real stores instead of rediscovering or inventing them.
+
+- **File (team-shared, "Jett's Team"):** https://app.eraser.io/workspace/Ex1bEXcuOL57kK2O5OQg — fileId `Ex1bEXcuOL57kK2O5OQg`, diagram `Eq1acA_bzgiRnh_K-Oit`, type cloud-architecture.
+- **Distinct from the structural schema ERD** `EV5zhW3hPU6v4Z7PiZoW` in [[fh6-catalog-structure-not-hoard]] — that one is fh6.db's table relationships; THIS one is a data-availability / pipeline onboarding map (sources → import scripts → fh6.db → API → dashboard/drift). Don't conflate them.
+- **Grounded in** docs/DATA-INVENTORY.md + db/schema.sql + `scripts/telemetry/fh6_dataout_capture.py` (verified against source, not prompt-generated — the anti-fiction lesson from [[fh6-catalog-structure-not-hoard]]).
+- **General reference, NOT drift-specific** (Jett corrected this 2026-09-12): drift is ONE example consumer, the map serves any agent / any future improvement. It has a **companion markdown doc in the same Eraser file** (voice matches the "Upgrade glossary" sibling reference) carrying the full two-axis matrix + a sanitized-branch plan.
+- **TWO AXES made visual:** group COLOUR = **provenance** (green official-feature / red live-decode / blue decoded-once-committed / teal derived-ours); node tag = **value type** (ID car-ID / TEL telemetry / CRS course / TUN tuning / LAP lap / INP input / STR strings). Bands 1-4 are the provenance groups; the Data Out node is split into channel sub-nodes (car-ID/motion/slip+tyre/input/position/lap-timing).
+- **The sanitization axis (Jett's future "sanitized branch" that drops live game-decode):** a code-grounded audit (workflow wf_c8d9cabf-6cb, 2026-09-12) found the daemon's ONLY runtime game-decode call sites = (1) `Tuning_*/Data` tune decode (`fh6_tune_decode.parse_tune`; daemon `disk_watcher` 1.5s + `/disk-tune`), (2) livery header+Thumb.webp (`_livery_strings`, `/liveries`), (3) `ContainersRoot` re-glob (`find_containers_root`), (4) `race_triggers.tz` re-parse in every `analyze_session` subprocess — PLUS a `build_web.py` build-time leak (Thumb.png from save path + race_triggers.tz; `build_web_reads_only_db=false`). The daemon's sqlite reads target OUR `data/fh6.db` read-only, NOT the game DB. **Key lever: car-ID is on the official packet (CarOrdinal/Class/PI) too**, so a sanitized branch keeps the feature + committed stores and replaces those 5 (race_triggers.tz already has a committed twin: `route_anchor`). Honest cost: loses live ID of an UNSAVED tune.
+- **Persistence gap any live analysis must know:** `lap_point` persists only the grip CODE + peak lat_g; raw per-point VelX/Y/Z, Yaw, per-wheel slip, HandBrake exist only in the live SSE stream or capture CSV. See [[fh6-turn-analysis-data-model]], [[fh6-drift-video-telemetry-union]].
+
+- **NOW VERSION-CONTROLLED (2026-09-13, commit 105e3d6, lab branch + master ff-mirror):** there was NO `CLAUDE.md` in the repo (a handoff wrongly promised one, and onboarding agents kept hitting the gap). Created `CLAUDE.md` at the WORKTREE ROOT (thin index: use the worktree as root NOT the `…/forza-horizon-6-tuning` mirror whose `dashboard/v2/api/` is empty/git-ignored/generated; `docs/` is a sibling of `dashboard/` so scope the whole root; start-here docs; runtime ports; the hard rules) + `docs/data-availability.md` (the committed twin of this Eraser map, with the master matrix + sanitized-branch plan + a DSL-skeleton appendix so it stands alone). Point new agents at the worktree root — they auto-load CLAUDE.md there.
+- **Three synced copies to keep in step:** `CLAUDE.md` (thin pointer) · `docs/data-availability.md` (committed detail) · the Eraser diagram+doc (fileId Ex1bEXcuOL57kK2O5OQg). Update trigger = a store added/removed, a new runtime game-decode call site, runtime/port change, or a new hard rule (a new store also updates DATA-INVENTORY.md same-commit).
+
+**How to apply:** when onboarding a new agent, hand it the worktree root (CLAUDE.md auto-loads) + docs/data-availability.md + docs/DATA-INVENTORY.md. To edit either, prefer Eraser `update_diagram` / `update_document` (natural-language) on the fileId above; the `manually_*` variants need the full body re-emitted. Keep it in step if a new store or a new runtime game-decode call site is added. Related: [[fh6-never-forget-a-store]], [[fh6-decrypt-landscape]].

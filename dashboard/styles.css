@@ -155,6 +155,10 @@ td.price { font-variant-numeric: tabular-nums; }
 .pib b { padding: 3px 5px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.55); font-style: normal; }
 .pib i { padding: 3px 5px; background: #0b0d10; color: #fff; font-style: normal; font-weight: 700; }
 .pib-img { height: 19px; width: auto; display: block; image-rendering: -webkit-optimize-contrast; }
+/* compact badge for dense one-line rows (tiles, ribbons, saves/build rows, chips) */
+.pib--sm { font-size: 10px; }
+.pib--sm .pib-img { height: 14px; }
+.pib--sm b, .pib--sm i { padding: 2px 4px; }
 
 /* visual-first primitives: rule card + why-drawer (prose budget doctrine) */
 .tz-rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin-top: 10px; }
@@ -315,3 +319,272 @@ tr.p2w-row td:nth-child(2) { color: var(--muted); }
 .fx-eg { border: 1px dashed var(--accent); border-radius: 8px; padding: 8px 11px; margin: 8px 0; }
 .fx-eg pre { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; line-height: 1.5;
   margin: 5px 0 0; white-space: pre-wrap; color: var(--txt); }
+
+/* ---- COURSE IDENTITY: the auto-computed shape is a course's primary identifier ---- */
+.course-id { display: flex; align-items: center; gap: 12px; margin: 0 0 10px; padding: 8px 11px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--bg2); }
+.course-id-glyph { flex: none; display: flex; align-items: center; justify-content: center;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 3px; }
+.course-id-glyph.noshape { width: 60px; height: 42px; font-size: 20px; opacity: .5; }
+.course-glyph { display: block; }
+.course-id-main { flex: 1; min-width: 0; }
+.course-id-title { font-size: 16px; font-weight: 700; line-height: 1.15; }
+.course-id-title b { font-weight: 800; }
+.course-id-meta { font-size: 11px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.course-id-hint { font-size: 10px; color: var(--warn); margin-top: 2px; }
+.course-id-right { flex: none; margin-left: auto; }
+.course-id-name.editable { cursor: text; border-bottom: 1px dashed transparent; transition: border-color .12s; }
+.course-id-name.editable:hover { border-bottom-color: var(--muted); }
+.course-id-nameinput { font-size: 16px; font-weight: 800; font-family: inherit; color: var(--txt); background: var(--bg2);
+  border: 1px solid var(--accent); border-radius: 5px; padding: 1px 6px; min-width: 180px; max-width: 100%; }
+.course-id-nameinput:focus { outline: none; box-shadow: 0 0 0 2px rgba(47,129,247,.3); }
+
+/* ---- COURSE SHAPE HERO: the map, front-and-centre under the identity in every stage ---- */
+.course-hero { margin: 0 0 10px; }
+.course-hero-ey { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 2px 2px 4px; }
+.course-hero-ey > span { font-size: 10px; letter-spacing: .13em; font-weight: 800; text-transform: uppercase; color: var(--accent2); }
+.shape-badge { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; font-size: 10px;
+  font-weight: 800; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--line);
+  border-radius: 11px; padding: 2px 9px; color: var(--muted); white-space: nowrap; }
+.shape-badge small { font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--muted); }
+.shape-badge.ok { color: #00d27a; border-color: rgba(0,210,122,.4); }
+.shape-badge.ok .sys-dot { background: #00d27a; box-shadow: 0 0 5px rgba(0,210,122,.5); }
+.shape-badge.warn { color: var(--warn); border-color: rgba(227,179,65,.4); }
+.shape-badge.warn .sys-dot { background: var(--warn); }
+.shape-badge.off { color: #e5414e; border-color: rgba(229,65,78,.45); }
+.shape-badge.off .sys-dot { background: #e5414e; box-shadow: 0 0 5px rgba(229,65,78,.5); }
+.course-hero .tz-svg { width: 100%; max-width: 620px !important; }
+.course-hero.building { display: flex; align-items: center; gap: 13px; padding: 15px 16px;
+  border: 1px dashed var(--muted); border-radius: 10px; background: var(--bg2); }
+
+/* ---- per-turn cornering breakdown (opened from the course map) ---- */
+.ct-marker.sel { filter: drop-shadow(0 0 3px rgba(230,237,243,.5)); }
+.ct-break { margin-top: 9px; border: 1px solid var(--accent2); border-radius: 9px; background: var(--bg); overflow: hidden; }
+.ct-break-hd { display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+  background: rgba(47,129,247,.10); border-bottom: 1px solid var(--line); font-size: 13px; }
+.ct-break-hd .ct-close { margin-left: auto; cursor: pointer; color: var(--muted); font-size: 13px; padding: 0 4px; }
+.ct-break-hd .ct-close:hover { color: var(--txt); }
+.ct-break-body { display: flex; gap: 12px; align-items: flex-start; padding: 9px 11px; flex-wrap: wrap; }
+.ct-glyph { flex: none; text-align: center; }
+.ct-glyph-cap { font-size: 9.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+.ct-break-main { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px; }
+.ct-speeds { display: flex; align-items: baseline; gap: 6px; font-size: 15px; font-variant-numeric: tabular-nums; }
+.ct-speeds small { font-size: 9px; color: var(--muted); margin-left: 1px; text-transform: uppercase; }
+.ct-speeds .ct-arr { color: var(--muted); font-size: 12px; }
+.ct-speeds .ct-g { margin-left: auto; font-size: 12px; color: var(--warn); }
+.ct-env { font-size: 11.5px; color: var(--txt); }
+.ct-env b { font-variant-numeric: tabular-nums; }
+.ct-stage { font-size: 12px; padding: 6px 8px; border-radius: 6px; background: var(--bg2); border-left: 3px solid var(--muted); line-height: 1.4; }
+.ct-stage.learn { border-left-color: var(--accent2); }
+.ct-stage.tune { border-left-color: var(--accent); }
+
+/* ---- FULL 5-phase per-turn analysis: every identified turn, all phases + tune/driver verdict ---- */
+.ft-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 8px; margin-top: 6px; }
+.ft-card { border: 1px solid var(--line); border-radius: 9px; background: var(--bg); overflow: hidden; }
+.ft-hd { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 5px 9px;
+  background: var(--bg2); border-bottom: 1px solid var(--line); font-size: 13px; }
+.ft-body { display: flex; gap: 10px; align-items: flex-start; padding: 8px 9px; flex-wrap: wrap; }
+.ft-glyph { flex: none; }
+.ft-main { flex: 1; min-width: 190px; display: flex; flex-direction: column; gap: 5px; }
+.tp-legend { display: flex; flex-direction: column; gap: 1px; font-size: 10.5px; }
+.tp-lg { display: flex; align-items: center; gap: 5px; color: var(--muted); }
+.tp-lg i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.tp-lg.first { color: var(--txt); font-weight: 600; }
+.ct-env2 { margin-left: auto; font-size: 10.5px; color: var(--muted); align-self: center; }
+.tv { font-size: 11.5px; padding: 5px 8px; border-radius: 6px; background: var(--bg2); border-left: 3px solid var(--muted); line-height: 1.35; }
+.tv.tune { border-left-color: #00d27a; background: rgba(0,210,122,.06); }
+.tv.driver { border-left-color: #e3b341; background: rgba(227,179,65,.07); }
+.tv.mixed { border-left-color: #d95926; }
+.tv.clean { border-left-color: #199e70; color: var(--muted); }
+.tv.unseen { border-left-color: var(--line); color: var(--muted); }
+.chip.trec { border-color: #e5414e; color: #e5414e; font-weight: 700; }
+
+/* ============ INTERACTIVE AFFORDANCE — anything clickable looks clickable; info pills stay flat ============ */
+/* Every element wired to a click handler (its data-* action attribute or button class) gets a pointer, a clear
+   hover lift, and a focus ring, so actions are never mistaken for static info pills. */
+:is([data-wf],[data-tab],[data-expected],[data-course-stage],[data-courseturn],[data-courseturn-close],
+    [data-diskpick],[data-popout],[data-atlas-route],[data-atlas-clear],[data-atlas-bg],[data-car],[data-donor],
+    [data-replica],[data-role],[data-savename],[data-saveroute],[data-shopcid],[data-shopmenu],[data-shopslot],
+    [data-shoppane],[data-shot],[data-shot-close],[data-src],[data-tunecid],[data-tunesl],[data-unpin],
+    [data-lib-pick],[data-lib-clear],[data-dockpanel],[data-dockmin],[data-dockdetach],[data-fpin],[data-fmin],
+    [data-fclose],[data-clonepop],[data-clonefocus],[data-cloneclose],
+    .lab-mode,.fhm-dchip,.fhm-dock-x,.dm-chip,.ct-close,.subnav-btn) {
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .13s ease, filter .13s ease, background-color .13s ease;
+}
+:is([data-wf],[data-tab],[data-expected],[data-course-stage],[data-courseturn],[data-courseturn-close],
+    [data-diskpick],[data-popout],[data-atlas-route],[data-atlas-clear],[data-atlas-bg],[data-car],[data-donor],
+    [data-replica],[data-role],[data-savename],[data-saveroute],[data-shopcid],[data-shopmenu],[data-shopslot],
+    [data-shoppane],[data-shot],[data-shot-close],[data-src],[data-tunecid],[data-tunesl],[data-unpin],
+    [data-lib-pick],[data-lib-clear],[data-dockpanel],[data-dockmin],[data-dockdetach],[data-fpin],[data-fmin],
+    [data-fclose],[data-clonepop],[data-clonefocus],[data-cloneclose],
+    .lab-mode,.fhm-dchip,.fhm-dock-x,.dm-chip,.ct-close,.subnav-btn):not(svg *):hover { transform: translateY(-1px); filter: brightness(1.09); }
+:is([data-wf],[data-expected],[data-course-stage],[data-diskpick],[data-popout],[data-role],[data-src],[data-donor],
+    [data-replica],[data-unpin],[data-shot],[data-clonepop],.lab-mode,.fhm-dchip,.dm-chip,.subnav-btn):not(svg *):active { transform: translateY(0); filter: brightness(.95); }
+:is([data-wf],[data-tab],[data-expected],[data-course-stage],[data-diskpick],[data-popout],[data-atlas-route],
+    [data-car],[data-role],[data-src],[data-donor],[data-replica],[data-unpin],[data-shot],[data-lib-pick],
+    .lab-mode,.fhm-dchip,.fhm-dock-x,.dm-chip,.ct-close,.subnav-btn):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* WHY :not(svg *) ON THE HOVER/ACTIVE RULES ABOVE.
+   These were written for HTML chips and buttons, where `transform: translateY(-1px)` is a harmless nudge. But
+   [data-courseturn] is an SVG <g> POSITIONED BY A transform ATTRIBUTE — translate(x,y) — and a CSS transform
+   PROPERTY does not compose with that attribute, it replaces it outright. So hovering a turn marker threw away
+   its translate and moved it to (0,-1): the top-left corner of the map. Mouse-out removed the CSS transform, the
+   attribute applied again, and it snapped back — the "turn icons flicker to the top left" report, which survived
+   two earlier fixes because the cause was never in the map's own code at all.
+   Anything laid out by an SVG transform attribute must be excluded from CSS transform rules, not just these
+   markers — hence the structural :not(svg *) rather than deleting one selector from the list. */
+
+/* The ambiguous case: chips/pills that are really buttons get a persistent faint accent ring + raised edge, so they
+   read as pressable AT REST — a flat info pill has neither. */
+.chip:is([data-expected],[data-course-stage],[data-role],[data-src],[data-donor],[data-replica],[data-unpin],
+         [data-saveroute],[data-savename],[data-shot],[data-atlas-clear],[data-atlas-bg],[data-tunecid],[data-shopcid]),
+.dm-chip, .fhm-dchip {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 1px 2px rgba(0,0,0,.22);
+}
+.chip:is([data-expected],[data-course-stage],[data-role],[data-src],[data-donor],[data-replica],[data-unpin],
+         [data-saveroute],[data-savename],[data-shot],[data-atlas-clear],[data-atlas-bg],[data-tunecid],[data-shopcid]):hover,
+.dm-chip:hover, .fhm-dchip:hover { box-shadow: inset 0 0 0 1px var(--accent), 0 3px 9px rgba(0,0,0,.34); }
+
+/* clickable table rows get a hover wash */
+tr:is([data-atlas-route],[data-lib-pick],[data-car]):hover { background: rgba(255,255,255,.05); }
+
+/* ============ LIVE TRACTION SCANNER — instant power-down diagnosis ============ */
+.trac { border-radius: 9px; padding: 8px 11px; margin: 0 0 9px; font-size: 12.5px; line-height: 1.4; }
+.trac.ok { border: 1px solid rgba(0,210,122,.4); background: rgba(0,210,122,.05); }
+.trac.ok b { color: #00d27a; }
+.trac.warn { border: 1px solid rgba(227,179,65,.5); background: rgba(227,179,65,.08); }
+.trac.bad { border: 1px solid #e5414e; background: rgba(229,65,78,.11); animation: tracPulse 1.8s ease-in-out infinite; }
+@keyframes tracPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(229,65,78,0); } 50% { box-shadow: 0 0 0 3px rgba(229,65,78,.18); } }
+@media (prefers-reduced-motion: reduce) { .trac.bad { animation: none; } }
+.trac-hd { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.trac.warn .trac-hd b { color: var(--warn); } .trac.bad .trac-hd b { color: #e5414e; }
+.trac-sev { font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; font-weight: 800;
+  border: 1px solid currentColor; border-radius: 9px; padding: 1px 7px; }
+.trac.bad .trac-sev { color: #e5414e; } .trac.warn .trac-sev { color: var(--warn); }
+.trac-why { margin: 4px 0; }
+.trac-fix { font-size: 12px; padding: 5px 8px; border-radius: 6px; background: var(--bg2); margin-top: 5px; }
+.trac.bad .trac-fix { border-left: 3px solid #e5414e; } .trac.warn .trac-fix { border-left: 3px solid var(--warn); }
+.trac-frozen { margin-left: auto; font-size: 9.5px; font-weight: 700; color: var(--warn);
+  border: 1px solid rgba(227,179,65,.45); border-radius: 9px; padding: 1px 8px; white-space: nowrap; }
+/* compact traction pill for the anchored dock */
+.dtrac { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 700;
+  border: 1px solid var(--line); border-radius: 11px; padding: 2px 9px; white-space: nowrap; }
+.dtrac .dot { width: 7px; height: 7px; border-radius: 50%; }
+.dtrac.ok { color: #00d27a; } .dtrac.ok .dot { background: #00d27a; }
+.dtrac.warn { color: var(--warn); border-color: rgba(227,179,65,.45); } .dtrac.warn .dot { background: var(--warn); }
+.dtrac.bad { color: #e5414e; border-color: rgba(229,65,78,.55); background: rgba(229,65,78,.08); } .dtrac.bad .dot { background: #e5414e; box-shadow: 0 0 6px rgba(229,65,78,.6); }
+
+/* ---- Lab sticky top: subtab switcher + necessary live state, anchored to the top of the screen ---- */
+.lab-top { position: sticky; top: 0; z-index: 20; background: var(--bg); padding: 6px 0 7px; margin: 0 0 9px;
+  border-bottom: 1px solid var(--line); }
+.lab-live-state { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; font-size: 12px; }
+.lab-live-state .dot { width: 8px; height: 8px; border-radius: 50%; background: #e5414e;
+  box-shadow: 0 0 6px rgba(229,65,78,.7); flex: none; }
+.lab-live-state #lvWfLine { flex: 1 1 200px; min-width: 160px; font-size: 12px; }
+.lab-live-ctrls { display: inline-flex; gap: 6px; align-items: center; margin-left: auto; }
+
+/* ---- system status strip: green/yellow/red health of every subsystem ---- */
+.lab-sys { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; align-items: center; }
+.sys-pill, .sys-lead { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px;
+  border: 1px solid var(--line); border-radius: 11px; padding: 2px 8px; white-space: nowrap; color: var(--muted); }
+.sys-lead { font-weight: 700; letter-spacing: .02em; }
+.sys-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--muted); }
+.sys-pill.ok, .sys-lead.ok { color: var(--txt); }
+.sys-pill.ok .sys-dot, .sys-lead.ok .sys-dot { background: #00d27a; box-shadow: 0 0 5px rgba(0,210,122,.5); }
+.sys-pill.warn, .sys-lead.warn { border-color: rgba(227,179,65,.4); color: var(--warn); }
+.sys-pill.warn .sys-dot, .sys-lead.warn .sys-dot { background: var(--warn); }
+.sys-pill.off, .sys-lead.off { border-color: rgba(229,65,78,.45); color: #e5414e; }
+.sys-pill.off .sys-dot, .sys-lead.off .sys-dot { background: #e5414e; box-shadow: 0 0 5px rgba(229,65,78,.5); }
+
+/* ================= DASHBOARD MODE — the two-column body =================
+   The map is the instrument you watch while driving, so it takes the left half outright, at the full size of that
+   half, and shares it with nothing. It is STICKY: on a portrait screen the analytical material below the body can
+   scroll past while the map stays where your eye already is — that is what live following means in a page that is
+   still taller than the screen. The right half is one pane with two states (tuning overview / selected turn), so it
+   never competes with itself; its body scrolls internally, bounding the row to roughly the map's own height. */
+.dash-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: start; margin: 0 0 10px; }
+.dash-map-pane, .dash-info-pane { border: 1px solid var(--line); border-radius: 10px; background: var(--bg2); padding: 8px 10px; min-width: 0; }
+.dash-map-pane { position: sticky; top: 8px; }
+.dash-info-pane.turn { border-color: var(--accent); box-shadow: inset 4px 0 0 var(--accent); }
+.dash-pane-hd { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 6px; font-size: 12px; }
+.dash-ey { font-size: 10px; letter-spacing: .13em; font-weight: 800; text-transform: uppercase; color: var(--accent2); }
+.dash-map-wrap { width: 100%; }
+.dash-map-wrap .tz-svg { width: 100%; height: auto; max-width: none; }
+.dash-map-key { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 10.5px; color: var(--muted); margin-top: 6px; }
+.dash-info-pane .dash-pane-body { max-height: min(74vh, 660px); overflow-y: auto; overflow-x: hidden; }
+/* one column when there is no second half to give away */
+@media (max-width: 900px) { .dash-body { grid-template-columns: minmax(0, 1fr); } .dash-map-pane { position: static; } }
+
+/* A trace-measured turn is a finding, not an absence — it must not wear the greyed-out "unseen" treatment that
+   used to mean "not driven". `flat` is the corner taken without a measurable lift (the thing the grip detector
+   structurally cannot see); `traced` is measured-but-no-grip-event. */
+.tv.flat { border-left: 3px solid #00d27a; background: rgba(0, 210, 122, .07); }
+.tv.traced { border-left: 3px solid var(--accent2); background: rgba(47, 129, 247, .06); }
+
+/* The colour-mode strip, shared by the course map and the speed trace so a colour cannot mean two things on one
+   screen. The selected pill is filled rather than outlined: which channel you are looking at has to be readable
+   at a glance, because every line on both surfaces changes meaning with it. */
+.seg-ctl { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin: 6px 0 2px; font-size: 10.5px; }
+.seg-ctl .chip.seg-mode.on { background: var(--accent2); border-color: var(--accent2); color: var(--bg); font-weight: 700; }
+.seg-ctl .chip.seg-grad { line-height: 0; border-color: var(--line); }
+.seg-ctl .chip.seg-grad.on { outline: 2px solid var(--accent2); outline-offset: 1px; }
+
+/* ONE COURSE, ONE SCREEN. The stored-session course view stacked every section vertically and a single course
+   measured 9050 px against a 900 px viewport. The map owns the left half and FILLS it; everything analytical
+   scrolls inside the right pane, so the page height no longer grows with the content. min-height:0 on every
+   flex/grid child is what actually lets an inner pane scroll instead of pushing its parent taller. */
+/* Sized to the space the app chrome actually leaves. Measured at 1600x900: topbar 82 + tabs 46 + section title
+   30 + source picker 111 + the section heading, and the course block began 376 px down -- so a 100vh - 168px
+   block ended 208 px below the fold and the "no scroll" layout still scrolled. The chrome is a constant, not a
+   fraction, so subtracting it scales correctly: 900 -> 504 px of course, 1080 -> 684 px, both fitting. */
+.dash-course { display: flex; flex-direction: column; height: calc(100vh - 396px); min-height: 420px; overflow: hidden; }
+/* Below ~1400 the tab nav wraps to a second line and the chrome grows to 409 px, so the block has to give the
+   same amount back or it lands below the fold again -- measured 829 against an 800 px viewport, 29 px over. */
+@media (max-width: 1400px) { .dash-course { height: calc(100vh - 424px); min-height: 340px; } }
+.dash-course > .dash-body { flex: 1 1 auto; min-height: 0; align-items: stretch; margin-bottom: 0; }
+.dash-course .dash-map-pane, .dash-course .dash-info-pane { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+.dash-course .dash-map-pane { position: static; }
+.dash-course .dash-map-wrap { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.dash-course .dash-map-wrap .tz-svg { max-height: 100%; width: auto; max-width: 100%; }
+.dash-course .dash-pane-body { flex: 1 1 auto; min-height: 0; max-height: none; overflow-y: auto; overflow-x: hidden; padding-right: 4px; }
+/* the identity block is a header, not a section: it must not eat the screen it introduces -- but it must not
+   be CRUSHED either. .dash-course is a fixed-height column flex container, so its first child inherits
+   flex-shrink: 1 and gives up height to the body below it before the max-height ever applies; combined with
+   overflow: hidden that clips the course NAME, which is the one thing the header exists to say. flex: none
+   pins it to its natural height and makes .dash-body the only thing that shrinks -- which is what should
+   shrink, since it scrolls internally. */
+.dash-course .course-id { flex: none; max-height: 132px; overflow: hidden; }
+.dash-course .course-tags { flex: none; max-height: 46px; overflow: hidden; }
+@media (max-width: 900px) { .dash-course { height: auto; overflow: visible; } .dash-course .course-id, .dash-course .course-tags { max-height: none; } }
+/* A COURSE IS NOT A CARD. .card-grid is repeat(auto-fill, minmax(300px, 1fr)), which lays out as many 300 px
+   columns as the width allows -- so a single course block took ONE of them and the two panes inside it came out
+   161 px wide each. The course layout is full-width by design; it gets one column and keeps the whole row. */
+.card-grid.course-grid { grid-template-columns: minmax(0, 1fr); }
+/* THE MAP GETS THE ROOM IT NEEDS. main is capped at 1200 px, which is right for prose and wrong for a course:
+   at 1920 the two panes came out 539 px each, so "the ENTIRE interactive course map" had a third of the screen.
+   The course section alone breaks out of the cap on wide viewports -- the rest of the app keeps its measure.
+   max-width is pinned to the same calc as width so the breakout can never introduce a horizontal scrollbar. */
+@media (min-width: 1400px) {
+  .block.course-wide {
+    width: calc(100vw - 48px);
+    max-width: calc(100vw - 48px);
+    margin-left: calc(-50vw + 50% + 24px);
+  }
+}
+
+/* SPLIT ALONG THE LONG AXIS, NOT ALWAYS LEFT/RIGHT. The brief says the map owns half the screen and the other
+   half is context, and on a landscape display that half is the left one. Jett's actual display is PORTRAIT
+   (1125x1800): side by side there gives two 494 px columns 1239 px tall, and the map -- which keeps the course's
+   own aspect -- drew 472x440 inside a 1239 px pane. About 800 px of the instrument's own half sat empty while
+   the map stayed small, which is the opposite of "the ENTIRE interactive course map".
+   Stacked on a tall screen the map gets the full 1077 px width and the detail takes the space below it. Same
+   rule, same halves, turned to match the screen. */
+/* Scoped ABOVE the 900 px breakpoint on purpose. Below it .dash-course is already reset to height: auto and
+   one column, and `fr` rows on an auto-height grid size from CONTENT, not from the viewport -- so at 860x1000,
+   an ordinary half-screen window that is both narrow AND tall, both queries matched and the block computed to
+   10,663 px with rows of 5574 px and 4847 px. The stacking exists to use a tall FIXED-height block well; where
+   there is no fixed height there is nothing to divide. */
+@media (max-aspect-ratio: 1/1) and (min-width: 901px) {
+  .dash-course > .dash-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1.15fr) minmax(0, 1fr); }
+}

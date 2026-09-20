@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Grip envelope — the fastest a build holds a corner</title>
+<link rel="stylesheet" href="../styles.css?v=202">
+<style>
+  /* MOCKUP (Jett 2026-09-18: "we could create a chart for every single build that shows the MAXIMUM speed
+     the tires can hold grip at any given turn angle. being able to visually see this information would
+     GREATLY increase the understanding of a build"). Data from scripts/analysis/grip_envelope.py. */
+  body{margin:0;padding:0 0 60px}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 18px}
+  header.top{position:sticky;top:0;z-index:30;background:var(--panel);border-bottom:1px solid var(--line);
+    height:auto;min-height:0;max-height:none;overflow:visible;
+    padding:8px 18px;display:grid;grid-template-columns:auto 1fr;gap:3px 14px;align-items:baseline}
+  header.top h1{font:700 15px var(--sans);margin:0;letter-spacing:0}
+  header.top .sub{grid-column:2}
+  header.top .ctl{grid-column:1/-1;display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:4px}
+  select{font:12px var(--mono);max-width:330px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:14px 16px;margin:16px 0}
+  .card>h2{font:700 14px var(--sans);margin:0 0 3px;letter-spacing:0;text-transform:none;color:var(--ink)}
+  .cap{font-size:12px;line-height:1.5;color:var(--mut);margin:0 0 12px}
+  .cap b{color:var(--ink);font-weight:600}
+  svg.chart{display:block;width:100%;height:auto;overflow:visible}
+  .note{background:var(--panel2);border-left:3px solid var(--acc2);border-radius:0 6px 6px 0;padding:9px 12px;
+    font-size:12px;line-height:1.5;color:var(--mut);margin:14px 0}
+  .note b{color:var(--ink)}
+  .sig{display:flex;gap:26px;flex-wrap:wrap;margin:2px 0 12px}
+  .sig div{min-width:96px}
+  .sig .v{font:700 20px var(--mono);color:var(--ink);line-height:1.1}
+  .sig .l{font:9.5px var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--dim);margin-top:2px}
+  .sig .v small{font:600 11px var(--mono);color:var(--mut)}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th{font:600 9px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);
+    text-align:right;padding:5px 7px;border-bottom:1px solid var(--line2);background:none}
+  th:first-child,td:first-child{text-align:left}
+  td{padding:5px 7px;border-bottom:1px solid var(--line);text-align:right}
+  td.mono{font-family:var(--mono)}
+  .key{display:flex;gap:15px;flex-wrap:wrap;font-size:11px;color:var(--mut);margin-top:9px}
+  .key span{display:inline-flex;align-items:center;gap:5px}
+  .key i{width:12px;height:12px;border-radius:2px;display:inline-block}
+  .key i.ln{height:3px;width:18px}
+  .pill{display:inline-block;padding:1px 7px;border-radius:10px;border:1px solid var(--line2);
+    font:11px var(--mono);color:var(--mut);cursor:pointer;margin:2px 3px 2px 0}
+  .pill.on{color:var(--ink);border-color:var(--acc2);background:var(--panel2)}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Grip envelope</h1>
+  <span class="why sub">the fastest a build can hold a corner, at every corner radius — measured, not modelled from a spec sheet</span>
+  <span class="ctl">
+    <label class="why">build <select id="build"></select></label>
+    <label class="why">compare <select id="cmp"></select></label>
+    <label class="why">corners of <select id="route"></select></label>
+  </span>
+</header>
+<div class="wrap">
+  <div class="card">
+    <h2 id="title"></h2>
+    <div class="sig" id="sig"></div>
+    <p class="cap" id="cap"></p>
+    <div id="chart"></div>
+    <div class="key" id="key"></div>
+  </div>
+  <div class="note" id="note"></div>
+  <div class="card">
+    <h2>What it holds, corner by corner</h2>
+    <p class="cap">Every catalogued turn on the selected route, at its own radius, against this build's envelope. <b>Hold mph</b> is what the tyres will take there; a corner whose envelope speed is at or above the build's own top speed is one it can take <b>flat</b>.</p>
+    <div id="table"></div>
+  </div>
+</div>
+<script>
+const MPS = 0.44704, G = 9.80665;
+const DGRIP = { front: "#2f81f7", rear: "#e5414e", both: "#a371f7" };
+const INK = { grip: "#45c8b0", power: "#e3b341", cmp: "#c98bff", held: "#8b97a7" };
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let DOC = null, CARS = {}, B = null, CMP = null, ROUTE = null;
+
+// the envelope itself: v_max(R) = sqrt(a_max * g * R), CLIPPED by the speed the build can actually reach.
+// Tight corners are grip-limited and follow the square root; open ones are power-limited and flat. Where
+// the two meet is the tightest corner the build takes flat out.
+const vGrip = (b, r) => {
+  let v = 60;
+  for (let i = 0; i < 3; i++) { const a = aAt(b, v); v = Math.sqrt(Math.max(.1, a) * G * r) / MPS; }
+  return v;
+};
+function aAt(b, v) {
+  for (const x of b.bands || []) if (v >= x.lo && (x.hi == null || v < x.hi)) return x.aMax;
+  return b.aMaxP95;
+}
+const vHold = (b, r) => Math.min(vGrip(b, r), b.vTop || 999);
+const carName = (cid) => { const o = String(cid).split("|")[0]; return (CARS[o] || {}).name || ("car " + o); };
+const bLabel = (b) => `${esc(carName(b.cid))} · ${b.class} ${b.pi} ${b.drivetrain} · ${b.aMaxP95.toFixed(2)} g · ${b.laps} laps`;
+
+function chart(b, cmp, turns) {
+  const W = 1080, H = 430, padL = 52, padR = 16, padT = 18, padB = 54;
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+  const R0 = 8, R1 = 1600;
+  const X = (r) => x0 + (Math.log(r / R0) / Math.log(R1 / R0)) * (x1 - x0);
+  const vMax = Math.max(b.vTop || 0, cmp ? cmp.vTop : 0, 60) * 1.12;
+  const Y = (v) => y1 - (v / vMax) * (y1 - y0);
+  let s = "";
+  // gridlines: radius decades-ish, and speed every 25 mph
+  for (const r of [8, 12, 18, 26, 38, 55, 80, 120, 180, 270, 400, 600, 1000, 1600]) {
+    s += `<line x1="${X(r).toFixed(1)}" y1="${y0}" x2="${X(r).toFixed(1)}" y2="${y1}" stroke="var(--line)" stroke-width=".7"/>`;
+    s += `<text x="${X(r).toFixed(1)}" y="${y1 + 14}" font-size="9.5" fill="var(--dim)" text-anchor="middle" font-family="var(--mono)">${r}</text>`;
+  }
+  for (let v = 0; v <= vMax; v += 25) {
+    s += `<line x1="${x0}" y1="${Y(v).toFixed(1)}" x2="${x1}" y2="${Y(v).toFixed(1)}" stroke="var(--line)" stroke-width=".7"/>`;
+    s += `<text x="${x0 - 6}" y="${(Y(v) + 3).toFixed(1)}" font-size="9.5" fill="var(--dim)" text-anchor="end" font-family="var(--mono)">${v}</text>`;
+  }
+  s += `<text x="${x0 - 6}" y="${y0 - 5}" font-size="9.5" fill="var(--mut)" text-anchor="end" font-family="var(--mono)">mph</text>`;
+  s += `<text x="${x1}" y="${y1 + 30}" font-size="10" fill="var(--mut)" text-anchor="end" font-family="var(--mono)">corner radius, metres — tighter ←</text>`;
+
+  // THE ENVELOPE, as a filled region: everything under the curve is speed the tyres will hold.
+  const pts = [];
+  for (let r = R0; r <= R1; r *= 1.04) pts.push([X(r), Y(vHold(b, r))]);
+  const poly = pts.map((p) => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ");
+  s += `<polygon points="${poly} ${X(R1).toFixed(1)},${y1} ${X(R0).toFixed(1)},${y1}" fill="${INK.grip}" opacity=".10"/>`;
+  // the grip-limited arm and the power-limited arm, drawn in different colours: they are different limits
+  const gripArm = pts.filter((p, i) => vGrip(b, R0 * Math.pow(1.04, i)) <= (b.vTop || 999));
+  const powArm = pts.filter((p, i) => vGrip(b, R0 * Math.pow(1.04, i)) > (b.vTop || 999));
+  const pl = (a, col, w) => a.length > 1 ? `<polyline points="${a.map((p) => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ")}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>` : "";
+  s += pl(gripArm, INK.grip, 2.8) + pl(powArm, INK.power, 2.8);
+  // where they meet -- the tightest corner this build takes flat
+  if (b.rFlat) {
+    s += `<line x1="${X(b.rFlat).toFixed(1)}" y1="${y0}" x2="${X(b.rFlat).toFixed(1)}" y2="${y1}" stroke="${INK.power}" stroke-width="1" stroke-dasharray="4 3" opacity=".8"/>`;
+    s += `<text x="${(X(b.rFlat) + 5).toFixed(1)}" y="${y0 + 11}" font-size="10" fill="${INK.power}" font-family="var(--mono)">flat from ${Math.round(b.rFlat)} m →</text>`;
+  }
+  // WHAT WAS ACTUALLY DRIVEN, behind the curve, so the model answers to the measurements: the fastest speed
+  // that still held grip in each radius bin, and the median speed at which it let go.
+  for (const bin of b.bins) {
+    if (bin.held < 10) continue;
+    const xa = X(bin.lo), xb = X(bin.hi);
+    s += `<line x1="${xa.toFixed(1)}" y1="${Y(bin.vHeld90).toFixed(1)}" x2="${xb.toFixed(1)}" y2="${Y(bin.vHeld90).toFixed(1)}" stroke="${INK.held}" stroke-width="2" opacity=".85"><title>${bin.lo}-${bin.hi} m · ${bin.held} samples held grip, fastest 10% of them above ${Math.round(bin.vHeld90)} mph</title></line>`;
+    if (bin.vLost50 != null && bin.lost >= 8) {
+      const dom = ["front", "rear", "both"][bin.axle.indexOf(Math.max(...bin.axle))];
+      s += `<line x1="${xa.toFixed(1)}" y1="${Y(bin.vLost50).toFixed(1)}" x2="${xb.toFixed(1)}" y2="${Y(bin.vLost50).toFixed(1)}" stroke="${DGRIP[dom]}" stroke-width="1.6" stroke-dasharray="3 2" opacity=".7"><title>${bin.lo}-${bin.hi} m · ${bin.lost} samples past the limit, median ${Math.round(bin.vLost50)} mph, mostly ${dom === "front" ? "understeer" : dom === "rear" ? "oversteer" : "all four"}</title></line>`;
+    }
+  }
+  // a second build to compare against
+  if (cmp) {
+    const cp = [];
+    for (let r = R0; r <= R1; r *= 1.04) cp.push([X(r), Y(vHold(cmp, r))]);
+    s += pl(cp, INK.cmp, 2.2);
+    s += `<text x="${X(R1).toFixed(1)}" y="${(Y(vHold(cmp, R1)) - 6).toFixed(1)}" font-size="10" fill="${INK.cmp}" text-anchor="end" font-family="var(--mono)">${esc(carName(cmp.cid))}</text>`;
+  }
+  // the corners this build will actually meet, as ticks on the radius axis
+  for (const t of turns) {
+    const xx = X(Math.max(R0, Math.min(R1, t.r)));
+    s += `<line x1="${xx.toFixed(1)}" y1="${y1}" x2="${xx.toFixed(1)}" y2="${y1 + 5}" stroke="var(--acc2)" stroke-width="1.4" opacity=".75"/>`;
+    s += `<circle cx="${xx.toFixed(1)}" cy="${Y(vHold(b, t.r)).toFixed(1)}" r="3" fill="var(--acc2)"><title>${esc(t.label)} · ${Math.round(t.r)} m · this build holds ${Math.round(vHold(b, t.r))} mph</title></circle>`;
+  }
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}">${s}</svg>`;
+}
+
+function draw() {
+  const b = B, cmp = CMP;
+  const turns = ROUTE ? DOC.turns.filter((t) => String(t.route_id) === ROUTE).map((t, i) => ({ ...t, label: t.turn_id })) : [];
+  document.getElementById("title").innerHTML = `${esc(carName(b.cid))} <span class="why">· ${b.class} ${b.pi} ${b.drivetrain} · build ${esc(b.hw.slice(0, 8))} / tune ${esc(b.tune.slice(0, 8))} · ${b.laps} laps, ${b.nPoints.toLocaleString()} cornering samples</span>`;
+  const knee = b.rFlat ? Math.round(b.rFlat) : null;
+  document.getElementById("sig").innerHTML = `
+    <div><div class="v">${b.aMaxP95.toFixed(2)}<small> g</small></div><div class="l">tyre ceiling</div></div>
+    <div><div class="v">${Math.round(b.vTop)}<small> mph</small></div><div class="l">top speed seen</div></div>
+    <div><div class="v">${knee ? knee : "—"}<small> m</small></div><div class="l">flat-out from</div></div>
+    <div><div class="v">${Math.round(vHold(b, 26))}<small> mph</small></div><div class="l">at a 26 m hairpin</div></div>
+    <div><div class="v">${Math.round(vHold(b, 80))}<small> mph</small></div><div class="l">at an 80 m sweeper</div></div>`;
+  document.getElementById("cap").innerHTML =
+    `The filled region is every speed this build's tyres will hold. Its edge has <b>two different limits</b>: on the left it is <b style="color:${INK.grip}">grip-limited</b> and rises as √radius, because a wider corner lets the same ${b.aMaxP95.toFixed(2)} g carry more speed; on the right it is <b style="color:${INK.power}">power-limited</b> and flat, because past ${knee ? knee + " m" : "a point"} the car cannot reach the speed the tyres would allow. <b>That corner is the tightest one it takes flat out.</b> The grey rungs behind are what was actually driven — the fastest speed that still held grip in each radius band — and the coloured dashes are where it let go, in the colour of the axle that went first.`;
+  document.getElementById("chart").innerHTML = chart(b, cmp, turns);
+  document.getElementById("key").innerHTML = [
+    [INK.grip, "grip-limited edge (√radius)", 1], [INK.power, "power-limited edge (flat)", 1],
+    [INK.held, "fastest 10% that held grip, measured", 1],
+    [DGRIP.front, "let go: understeer", 1], [DGRIP.rear, "oversteer", 1], [DGRIP.both, "all four", 1],
+    ["var(--acc2)", "a corner on the selected route"],
+  ].map(([c, w, ln]) => `<span><i class="${ln ? "ln" : ""}" style="background:${c}"></i>${esc(w)}</span>`).join("");
+
+  const rows = turns.slice().sort((a, c) => a.r - c.r).map((t) => {
+    const v = vHold(b, t.r), flat = b.vTop && vGrip(b, t.r) >= b.vTop;
+    const vc = cmp ? vHold(cmp, t.r) : null;
+    return `<tr><td>${esc(t.turn_id)} <span class="why">${esc(t.kind || "")}${t.dir ? " " + t.dir : ""}</span></td>
+      <td class="mono">${Math.round(t.r)}</td><td class="mono">${t.deg != null ? Math.round(t.deg) + "°" : "—"}</td>
+      <td class="mono" style="color:${flat ? INK.power : "var(--ink)"};font-weight:700">${Math.round(v)}</td>
+      <td class="mono why">${flat ? "flat" : "grip"}</td>
+      ${cmp ? `<td class="mono" style="color:${INK.cmp}">${Math.round(vc)}</td><td class="mono ${vc > v ? "" : "why"}">${vc - v > 0 ? "+" : ""}${Math.round(vc - v)}</td>` : ""}</tr>`;
+  }).join("");
+  document.getElementById("table").innerHTML = turns.length
+    ? `<table><thead><tr><th>turn</th><th>radius m</th><th>angle</th><th>hold mph</th><th>limited by</th>${cmp ? `<th>${esc(carName(cmp.cid))}</th><th>Δ</th>` : ""}</tr></thead><tbody>${rows}</tbody></table>`
+    : `<p class="cap">pick a route above</p>`;
+}
+
+async function boot() {
+  DOC = await (await fetch("../api/grip-envelope.json")).json();
+  (await (await fetch("../api/cars.json")).json()).forEach((c) => { CARS[String(c.ordinal)] = c; });
+  const bs = document.getElementById("build"), cs = document.getElementById("cmp"), rs = document.getElementById("route");
+  bs.innerHTML = DOC.builds.map((b, i) => `<option value="${i}">${bLabel(b)}</option>`).join("");
+  cs.innerHTML = `<option value="">— none</option>` + DOC.builds.map((b, i) => `<option value="${i}">${bLabel(b)}</option>`).join("");
+  const routes = {};
+  DOC.turns.forEach((t) => { routes[t.route_id] = (routes[t.route_id] || { n: 0, name: t.route }); routes[t.route_id].n++; });
+  rs.innerHTML = `<option value="">— none</option>` + Object.entries(routes).filter(([, v]) => v.n >= 6)
+    .sort((a, c) => String(a[1].name || "").localeCompare(String(c[1].name || "")))
+    .map(([id, v]) => `<option value="${id}">${esc(v.name || ("route " + id))} · ${v.n} turns</option>`).join("");
+  rs.value = "5191";
+  ROUTE = rs.value;
+  B = DOC.builds[0];
+  document.getElementById("note").innerHTML =
+    `<b>What is measured and what is modelled.</b> The <b>tyre ceiling</b> is measured — a high quantile of the recorded <code>lat_g</code> over this build's own cornering samples, where the radius comes from <code>r = v / yaw&nbsp;rate</code> at the full 60&nbsp;Hz capture rate rather than from differencing rounded coordinates. The <b>top speed</b> is measured the same way. Only the curve between them is modelled, and it is the one line of physics this whole page rests on: <code>a = v²/R</code>. ` +
+    `<b>One caveat worth keeping:</b> "how often grip was lost" at a given radius is a fact about the driving as much as the build — at a 20&nbsp;m radius the driver is always near the limit, so almost every sample shows slip. That is why the ceiling here comes from <code>lat_g</code> and the speed plateau, which do not care how hard the corner was attacked, and the loss markers are shown as context only.`;
+  bs.onchange = () => { B = DOC.builds[+bs.value]; draw(); };
+  cs.onchange = () => { CMP = cs.value === "" ? null : DOC.builds[+cs.value]; draw(); };
+  rs.onchange = () => { ROUTE = rs.value; draw(); };
+  draw();
+}
+boot();
+</script>
+</body>
+</html>

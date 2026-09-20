@@ -1,0 +1,99 @@
+{
+ "session": "fh6_20260911_133413",
+ "built_utc": "2026-09-18T18:38:52Z",
+ "capture": "fh6_20260911_133413.csv.gz",
+ "laps": 1,
+ "findings": [
+  {
+   "fault": "gear-under-revved",
+   "severity": 0.1930629279940292,
+   "detail": "top gear reached only 84% of the 9207 rpm redline (peak 7753); the gear is carried but never used",
+   "fix": "shorten the final drive (raise the ratio) so top gear reaches the power band, or accept it as a cruising gear this course does not need",
+   "measure": {
+    "peak_rpm": 7753,
+    "redline": 9207,
+    "frac": 0.842
+   },
+   "lap_id": 1289,
+   "cid": "3429|2|4|700",
+   "route_key": "route:311",
+   "container": "Tuning_3429_20260911170553",
+   "hw_hash": "39c3211b0a7f69da"
+  },
+  {
+   "fault": "brake-lock-all-four",
+   "severity": 0.34213442019446116,
+   "t": 793.91,
+   "x": 4341.80224609375,
+   "z": -5924.91357421875,
+   "detail": "all four locked at full pedal, 14 samples over 0.09 s from 89 mph; worst wheel turning at 68% of road speed",
+   "fix": "brake pressure down a step",
+   "measure": {
+    "end": "all four",
+    "worst_ratio": 0.679,
+    "samples": 14,
+    "held_s": 0.09,
+    "entry_mph": 88.7
+   },
+   "shallow_excursions": 14,
+   "lap_id": 1289,
+   "cid": "3429|2|4|700",
+   "route_key": "route:311",
+   "container": "Tuning_3429_20260911170553",
+   "hw_hash": "39c3211b0a7f69da"
+  },
+  {
+   "fault": "brake-lock-all-four",
+   "severity": 0.5155249708612835,
+   "t": 813.69,
+   "x": 4032.58544921875,
+   "z": -5174.58251953125,
+   "detail": "all four locked at full pedal, 34 samples over 0.22 s from 77 mph; worst wheel turning at 59% of road speed",
+   "fix": "brake pressure down a step",
+   "measure": {
+    "end": "all four",
+    "worst_ratio": 0.592,
+    "samples": 34,
+    "held_s": 0.222,
+    "entry_mph": 77.0
+   },
+   "shallow_excursions": 14,
+   "lap_id": 1289,
+   "cid": "3429|2|4|700",
+   "route_key": "route:311",
+   "container": "Tuning_3429_20260911170553",
+   "hw_hash": "39c3211b0a7f69da"
+  },
+  {
+   "fault": "bottoming",
+   "severity": 1.0,
+   "t": 811.28,
+   "x": 4029.054931640625,
+   "z": -5300.84521484375,
+   "detail": "RL suspension on the stop (travel 1.000) at 154 mph",
+   "fix": "rear ride height up a notch; if that costs too much PI, bump stiffness up first",
+   "measure": {
+    "wheel": "RL",
+    "travel": 1.0,
+    "mph": 153.6
+   },
+   "lap_id": 1289,
+   "cid": "3429|2|4|700",
+   "route_key": "route:311",
+   "container": "Tuning_3429_20260911170553",
+   "hw_hash": "39c3211b0a7f69da"
+  }
+ ],
+ "calibration": {
+  "3429": {
+   "redline": 9206.9775390625,
+   "declared": 9999.9951171875,
+   "radii": {
+    "FL": 0.2881678135941832,
+    "FR": 0.28791326541274465,
+    "RL": 0.28923608851802896,
+    "RR": 0.28899258639839914
+   }
+  }
+ }
+}

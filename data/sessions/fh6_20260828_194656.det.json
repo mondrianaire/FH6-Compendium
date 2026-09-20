@@ -1,0 +1,168 @@
+{
+ "session": "fh6_20260828_194656",
+ "built_utc": "2026-09-18T18:25:23Z",
+ "capture": "fh6_20260828_194656.csv.gz",
+ "laps": 3,
+ "findings": [
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.7136686245197685,
+   "t": 304.83,
+   "x": -7466.2705078125,
+   "z": -2219.48291015625,
+   "detail": "front locked at full pedal, 30 samples over 0.20 s from 53 mph; worst wheel turning at 49% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.493,
+    "samples": 30,
+    "held_s": 0.198,
+    "entry_mph": 52.6
+   },
+   "shallow_excursions": 1,
+   "lap_id": 690,
+   "cid": "2866|2|4|800",
+   "route_key": "route:6001",
+   "container": "Tuning_2866_20260828151050",
+   "hw_hash": "5e97240bcaa44c9d"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.34929551966810934,
+   "t": 305.28,
+   "x": -7458.80859375,
+   "z": -2225.102294921875,
+   "detail": "front locked at full pedal, 6 samples over 0.03 s from 40 mph; worst wheel turning at 68% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.675,
+    "samples": 6,
+    "held_s": 0.033,
+    "entry_mph": 40.0
+   },
+   "shallow_excursions": 1,
+   "lap_id": 690,
+   "cid": "2866|2|4|800",
+   "route_key": "route:6001",
+   "container": "Tuning_2866_20260828151050",
+   "hw_hash": "5e97240bcaa44c9d"
+  },
+  {
+   "fault": "gear-limiter-bound",
+   "severity": 0.33899870000216953,
+   "detail": "1.0 s on the limiter in top gear (9201 of 9186 rpm); the ladder runs out before the course does",
+   "fix": "lengthen the final drive (lower the ratio) so top gear still pulls at the fastest point",
+   "measure": {
+    "limiter_s": 1.02,
+    "peak_rpm": 9201,
+    "redline": 9186
+   },
+   "lap_id": 692,
+   "cid": "2866|2|4|800",
+   "route_key": "route:6001",
+   "container": "Tuning_2866_20260828151050",
+   "hw_hash": "5e97240bcaa44c9d"
+  },
+  {
+   "fault": "brake-lock-all-four",
+   "severity": 0.16467941810762743,
+   "t": 5598.17,
+   "x": -7497.6484375,
+   "z": -2009.97900390625,
+   "detail": "all four locked at full pedal, 55 samples over 0.36 s from 74 mph; worst wheel turning at 77% of road speed",
+   "fix": "brake pressure down a step",
+   "measure": {
+    "end": "all four",
+    "worst_ratio": 0.768,
+    "samples": 55,
+    "held_s": 0.358,
+    "entry_mph": 74.2
+   },
+   "shallow_excursions": 3,
+   "lap_id": 692,
+   "cid": "2866|2|4|800",
+   "route_key": "route:6001",
+   "container": "Tuning_2866_20260828151050",
+   "hw_hash": "5e97240bcaa44c9d"
+  },
+  {
+   "fault": "brake-lock-all-four",
+   "severity": 0.22014249579390888,
+   "t": 5598.67,
+   "x": -7505.45263671875,
+   "z": -2023.130615234375,
+   "detail": "all four locked at full pedal, 93 samples over 0.62 s from 60 mph; worst wheel turning at 74% of road speed",
+   "fix": "brake pressure down a step",
+   "measure": {
+    "end": "all four",
+    "worst_ratio": 0.74,
+    "samples": 93,
+    "held_s": 0.618,
+    "entry_mph": 59.8
+   },
+   "shallow_excursions": 3,
+   "lap_id": 692,
+   "cid": "2866|2|4|800",
+   "route_key": "route:6001",
+   "container": "Tuning_2866_20260828151050",
+   "hw_hash": "5e97240bcaa44c9d"
+  },
+  {
+   "fault": "brake-lock-all-four",
+   "severity": 0.6333650027417139,
+   "t": 5602.82,
+   "x": -7530.19775390625,
+   "z": -2137.509033203125,
+   "detail": "all four locked at full pedal, 23 samples over 0.14 s from 82 mph; worst wheel turning at 53% of road speed",
+   "fix": "brake pressure down a step",
+   "measure": {
+    "end": "all four",
+    "worst_ratio": 0.533,
+    "samples": 23,
+    "held_s": 0.144,
+    "entry_mph": 82.2
+   },
+   "shallow_excursions": 3,
+   "lap_id": 692,
+   "cid": "2866|2|4|800",
+   "route_key": "route:6001",
+   "container": "Tuning_2866_20260828151050",
+   "hw_hash": "5e97240bcaa44c9d"
+  },
+  {
+   "fault": "brake-lock-front",
+   "severity": 0.5343922302508599,
+   "t": 5608.6,
+   "x": -7448.41015625,
+   "z": -2238.829833984375,
+   "detail": "front locked at full pedal, 22 samples over 0.14 s from 36 mph; worst wheel turning at 58% of road speed",
+   "fix": "brake pressure down, and balance rearward",
+   "measure": {
+    "end": "front",
+    "worst_ratio": 0.583,
+    "samples": 22,
+    "held_s": 0.137,
+    "entry_mph": 36.5
+   },
+   "shallow_excursions": 3,
+   "lap_id": 692,
+   "cid": "2866|2|4|800",
+   "route_key": "route:6001",
+   "container": "Tuning_2866_20260828151050",
+   "hw_hash": "5e97240bcaa44c9d"
+  }
+ ],
+ "calibration": {
+  "2866": {
+   "redline": 9185.7822265625,
+   "declared": 9999.9951171875,
+   "radii": {
+    "FL": 0.25664855810782733,
+    "FR": 0.2565478496220701,
+    "RL": 0.2542142315870932,
+    "RR": 0.25405805348455307
+   }
+  }
+ }
+}

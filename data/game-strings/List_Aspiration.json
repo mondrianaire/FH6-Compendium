@@ -1,0 +1,18 @@
+{
+ "IDS_DisplayName_1": "Normally Aspirated",
+ "IDS_DisplayName_2": "Turbocharged",
+ "IDS_DisplayName_3": "Twin Turbocharged",
+ "IDS_DisplayName_4": "Quad Turbocharged",
+ "IDS_DisplayName_5": "Positive Displacement Supercharged",
+ "IDS_DisplayName_6": "Centrifugal Supercharged",
+ "IDS_DisplayName_7": "",
+ "IDS_DisplayName_8": "N/A",
+ "IDS_ShortDisplayName_1": "NA",
+ "IDS_ShortDisplayName_2": "T",
+ "IDS_ShortDisplayName_3": "TT",
+ "IDS_ShortDisplayName_4": "QT",
+ "IDS_ShortDisplayName_5": "PDSC",
+ "IDS_ShortDisplayName_6": "CSC",
+ "IDS_ShortDisplayName_7": "",
+ "IDS_ShortDisplayName_8": "N/A"
+}

@@ -1,0 +1,52 @@
+{
+ "session": "fh6_20260827_190700",
+ "built_utc": "2026-09-18T18:23:25Z",
+ "capture": "fh6_20260827_190700.csv.gz",
+ "laps": 2,
+ "findings": [
+  {
+   "fault": "gear-limiter-bound",
+   "severity": 0.20016636666665968,
+   "detail": "0.6 s on the limiter in top gear (9200 of 9125 rpm); the ladder runs out before the course does",
+   "fix": "lengthen the final drive (lower the ratio) so top gear still pulls at the fastest point",
+   "measure": {
+    "limiter_s": 0.6,
+    "peak_rpm": 9200,
+    "redline": 9125
+   },
+   "lap_id": 619,
+   "cid": "2866|2|4|800",
+   "route_key": "route:6001",
+   "container": "Tuning_2866_20260822010444",
+   "hw_hash": "5aff21ad966cf76c"
+  },
+  {
+   "fault": "gear-under-revved",
+   "severity": 0.20650649838601653,
+   "detail": "top gear reached only 84% of the 9125 rpm redline (peak 7647); the gear is carried but never used",
+   "fix": "shorten the final drive (raise the ratio) so top gear reaches the power band, or accept it as a cruising gear this course does not need",
+   "measure": {
+    "peak_rpm": 7647,
+    "redline": 9125,
+    "frac": 0.838
+   },
+   "lap_id": 620,
+   "cid": "2866|2|4|800",
+   "route_key": "route:6001",
+   "container": "Tuning_2866_20260822010444",
+   "hw_hash": "5aff21ad966cf76c"
+  }
+ ],
+ "calibration": {
+  "2866": {
+   "redline": 9124.76171875,
+   "declared": 9999.9951171875,
+   "radii": {
+    "FL": 0.25654943060210633,
+    "FR": 0.2565107677780993,
+    "RL": 0.25394036433307526,
+    "RR": 0.25390259728695375
+   }
+  }
+ }
+}

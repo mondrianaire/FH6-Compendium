@@ -1,0 +1,94 @@
+//------------------------------------------------
+//--- 010 Editor Binary Template
+//
+//      File: fh6_nav.bt
+//   Authors: FH6 Tuning Lab
+//   Version: 1.0 (2026-09-18)
+//   Purpose: ForzaTech navigation file -- Route<id>.nav / Brio_00.nav ('WVAN')
+//  Category: Game
+// File Mask: *.nav
+//
+// SOURCE-CATEGORY: game install -- loose binary, readable as-is
+// SOURCE-LOCATION: C:\XboxGames\Forza Horizon 6\Content\media\openworld\brio\aitracks\Route*.nav -- 170 per-route graphs
+// SOURCE-LOCATION: C:\XboxGames\Forza Horizon 6\Content\media\openworld\brio\freeroam\Brio_00.nav -- the FREE-ROAM graph, 1 file
+// SOURCE-READ: Brio_00.nav is in a DIFFERENT folder from the per-route files (freeroam, not
+// SOURCE-READ: aitracks) and is far larger -- 1,532 splines against 1..3 on a route.
+// SOURCE-READ: no decryption. Walk chunk headers to EOF; each chunk's 16-byte footer echoes its header,
+// SOURCE-READ: which is the alignment check. The payload is NOT sequential -- see the note below.
+// SOURCE-READER: scripts/telemetry/fh6_nav.py (surface import: scripts/db/import_surface.py)
+//
+// WHY IT MATTERS: the .owt centre-line gives a corner's SHAPE -- radius, width,
+// banking. It cannot say what the corner is MADE OF, and surface decides which
+// tyre compound is legal and whether a slider recommendation applies at all.
+// The surface is here: every road is a spline carrying a `road_type` attribute
+// whose value is a PLAIN STRING in the file's own value blob -- 'a', 'b',
+// 'freeway', 'dirt', 'trail', 'hidden', 'shortcut', 'evolving_world'.
+//
+// That vocabulary is READ, not inferred. It was chosen over the 16-bit surface
+// code in the .owt point records, which is per-point and exact but whose
+// meaning would have to be guessed. The two are used together: nav NAMES the
+// surface, the .owt code carries it to the points nav does not cover.
+// See scripts/db/import_surface.py.
+//
+// Canonical reader: scripts/telemetry/fh6_nav.py
+//
+// SCOPE: this template describes the CHUNK CONTAINER, which is fully verified.
+// The spline payload inside each chunk is a typed attribute store that the
+// Python reader walks; it is not modelled here, because a half-described
+// payload is worse than an honestly empty one.
+//
+// AND THE PAYLOAD CANNOT BE MODELLED SEQUENTIALLY ANYWAY. It is laid out FROM
+// BOTH ENDS:
+//   forward from 0x90        node[] (48 B each), then spline[] (24 B each)
+//   backward from payload end, each section taking align16(size):
+//                            valBlob, keyBlob, valOff[], keyOff[], attr[],
+//                            then link[] and memberNode[] below those
+// The two regions OVERLAP. The last spline record's trailing (memberEnd,
+// attrEnd) u64 pair occupies the same bytes as memberNode[0..1]; the writer
+// never fills them in and fh6_nav.py reconstructs them as nLink / nAttr.
+// MEASURED over all 171 files: the overlap is 0 bytes on 79, 8 on 89 and 16 on
+// 3 -- never negative, never more than 16. It is structural, not corruption.
+// A forward-only reading of the payload map does not close; do not attempt one.
+// See kaitai-assessment.md, which is where this was found.
+//
+// CORPUS: measured 2026-09-18 over all 170 .nav files in aitracks.
+//   every file holds exactly 2 chunks                      170/170
+//   chunk magics, in order: 'WVAN' then 'RVAN'             170/170
+//   version == 0x00000200 in every chunk                   340/340
+//   every footer is a byte-exact echo of its chunk header  170/170
+//   walking header->payload->footer lands exactly on EOF   170/170
+//
+// That last line is the strong result: the container is self-checking. If a
+// walk does not land on EOF, the file is not what this template says it is.
+//------------------------------------------------
+
+LittleEndian();
+
+typedef struct {
+    char  Magic[4]     <comment="'WVAN' (NAVW stored little-endian) or 'RVAN'">;
+    uint  Version      <comment="0x00000200 in FH6">;
+    uint  AssetHash    <comment="asset id; the SAME value in every chunk of one file">;
+    uint  PayloadSize;
+} ChunkHeader <comment="16 bytes">;
+
+typedef struct {
+    ChunkHeader header;
+    ubyte       Payload[ header.PayloadSize ] <comment="typed attribute store; see fh6_nav.py">;
+    // The footer is a verbatim 16-byte echo of this chunk's own header.
+    // Re-reading it as a struct makes a mismatch obvious in the tree.
+    ChunkHeader footer <comment="must equal header, byte for byte">;
+} NavChunk <optimize=false>;
+
+//------------------------------------------------ file
+// A flat list of chunks, back to back, with no file-level header and no count.
+// The only terminator is EOF, which is why the footer echo matters: it is the
+// one thing that tells you the walk is still aligned.
+struct FH6_NAV {
+    while ( FTell() < FileSize() )
+        NavChunk chunk <optimize=false>;
+} file;
+
+// ---- assertions -------------------------------------------------------------
+// Checked per chunk by the external checker; 010 shows them structurally.
+if ( file.chunk[0].header.Magic != "WVAN" )
+    Warning( "First chunk is '%s', expected WVAN", file.chunk[0].header.Magic );

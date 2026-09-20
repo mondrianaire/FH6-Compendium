@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0.0",
+  "created": "2026-08-22",
+  "purpose": "Per-car total weight (lb) + front weight distribution (0..1), used to de-normalize the SPRING-RATE sliders: k_lb_per_in = f_hz^2 * W_axle_lb / 19.56, where W_axle = total_lb * dist. Populate from the in-game My Cars stats pane (the shop-capture flow already reads weight + front %).",
+  "note": "Spring rate is the one per-car slider that IS derivable from car physics — but it needs mass + distribution, which live here, plus the calibrated frequency band in data/global-slider-ranges.json (spring_model). Add an entry and that car's springs print automatically.",
+  "masses": {
+    "2866": { "mass_lb": 1498, "front_pct": 0.52, "source": "My Cars stats pane screenshot 2026-08-23 (Exocet Sport V8 XP-5, S1 800 AWD build)" }
+  }
+}

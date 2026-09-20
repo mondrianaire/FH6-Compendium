@@ -1,0 +1,28 @@
+{
+ "source": "C:/XboxGames/Forza Horizon 6/Content/media/stripped/stringtables/EN.zip",
+ "format": "see fh6_strings.py docstring",
+ "tables": {
+  "Upgrades": 496,
+  "UpgradeTypes": 106,
+  "UpgradeAreas": 22,
+  "UpgradePresetPackages": 896,
+  "List_Aspiration": 16,
+  "List_PartManufacturer": 740,
+  "WheelCategories": 10,
+  "CarClasses": 16,
+  "Tuning": 131,
+  "Data_Car": 1342,
+  "List_CarMake": 184,
+  "List_EngineConfig": 9,
+  "List_Cylinders": 14,
+  "List_DriveType": 3,
+  "Tracks": 232,
+  "RivalsEventData": 1208,
+  "CareerTrackInfo": 448,
+  "Landmarks": 81,
+  "MapRegion": 20,
+  "PointsOfInterest": 19,
+  "Rivals": 267,
+  "TimeAttack": 10
+ }
+}

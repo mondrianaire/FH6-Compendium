@@ -2,3 +2,22 @@ node_modules/
 package-lock.json
 .DS_Store
 captures/
+__pycache__/
+*.pyc
+data/_backup_courses_*/
+data/laps.db*
+data/fh6.db*
+data/logs/
+
+# atomic-write scratch files: analyze_session and the daemon write X.tmp then os.replace it
+*.tmp
+
+# Windows reserved device name: a stray >NUL redirect creates a file git cannot index
+NUL
+
+# decoded from the game install by scripts/db/export_icons.py (20 MB, reproducible)
+dashboard/v2/assets/upgrade/
+data/_snapshots/
+
+# generated from the database by scripts/analysis/grip_envelope.py — regenerable, never committed
+data/grip-envelope.json

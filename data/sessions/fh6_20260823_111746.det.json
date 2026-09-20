@@ -1,0 +1,35 @@
+{
+ "session": "fh6_20260823_111746",
+ "built_utc": "2026-09-18T18:23:18Z",
+ "capture": "fh6_20260823_111746.csv.gz",
+ "laps": 1,
+ "findings": [
+  {
+   "fault": "gear-never-reached",
+   "severity": 0.3333333333333333,
+   "detail": "gear 6 never engaged (the build has 6); the ladder is taller than this course can use",
+   "fix": "shorten the final drive (raise the ratio) until top gear comes in before the fastest point of the lap",
+   "measure": {
+    "top_gear_built": 6,
+    "top_gear_used": 5
+   },
+   "lap_id": 351,
+   "cid": "2866|1|4|700",
+   "route_key": "route:141",
+   "container": "Tuning_2866_20260822010444",
+   "hw_hash": "5aff21ad966cf76c"
+  }
+ ],
+ "calibration": {
+  "2866": {
+   "redline": 9168.3076171875,
+   "declared": 16499.990234375,
+   "radii": {
+    "FL": 0.25645143814964133,
+    "FR": 0.25649329954010214,
+    "RL": 0.2535933215183783,
+    "RR": 0.2538968308215328
+   }
+  }
+ }
+}

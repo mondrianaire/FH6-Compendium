@@ -1,0 +1,655 @@
+{
+ "source": "scratchpad/rimdbg d_001..d_104 (rim debug clip, 2026-09-01), workflow wf_2909f6a2-a6e",
+ "note": "List A = Sport Rim Style category (21 wheels, alphabetical by brand). List B = a larger list entered after Back (category not recorded; superset of A, plausibly All Rim Styles), walked down column 3 only so it samples ~every third tile. Names verbatim from the lime name bar. Ids unknown until anchor saves are diffed.",
+ "category_order": [
+  "Stock",
+  "Sport",
+  "Multi Piece",
+  "Specialized",
+  "All Rim Styles"
+ ],
+ "known_ids": {
+  "638": "Asanti AF 134 (verified INSTALLED on the NSX-R clone)"
+ },
+ "wheels": [
+  {
+   "n": 1,
+   "list": "A",
+   "category": "Sport",
+   "name": "5Zigen Becketts MK6",
+   "price_cr": 3200,
+   "weight_lb": 0,
+   "frames": "d_031 (1,1 / 0%)"
+  },
+  {
+   "n": 2,
+   "list": "A",
+   "category": "Sport",
+   "name": "5Zigen D-Force RSX-6",
+   "price_cr": 3400,
+   "weight_lb": -28,
+   "frames": "d_032 (1,2 / 0%)"
+  },
+  {
+   "n": 3,
+   "list": "A",
+   "category": "Sport",
+   "name": "5Zigen ProRacer Z1",
+   "price_cr": 3400,
+   "weight_lb": -28,
+   "frames": "d_033 (3,1 / 0%)"
+  },
+  {
+   "n": 4,
+   "list": "A",
+   "category": "Sport",
+   "name": "ADV.1 ADV05S M.V2 Standard",
+   "price_cr": 3400,
+   "weight_lb": -28,
+   "frames": "d_034 (3,1 / ~3%, mid-scroll)"
+  },
+  {
+   "n": 5,
+   "list": "A",
+   "category": "Sport",
+   "name": "ADV.1 ADV5S Track Spec CS",
+   "price_cr": 3300,
+   "weight_lb": -14,
+   "frames": "d_035 (3,3 / ~4%)"
+  },
+  {
+   "n": 6,
+   "list": "A",
+   "category": "Sport",
+   "name": "Advan GT",
+   "price_cr": 3400,
+   "weight_lb": -28,
+   "frames": "d_036 (3,3 / ~7%)"
+  },
+  {
+   "n": 7,
+   "list": "A",
+   "category": "Sport",
+   "name": "Advan RZ-F2",
+   "price_cr": 3400,
+   "weight_lb": -28,
+   "frames": "d_037 (3,3 / ~10%)"
+  },
+  {
+   "n": 8,
+   "list": "A",
+   "category": "Sport",
+   "name": "American Racing AR907",
+   "price_cr": 3200,
+   "weight_lb": 0,
+   "frames": "d_038 (3,2 / ~12%)"
+  },
+  {
+   "n": 9,
+   "list": "A",
+   "category": "Sport",
+   "name": "BBS RE",
+   "price_cr": 3600,
+   "weight_lb": -28,
+   "frames": "d_039 (3,2 / ~15%)"
+  },
+  {
+   "n": 10,
+   "list": "A",
+   "category": "Sport",
+   "name": "Dymag 9 Spoke",
+   "price_cr": 3700,
+   "weight_lb": -42,
+   "frames": "d_040 (3,2 / ~18%)"
+  },
+  {
+   "n": 11,
+   "list": "A",
+   "category": "Sport",
+   "name": "Enkei TS-10",
+   "price_cr": 3300,
+   "weight_lb": -14,
+   "frames": "d_041 (3,1 / ~20%, mid-scroll)"
+  },
+  {
+   "n": 12,
+   "list": "A",
+   "category": "Sport",
+   "name": "fifteen52 Forged Monoblock Pent",
+   "price_cr": 3300,
+   "weight_lb": -14,
+   "frames": "d_042 (3,1 / ~23%, mid-scroll)"
+  },
+  {
+   "n": 13,
+   "list": "A",
+   "category": "Sport",
+   "name": "Gram Lights 57 OPTIMISE",
+   "price_cr": 3600,
+   "weight_lb": null,
+   "frames": "d_043 (3,3 / ~26%)"
+  },
+  {
+   "n": 14,
+   "list": "A",
+   "category": "Sport",
+   "name": "KMC Wheels XD228 Machete Des… (TRUNCATED, full name unreadable)",
+   "price_cr": 3300,
+   "weight_lb": -28,
+   "frames": "d_044 (3,3 / ~27%)"
+  },
+  {
+   "n": 15,
+   "list": "A",
+   "category": "Sport",
+   "name": "König Dial-In",
+   "price_cr": 3400,
+   "weight_lb": -28,
+   "frames": "d_045 (3,2 / ~30%)"
+  },
+  {
+   "n": 16,
+   "list": "A",
+   "category": "Sport",
+   "name": "Kosei K1-Racing TS-Version",
+   "price_cr": 3700,
+   "weight_lb": -42,
+   "frames": "d_046 (3,2 / ~33%)"
+  },
+  {
+   "n": 17,
+   "list": "A",
+   "category": "Sport",
+   "name": "Modulare B14",
+   "price_cr": 3400,
+   "weight_lb": -28,
+   "frames": "d_047 (3,1 / ~36%, mid-scroll)"
+  },
+  {
+   "n": 18,
+   "list": "A",
+   "category": "Sport",
+   "name": "Momo Heritage 6",
+   "price_cr": 3400,
+   "weight_lb": null,
+   "frames": "d_048 (3,3 / ~38%)"
+  },
+  {
+   "n": 19,
+   "list": "A",
+   "category": "Sport",
+   "name": "Momo TEN-S",
+   "price_cr": 3500,
+   "weight_lb": 0,
+   "frames": "d_049 (3,3 / ~40%)"
+  },
+  {
+   "n": 20,
+   "list": "A",
+   "category": "Sport",
+   "name": "Motegi Racing MR119 Rally Cross",
+   "price_cr": 3400,
+   "weight_lb": -28,
+   "frames": "d_050 (3,1 / ~42%)"
+  },
+  {
+   "n": 21,
+   "list": "A",
+   "category": "Sport",
+   "name": "Motegi Racing MR221 Traklite 1.0",
+   "price_cr": 3400,
+   "weight_lb": -28,
+   "frames": "d_051 (3,1 / ~45%, mid-scroll)"
+  },
+  {
+   "n": 22,
+   "list": "B",
+   "category": null,
+   "name": "5Zigen 5ZR Copse",
+   "price_cr": 3200,
+   "weight_lb": 0,
+   "frames": "d_053, d_054 (1,1 / top)"
+  },
+  {
+   "n": 23,
+   "list": "B",
+   "category": null,
+   "name": "5Zigen D-Force RSX-6 (repeat of #2)",
+   "price_cr": 3400,
+   "weight_lb": -28,
+   "frames": "d_055 (1,3 / top)"
+  },
+  {
+   "n": 24,
+   "list": "B",
+   "category": null,
+   "name": "5Zigen ZR+520",
+   "price_cr": 3600,
+   "weight_lb": -28,
+   "frames": "d_056 (3,3 / top)"
+  },
+  {
+   "n": 25,
+   "list": "B",
+   "category": null,
+   "name": "ADV.1 ADV07R M.V2 CS",
+   "price_cr": 3400,
+   "weight_lb": -28,
+   "frames": "d_057 (3,3 / top)"
+  },
+  {
+   "n": 26,
+   "list": "B",
+   "category": null,
+   "name": "ADV.1 ADV6 M.V2 SL",
+   "price_cr": 3400,
+   "weight_lb": 0,
+   "frames": "d_058 (3,3 / top)"
+  },
+  {
+   "n": 27,
+   "list": "B",
+   "category": null,
+   "name": "Advan AVS Model 6",
+   "price_cr": 3500,
+   "weight_lb": -42,
+   "frames": "d_059 (3,3 / top)"
+  },
+  {
+   "n": 28,
+   "list": "B",
+   "category": null,
+   "name": "American Racing Outlaw II",
+   "price_cr": 3500,
+   "weight_lb": 0,
+   "frames": "d_060 (3,3 / top)"
+  },
+  {
+   "n": 29,
+   "list": "B",
+   "category": null,
+   "name": "American Racing VF526",
+   "price_cr": 3000,
+   "weight_lb": 0,
+   "frames": "d_061 (3,3 / top)"
+  },
+  {
+   "n": 30,
+   "list": "B",
+   "category": null,
+   "name": "Asanti AF 118",
+   "price_cr": 3400,
+   "weight_lb": null,
+   "frames": "d_062 (4,3 / top)"
+  },
+  {
+   "n": 31,
+   "list": "B",
+   "category": null,
+   "name": "BBS CX-R",
+   "price_cr": 3300,
+   "weight_lb": 0,
+   "frames": "d_063 (3,3 / top)"
+  },
+  {
+   "n": 32,
+   "list": "B",
+   "category": null,
+   "name": "Compomotive M05",
+   "price_cr": 3400,
+   "weight_lb": null,
+   "frames": "d_064 (4,3 / top)"
+  },
+  {
+   "n": 33,
+   "list": "B",
+   "category": null,
+   "name": "Enkei RS6",
+   "price_cr": 3500,
+   "weight_lb": 0,
+   "frames": "d_065 (4,3 / top)"
+  },
+  {
+   "n": 34,
+   "list": "B",
+   "category": null,
+   "name": "fifteen52 Forged 3pc Tarmac 348",
+   "price_cr": 3200,
+   "weight_lb": 0,
+   "frames": "d_066 (3,3 / top)"
+  },
+  {
+   "n": 35,
+   "list": "B",
+   "category": null,
+   "name": "Gram Lights 57C",
+   "price_cr": 3600,
+   "weight_lb": -28,
+   "frames": "d_067 (3,3 / top)"
+  },
+  {
+   "n": 36,
+   "list": "B",
+   "category": null,
+   "name": "HRE 300M",
+   "price_cr": 3400,
+   "weight_lb": -28,
+   "frames": "d_068 (3,3 / top)"
+  },
+  {
+   "n": 37,
+   "list": "B",
+   "category": null,
+   "name": "HRE C100",
+   "price_cr": 3700,
+   "weight_lb": -28,
+   "frames": "d_069 (3,3 / top)"
+  },
+  {
+   "n": 38,
+   "list": "B",
+   "category": null,
+   "name": "HRE P104",
+   "price_cr": 3700,
+   "weight_lb": -28,
+   "frames": "d_070 (3,3 / middle)"
+  },
+  {
+   "n": 39,
+   "list": "B",
+   "category": null,
+   "name": "HRE Recoil with Ring",
+   "price_cr": 3400,
+   "weight_lb": 0,
+   "frames": "d_071 (3,3 / middle)"
+  },
+  {
+   "n": 40,
+   "list": "B",
+   "category": null,
+   "name": "HRE S204",
+   "price_cr": 3300,
+   "weight_lb": 0,
+   "frames": "d_072 (3,3 / middle)"
+  },
+  {
+   "n": 41,
+   "list": "B",
+   "category": null,
+   "name": "KMC Wheels KM709 Flux",
+   "price_cr": 3400,
+   "weight_lb": 0,
+   "frames": "d_073 (3,3 / middle)"
+  },
+  {
+   "n": 42,
+   "list": "B",
+   "category": null,
+   "name": "König Lockout",
+   "price_cr": 3400,
+   "weight_lb": null,
+   "frames": "d_074 (4,3 / middle)"
+  },
+  {
+   "n": 43,
+   "list": "B",
+   "category": null,
+   "name": "Mickey Thompson Classic Lock",
+   "price_cr": 3500,
+   "weight_lb": null,
+   "frames": "d_075 (4,3 / middle)"
+  },
+  {
+   "n": 44,
+   "list": "B",
+   "category": null,
+   "name": "Modulare D32",
+   "price_cr": 3300,
+   "weight_lb": -14,
+   "frames": "d_076 (4,3 / middle)"
+  },
+  {
+   "n": 45,
+   "list": "B",
+   "category": null,
+   "name": "Momo GTR",
+   "price_cr": 3500,
+   "weight_lb": -14,
+   "frames": "d_077 (3,3 / middle)"
+  },
+  {
+   "n": 46,
+   "list": "B",
+   "category": null,
+   "name": "Motegi Racing FF5",
+   "price_cr": 3400,
+   "weight_lb": -28,
+   "frames": "d_078 (3,3 / middle)"
+  },
+  {
+   "n": 47,
+   "list": "B",
+   "category": null,
+   "name": "Motegi Racing MR406",
+   "price_cr": 3400,
+   "weight_lb": -28,
+   "frames": "d_079 (3,3 / ~55%)"
+  },
+  {
+   "n": 48,
+   "list": "B",
+   "category": null,
+   "name": "OZ Racing F1",
+   "price_cr": 4000,
+   "weight_lb": -42,
+   "frames": "d_080 (3,3 / ~57%)"
+  },
+  {
+   "n": 49,
+   "list": "B",
+   "category": null,
+   "name": "Racing Dynamics S4",
+   "price_cr": 3300,
+   "weight_lb": -14,
+   "frames": "d_081 (3,3 / ~59%)"
+  },
+  {
+   "n": 50,
+   "list": "B",
+   "category": null,
+   "name": "Rotiform 356",
+   "price_cr": 3400,
+   "weight_lb": -28,
+   "frames": "d_082 (3,3 / ~62%)"
+  },
+  {
+   "n": 51,
+   "list": "B",
+   "category": null,
+   "name": "Rotiform CCV",
+   "price_cr": 3400,
+   "weight_lb": null,
+   "frames": "d_083 (3,3 / ~65%)"
+  },
+  {
+   "n": 52,
+   "list": "B",
+   "category": null,
+   "name": "Rotiform LAS-R",
+   "price_cr": 3400,
+   "weight_lb": null,
+   "frames": "d_084 (3,3 / ~67%)"
+  },
+  {
+   "n": 53,
+   "list": "B",
+   "category": null,
+   "name": "Rotiform SNA",
+   "price_cr": 3400,
+   "weight_lb": null,
+   "frames": "d_085 (4,3 / ~69%, mid-scroll)"
+  },
+  {
+   "n": 54,
+   "list": "B",
+   "category": null,
+   "name": "RS Watanabe GR8",
+   "price_cr": 3400,
+   "weight_lb": null,
+   "frames": "d_086 (4,3 / ~71%, mid-scroll)"
+  },
+  {
+   "n": 55,
+   "list": "B",
+   "category": null,
+   "name": "Tenzo R Meister V1",
+   "price_cr": 3400,
+   "weight_lb": null,
+   "frames": "d_087 (4,3 / ~74%, mid-scroll)"
+  },
+  {
+   "n": 56,
+   "list": "B",
+   "category": null,
+   "name": "TSW Chrono",
+   "price_cr": 3300,
+   "weight_lb": -14,
+   "frames": "d_088 (4,3 / ~76%, mid-scroll)"
+  },
+  {
+   "n": 57,
+   "list": "B",
+   "category": null,
+   "name": "TSW Sonoma",
+   "price_cr": 3300,
+   "weight_lb": -14,
+   "frames": "d_089 (3,3 / ~78%)"
+  },
+  {
+   "n": 58,
+   "list": "B",
+   "category": null,
+   "name": "Volk Racing GT-P",
+   "price_cr": 3200,
+   "weight_lb": null,
+   "frames": "d_090 (3,3 / ~81%)"
+  },
+  {
+   "n": 59,
+   "list": "B",
+   "category": null,
+   "name": "Vorsteiner VCS 001",
+   "price_cr": 3500,
+   "weight_lb": -42,
+   "frames": "d_091 (3,3 / ~83%)"
+  },
+  {
+   "n": 60,
+   "list": "B",
+   "category": null,
+   "name": "Vorsteiner VFN 310",
+   "price_cr": 3400,
+   "weight_lb": -28,
+   "frames": "d_092 (3,3 / ~84%)"
+  },
+  {
+   "n": 61,
+   "list": "B",
+   "category": null,
+   "name": "Vorsteiner VFN 506",
+   "price_cr": 3400,
+   "weight_lb": null,
+   "frames": "d_093 (3,3 / ~86%)"
+  },
+  {
+   "n": 62,
+   "list": "B",
+   "category": null,
+   "name": "WedsSport SA-70",
+   "price_cr": 3700,
+   "weight_lb": null,
+   "frames": "d_094 (4,3 / ~88%, mid-scroll)"
+  },
+  {
+   "n": 63,
+   "list": "B",
+   "category": null,
+   "name": "Weld Racing Vektor",
+   "price_cr": 3200,
+   "weight_lb": null,
+   "frames": "d_095 (3,3 / ~90%)"
+  },
+  {
+   "n": 64,
+   "list": "B",
+   "category": null,
+   "name": "Work Gnosis FCV01",
+   "price_cr": 3300,
+   "weight_lb": -14,
+   "frames": "d_096 (3,3 / ~93%)"
+  },
+  {
+   "n": 65,
+   "list": "B",
+   "category": null,
+   "name": "Work M.C.O Racing Type-CS",
+   "price_cr": 3400,
+   "weight_lb": -28,
+   "frames": "d_097 (3,3 / ~95%)"
+  },
+  {
+   "n": 66,
+   "list": "B",
+   "category": null,
+   "name": "Work WORK Emotion T5R",
+   "price_cr": 3300,
+   "weight_lb": null,
+   "frames": "d_098 (3,3 / ~98%)"
+  },
+  {
+   "n": 67,
+   "list": "B",
+   "category": null,
+   "name": "5Zigen GN+",
+   "price_cr": 3500,
+   "weight_lb": -14,
+   "frames": "d_099 (2,2 / top)"
+  },
+  {
+   "n": 68,
+   "list": "B",
+   "category": null,
+   "name": "5Zigen Becketts MK6 (repeat of #1)",
+   "price_cr": 3200,
+   "weight_lb": null,
+   "frames": "d_100 (1,2 / top)"
+  },
+  {
+   "n": 69,
+   "list": "B",
+   "category": null,
+   "name": "Work XD9",
+   "price_cr": 3700,
+   "weight_lb": -42,
+   "frames": "d_101 (3,1 / bottom; row 3 has 2 tiles, (3,3) empty = end of list; (3,2) tile unnamed)"
+  },
+  {
+   "n": 70,
+   "list": "B",
+   "category": null,
+   "name": "Work WORK Emotion T5R 2-piece",
+   "price_cr": 3400,
+   "weight_lb": -28,
+   "frames": "d_102 (2,1 / bottom)"
+  },
+  {
+   "n": 71,
+   "list": "B",
+   "category": null,
+   "name": "Work X JDM Concept GT5",
+   "price_cr": 3300,
+   "weight_lb": -14,
+   "frames": "d_103, d_104 (2,3 / bottom)"
+  }
+ ]
+}

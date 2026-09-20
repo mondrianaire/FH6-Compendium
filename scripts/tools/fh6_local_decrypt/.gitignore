@@ -1,0 +1,4 @@
+bin/
+obj/
+# never commit the third-party key assembly
+FH6LocalCrypto.Runtime.dll

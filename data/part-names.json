@@ -1,0 +1,783 @@
+{
+ "schema_version": "1.0.0",
+ "created": "2026-09-01",
+ "purpose": "The missing layer: internal part ID -> common name. Everything else in the clone pipeline is downstream of this. A part ID decodes to (slot, index); this file turns that into the string the game prints in the Upgrade Shop and the basket.",
+ "why_it_must_be_observed": "The game ships no readable table. Content/media/nerddata/NerdData.json and Content/media/physics/PI.xml are ENCRYPTED despite their extensions (verified 2026-09-01), and the bulk of the game sits in a 1.09 GB packed container. Names can only come from the screen.",
+ "how_to_add_a_row": [
+  "1. Fit the part in game and note the name from the BASKET screen (it prints names as plain text; tiles do not).",
+  "2. Save a setup, then diff the new container against the previous one.",
+  "3. The diff names exactly which (slot, index) changed. Pair THAT index with the basket name.",
+  "NEVER pair a basket name with an index you merely expected to be installed -- that is how 701 was wrongly recorded as Asanti AF 134. The index must come from a diff."
+ ],
+ "confidence": {
+  "verified": "read off a named frame AND pinned to an index by a container diff",
+  "derived": "index->name follows a rule confirmed across the corpus, but this specific row was not diffed",
+  "unknown": "the id exists in the data and has never been seen on screen"
+ },
+ "tier_ladder": {
+  "_note": "Global vocabulary used by the SPARSE slots. Confirmed end to end: 1 from 'Street Centrifugal Supercharger', 2 and 3 from the basket ('Sport Cams and Valves', 'Race Exhaust'), 4/5/6 from the Spring and Dampers and Differential menus.",
+  "0": "Stock",
+  "1": "Street",
+  "2": "Sport",
+  "3": "Race",
+  "4": "Rally",
+  "5": "Drift",
+  "6": "Offroad",
+  "applies_to": [
+   "brakes",
+   "front_arb",
+   "rear_arb",
+   "springs_dampers",
+   "differential",
+   "clutch",
+   "driveline"
+  ],
+  "confidence": "verified"
+ },
+ "dense_slots": {
+  "_note": "Index IS the 0-based tile position. Do NOT read these against the ladder -- doing so put Race Weight Reduction one tile too low.",
+  "slots": [
+   "drivetrain",
+   "car_body",
+   "engine",
+   "rear_wing",
+   "weight_reduction"
+  ],
+  "confidence": "verified",
+  "front_tire_width": "size ladder: tile = tier + 1 (2026-09-02 audit; rear_tire_width/rear_rim_size/front_rim_size proven on the NSX-R clone frames, the rest dense by construction)",
+  "rear_tire_width": "size ladder: tile = tier + 1 (2026-09-02 audit; rear_tire_width/rear_rim_size/front_rim_size proven on the NSX-R clone frames, the rest dense by construction)",
+  "front_rim_size": "size ladder: tile = tier + 1 (2026-09-02 audit; rear_tire_width/rear_rim_size/front_rim_size proven on the NSX-R clone frames, the rest dense by construction)",
+  "rear_rim_size": "size ladder: tile = tier + 1 (2026-09-02 audit; rear_tire_width/rear_rim_size/front_rim_size proven on the NSX-R clone frames, the rest dense by construction)",
+  "front_track_width": "size ladder: tile = tier + 1 (2026-09-02 audit; rear_tire_width/rear_rim_size/front_rim_size proven on the NSX-R clone frames, the rest dense by construction)",
+  "rear_track_width": "size ladder: tile = tier + 1 (2026-09-02 audit; rear_tire_width/rear_rim_size/front_rim_size proven on the NSX-R clone frames, the rest dense by construction)",
+  "front_tire_profile": "size ladder: tile = tier + 1 (2026-09-02 audit; rear_tire_width/rear_rim_size/front_rim_size proven on the NSX-R clone frames, the rest dense by construction)",
+  "rear_tire_profile": "size ladder: tile = tier + 1 (2026-09-02 audit; rear_tire_width/rear_rim_size/front_rim_size proven on the NSX-R clone frames, the rest dense by construction)",
+  "motor": "Motor and Battery Swap conversion slot; per-car names"
+ },
+ "named": {
+  "transmission": {
+   "_scheme": "Own catalogue, shared donor set 2102: id = 2102000 + index. Gear count = number of non-sentinel gear slots in the container.",
+   "0": "Stock Transmission",
+   "4": "Race Transmission: 7 Speed",
+   "5": "Race Transmission: 8 Speed",
+   "6": "Race Transmission: 9 Speed",
+   "7": "Race Transmission: 10 Speed",
+   "8": "Drift Transmission: 4 Speed",
+   "_proof": "2026-09-02 NSX-R saves trm1..trm6 read directly; trm5 (10 Speed, installed) unchanged = self-check.",
+   "_unverified": {
+    "1": "Street Transmission (catalogue order)",
+    "2": "Sport Transmission (catalogue order)",
+    "3": "Race Transmission: 6 Speed (catalogue order)",
+    "9": "Rally Transmission (catalogue order)"
+   },
+   "_side_effect": "install rewrites gear sliders + final drive to the transmission's defaults; unused slots = -1.0"
+  },
+  "differential": {
+   "_scheme": "Global ladder positions, donor set varies (2102 on the NSX-R)",
+   "_proof": "NSX-R saves dif1..dif4 2026-09-02; dif4 = installed Offroad = index 6 self-check",
+   "0": "Stock Diff",
+   "3": "Race Diff",
+   "5": "Drift Diff",
+   "6": "Offroad Diff",
+   "_hypothesis": {
+    "7": "Rally Diff (AWD cars only; index 4 unused in 544 tunes)"
+   },
+   "_unverified": {
+    "1": "Street?",
+    "2": "Sport?"
+   },
+   "_side_effect": "install rewrites center/front/rear accel+decel sliders to the part's defaults"
+  },
+  "weight_reduction": {
+   "_scheme": "DENSE within the body variant: index = variant*100 + tile position (412100/412101/412102 on the widebody NSX-R)",
+   "_proof": "wgt1..wgt3 2026-09-02; wgt3 = installed Race = self-check",
+   "0": "Stock Weight Reduction",
+   "1": "Sport Weight Reduction",
+   "2": "Race Weight Reduction",
+   "_note": "tier digit only; hundreds digit is the body variant. A 4-tile car (Street present) would shift Sport/Race to 2/3 under the dense rule; unverified.",
+   "_side_effect": "none"
+  },
+  "tire_compound": {
+   "_scheme": "GLOBAL enum, same index on every car. Part id = ordinal*1000 + index (412001 on the NSX-R).",
+   "_proof": "2026-09-02 NSX-R capture session: every tile queued in the basket, setup saved as cmpN (N = tile, cmp1..cmp11; cmp1 = Stock = index 0 saved last), container tire_compound read directly (Tuning_0412_20260902021611..022740). Names verbatim from the lime name bar. cmp8 = index 5 with 'Rally Tire Compound' on screen is the self-check.",
+   "_menu_order_nsxr": {
+    "1": 0,
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 10,
+    "6": 6,
+    "7": 15,
+    "8": 5,
+    "9": 7,
+    "10": 8,
+    "11": 9
+   },
+   "_menu_is_not_index_order": "tile 5 = index 10, tile 7 = index 15. Never read an index off tile position.",
+   "_not_offered_on_nsxr": "indices 4, 11, 12, 13, 14 unseen; catalogue rows still unplaced: 281 Vintage Race, 300 Vintage White Wall, 303 'Hot Wheels' Semi-Slick Race. Need a car that sells them.",
+   "_side_effect": "Installing a compound resets front_tire_pressure to 0.400 and rear_tire_pressure to 0.450 (normalised); gears untouched (10/10 saves).",
+   "0": "Stock Tire Compound",
+   "1": "Street Tire Compound",
+   "2": "Sport Tire Compound",
+   "3": "Semi-Slick Race Tire Compound",
+   "5": "Rally Tire Compound",
+   "6": "Slick Race Tire Compound",
+   "7": "Offroad Race Tire Compound",
+   "8": "Snow Tire Compound",
+   "9": "Drag Tire Compound",
+   "10": "'Horizon' Semi-Slick Race Tire Compound",
+   "15": "Drift Tire Compound"
+  },
+  "rim_style": {
+   "_scheme": "FLAT global catalogue. No partset, nothing derivable from the number. 148 distinct ids observed, 326..14670, block-allocated.",
+   "638": {
+    "name": "Asanti AF 134",
+    "confidence": "verified",
+    "note": "read off the car with the id taken from a diffed container"
+   },
+   "701": {
+    "name": "UNKNOWN",
+    "confidence": "unknown",
+    "note": "carried by Tuning_0412_20260901181414; never seen on screen. Previously and WRONGLY recorded as Asanti AF 134."
+   },
+   "13636": {
+    "name": "UNKNOWN",
+    "confidence": "unknown"
+   },
+   "4294967295": {
+    "name": "(empty slot - stock wheels)",
+    "confidence": "verified"
+   },
+   "_functional_equivalence": "Rims differ ONLY in weight delta (hence PWR and PI). Weight deltas come in classes that are multiples of a per-car unit: NSX-R unit 11 lb (Advan TC-4 -11, RZ-F2 -22, RGII -33; PI 636/637/638 on the same build), another car unit 14 lb (-14/-28/-42). Any rim of the same class is functionally identical for cloning. Observed 2026-09-02.",
+   "_clone_protocol": "No id->name table is required: the lock hides sliders, not INSTALLED badges, and the Rim Style menu opens with the cursor on the installed tile. Read the source car's installed rim (name + weight chip) and fit any rim of the same weight class. Each such read pairs the container id with a name and class: record it here.",
+   "_observed_names_no_id": {
+    "Advan TC-4": {
+     "weight_lb": -11,
+     "price_cr": 3300,
+     "car": "NSX-R",
+     "pi_preview": 636
+    },
+    "Advan RZ-F2": {
+     "weight_lb": -22,
+     "price_cr": 3400,
+     "car": "NSX-R",
+     "pi_preview": 637
+    },
+    "Advan RGII": {
+     "weight_lb": -33,
+     "price_cr": 3700,
+     "car": "NSX-R",
+     "pi_preview": 638
+    }
+   },
+   "_price_hint": "price tracks class loosely (3,200 = no change, 3,300 = 1 unit, 3,400 = 2 units, 3,700 = 3 units) with exceptions at 3,500 and 4,000.",
+   "_id_to_name_sources": "No readable install file carries the rim id->name table (it lives in the encrypted gamedbRC.slt); icon zip order and archive dates are alphabetical/installer artefacts. Two usable sources: (1) 167 containers have per-build WebP Thumb.png renders (670x376) showing the installed wheels: match the wheel crop against the 528 decoded icons; (2) ids appear to ascend alphabetically within allocation batches (636 American Racing Outlaw II, 637 Asanti AF 118, 638 Asanti AF 134 verified, 639 Asanti AF 140, 649 Compomotive M05: visual reads, unproven). 99100 on ordinal 1562 is a non-rim anomaly.",
+   "_smoke_test_2026_09_02": "Top Meta Rival clone on a second NSX-R via one basket: with stock rims the preview read A 702 (all other parts matched); fitting a heavier rim brought it to A 700, the target's PI. So rim 701 (target) is a heavier-than-stock class, and 638 Asanti AF 134 is in that same class (the first clone also reached 700 with it). Weight chips on tiles are deltas versus the installed rim, so classes are relative; the stock rim is not the heaviest option on this car.",
+   "_weight_class_observations": {
+    "nsxr_top_meta_rival_class": {
+     "ids": [
+      701,
+      638,
+      13675
+     ],
+     "evidence": "each yields A 700 on the Top Meta Rival hardware (701 = target; 638 Asanti AF 134 = first clone; 13675 = smoke-test clone 'cloned rsx' 2026-09-02); stock rim yields 702, so this class is heavier than the NSX-R stock rim",
+     "name_13675": "pending (read from the name bar)"
+    }
+   },
+   "_smoke_test_verdict": "cloned rsx (Tuning_0412_20260902044227) vs Top Meta Rival: all 100 part slots identical except rim_style/rear_rim_style (13675 vs 701); gears identical; 12 sliders at install defaults awaiting the tune screen.",
+   "_render_matches": "data/rim-id-matches.json (2026-09-02): the wheel in each of the 167 WebP build renders matched against the 528 decoded wheel icons, 62 distinct ids scored, 41 matched BY EYE (701 TSW Hockenheim R moderate, 13675 American Racing VF 309 high, 638 Asanti AF 134 anchor-confirmed, 13147 Speedline F1 high, 371 OZ Superturismo GT moderate), 17 ambiguous with candidate lists, 4 no verdict; 711 has no render. The automatic matcher alone got only ~10 of 62 right (spoke counting fails under ~45 px), so every verdict is a human read of the compare sheets. Alphabetical ascent within an allocation batch holds in 4 of 6 batches (632..711 strongest); it breaks at 12928 (ADV.1 Forza) and twice in 13616..14050. Hints for finding the tile, never proof: the weight chip must agree."
+  },
+  "driveline": {
+   "_scheme": "Global ladder",
+   "_proof": "NSX-R saves drv1..drv2 2026-09-02",
+   "0": "Stock Driveline",
+   "3": "Race Driveline",
+   "_unverified": {
+    "1": "Street Driveline?",
+    "2": "Sport Driveline?"
+   }
+  },
+  "clutch": {
+   "_scheme": "Global ladder (0 Stock, 3 Race seen in stored tunes; 1, 2 rare)",
+   "_menu": "NO Clutch tile on the 1992 NSX-R: its Drivetrain menu is Transmission, Driveline, Differential only, while the save still holds clutch = 2102000. Cars with a Race clutch in stored tunes: 1998 Impreza 22B, 2014 Golf R, 1985 Sprinter FE.",
+   "_unverified": {
+    "1": "Street Clutch?",
+    "2": "Sport Clutch?",
+    "3": "Race Clutch (catalogue order)"
+   }
+  },
+  "brakes": {
+   "_scheme": "Global ladder, car set (412xxx)",
+   "_proof": "NSX-R saves brk1..brk3 2026-09-02; brk1 = installed Stock unchanged = self-check",
+   "0": "Stock Brakes",
+   "2": "Sport Brakes",
+   "3": "Race Brakes",
+   "_unverified": {
+    "1": "Street Brakes (not offered on this car)"
+   },
+   "_banner": "UNLOCKS BRAKE TUNING on Race only",
+   "_side_effect": "none"
+  },
+  "springs_dampers": {
+   "_scheme": "Global ladder, car set (412xxx)",
+   "_proof": "NSX-R saves spr1..spr4 2026-09-02; spr1 = installed Stock unchanged = self-check",
+   "0": "Stock Spring and Dampers",
+   "3": "Race Spring and Dampers",
+   "4": "Rally Spring and Dampers",
+   "5": "Drift Spring and Dampers",
+   "_unverified": {
+    "1": "Street?",
+    "2": "Sport? (neither offered on this car)"
+   },
+   "_banner": "UNLOCKS SPRING, DAMPER, AND ALIGNMENT TUNING on every non-stock tile",
+   "_side_effect": "rewrites 12 suspension sliders incl. rear_caster (0.667 stock, 0.000 on Race/Rally/Drift)"
+  },
+  "front_arb": {
+   "_scheme": "Global ladder",
+   "_proof": "far1/far2 2026-09-02; far2 = installed Race = self-check",
+   "0": "Stock Front Anti-roll Bars",
+   "3": "Race Front Anti-roll Bars",
+   "_banner": "UNLOCKS FRONT ANTI-ROLL BAR STIFFNESS TUNING on Race",
+   "_side_effect": "rewrites front_arb slider (Stock 0.500, Race 0.480)"
+  },
+  "rear_arb": {
+   "_scheme": "Global ladder",
+   "_proof": "rar1/rar2 2026-09-02; rar2 = installed Race = self-check",
+   "0": "Stock Rear Anti-roll Bars",
+   "3": "Race Rear Anti-roll Bars",
+   "_banner": "UNLOCKS REAR ANTIROLL BAR STIFFNESS TUNING on Race",
+   "_side_effect": "rewrites rear_arb slider (Stock 0.500, Race 0.378)"
+  },
+  "roll_cage": {
+   "_scheme": "DENSE within the body variant: index = variant*100 + tile position (412100/412101/412102 on the widebody NSX-R)",
+   "_proof": "chs1..chs3 2026-09-02; chs1 = installed Stock unchanged",
+   "0": "Stock Chassis Reinforcement / Roll Cage",
+   "1": "Sport Chassis Reinforcement / Roll Cage",
+   "2": "Race Chassis Reinforcement / Roll Cage",
+   "_note": "tier digit only; the hundreds digit is the body variant",
+   "_side_effect": "none"
+  },
+  "engine": {
+   "_scheme": "DENSE per car: tile position = index in the car's own set. Names are composed (displacement + layout + optional suffix), not a string-table row; record per car.",
+   "_per_car": {
+    "412": {
+     "car": "1992 Honda NSX-R",
+     "captured": "2026-09-02 name bar, no saves",
+     "0": "Stock Powertrain Swap",
+     "1": "1.6L I4 - Turbo Rally",
+     "2": "2.0L I4-T",
+     "3": "3.2L I6",
+     "4": "6.2L V8",
+     "power_chip_hp": {
+      "1": -140,
+      "2": -125,
+      "3": -119,
+      "4": 179
+     },
+     "price_cr": {
+      "1": 25000,
+      "2": 25000,
+      "3": 25000,
+      "4": 3700
+     },
+     "pi_preview": {
+      "0": 638,
+      "1": 616,
+      "2": 601,
+      "3": 582,
+      "4": 651
+     },
+     "cross_check": "engine 412003 in stored tunes 'Road Grip (Rocket Bunny)' and '(A) Cornering Speed RWD' carries internals in set 136 -> set 136 = the 3.2L I6"
+    }
+   }
+  },
+  "_aspiration_menu": {
+   "412": {
+    "car": "1992 Honda NSX-R",
+    "tiles": [
+     "Stock - Naturally Aspirated",
+     "Twin Turbo",
+     "Positive-Displacement Supercharger",
+     "Centrifugal Supercharger"
+    ],
+    "slots": [
+     "manifold (NA marker)",
+     "twin_turbo",
+     "pos_supercharger",
+     "centrifugal_supercharger"
+    ],
+    "power_chip_hp": {
+     "Twin Turbo": 55,
+     "Positive-Displacement Supercharger": 33,
+     "Centrifugal Supercharger": 29
+    },
+    "price_cr": {
+     "Twin Turbo": 1800,
+     "Positive-Displacement Supercharger": 1500
+    },
+    "pi_preview": {
+     "Stock": 566,
+     "Twin Turbo": 596,
+     "Positive-Displacement Supercharger": 583,
+     "Centrifugal Supercharger": 572
+    },
+    "note": "no Single Turbo tile on this car; the type chosen here decides which Engine sub-menu (and slot) exists"
+   }
+  },
+  "rear_wing": {
+   "_scheme": "DENSE per car; name = <PartManufacturer> - <Upgrades row> (brand rule verified on screen 2026-09-02)",
+   "_per_car": {
+    "412": {
+     "car": "1992 Honda NSX-R",
+     "0": "Honda - Stock Rear Wing",
+     "1": "Rocket Bunny - Race Rear Wing",
+     "2": "Forza Horizon 6 - Race Rear Wing",
+     "price_cr": {
+      "1": 5000
+     },
+     "pi_preview": {
+      "0": 591,
+      "1": 578,
+      "2": 578
+     },
+     "chips": "ADJUSTABLE on all three tiles; banner UNLOCKS REAR WING DOWNFORCE TUNING on the two Race wings",
+     "installed_in_clone": "2 (matches rear_wing 412002)"
+    }
+   }
+  },
+  "manifold": {
+   "_exclusive": "manifold (NA marker) and any populated aspiration slot are mutually exclusive; never schedule a manifold purchase after an Aspiration conversion."
+  },
+  "motor": {
+   "_scheme": "DENSE conversion slot (Motor and Battery Swap), per-car names; do not name by catalogue row. motor_parts rows 259-262 are a normal Stock/Street/Sport/Race run keyed by the motor family."
+  },
+  "car_body": {
+   "_per_car": {
+    "412": {
+     "car": "1992 Honda NSX-R",
+     "0": "Stock Body",
+     "1": "Rocket Bunny - Widebody Kit",
+     "_source": "basket line 2026-09-02 smoke test"
+    }
+   },
+   "_scheme": "DENSE per car (Body Kit tiles); names per car, brand-prefixed"
+  },
+  "drivetrain": {
+   "_per_car": {
+    "412": {
+     "car": "1992 Honda NSX-R",
+     "0": "Stock Drivetrain",
+     "1": "AWD Drivetrain",
+     "_source": "basket line 2026-09-02 smoke test; spec 9.2 Drivetrain Swap tile 2"
+    }
+   }
+  }
+ },
+ "gaps": {
+  "rim_style": "147 of 148 ids unnamed. Each needs fit + save + diff, so this is the most expensive catalogue and the least performance-relevant (cosmetic, though wheels do carry a weight delta).",
+  "engine_families": "134 families in data/engine-swaps.json, 25 carry a donor_name and 18 of those are known WRONG -- the engine head is a parallel enumeration offset from the car table, not a donor ordinal, so names cannot be derived from the number.",
+  "tier_1_and_2_on_some_slots": "Street and Sport are named in the ladder but were only observed on a few slots; a slot could in principle skip them.",
+  "engine_internal_slots": "Group membership is proven (they carry the ENGINE's partset, 519/519) but which slot is camshaft vs valves vs displacement is not. The Engine menu lists Camshaft and Valves as SEPARATE tiles while the part sold under Camshaft is named 'Sport Cams and Valves'.",
+  "transmission_2102000": "The shared 6-speed (2102000, 97 tunes) has no observed name."
+ },
+ "catalogue": {
+  "source": "Content/media/stripped/stringtables/EN.zip -> Upgrades.str, IDS_Name_<n>; parsed by scripts/telemetry/fh6_strings.py; exported to data/game-strings/Upgrades.json",
+  "rule": "For a 4-tier family the display name is Upgrades[base(slot) + tier], tier = index % 100 in 0..3 (Stock/Street/Sport/Race). Validated on all 12 screen-verified (slot, tier, name) pairs with zero misses.",
+  "why_the_ladder_looked_sparse": "Rally/Drift/Offroad were added to the catalogue later at high IDS numbers (272, 278, 291, 292, 301) while the save encodes them as tiers 4/5/6 of the same slot. extended_tiers maps those.",
+  "brand_rule": "Brand parts compose as '<List_PartManufacturer name> - <Upgrades name>' (e.g. 'Rocket Bunny - Widebody Kit', 'Forza Horizon 6 - Race Rear Wing'); they are not rows of Upgrades.str.",
+  "bases": {
+   "camshaft": 3,
+   "displacement": 7,
+   "fuel_system": 11,
+   "ignition": 15,
+   "exhaust": 19,
+   "intake": 23,
+   "single_turbo": 27,
+   "pos_supercharger": 31,
+   "centrifugal_supercharger": 35,
+   "intercooler": 39,
+   "brakes": 43,
+   "springs_dampers": 47,
+   "front_arb": 51,
+   "transmission": 55,
+   "clutch": 59,
+   "flywheel": 63,
+   "driveline": 67,
+   "differential": 71,
+   "weight_reduction": 75,
+   "tire_compound": 78,
+   "front_rim_size": 82,
+   "front_tire_width": 84,
+   "front_bumper": 86,
+   "rear_wing": 90,
+   "rear_bumper": 94,
+   "side_skirts": 98,
+   "hood": 100,
+   "rim_style": 114,
+   "drivetrain": 141,
+   "car_body": 143,
+   "rear_tire_width": 149,
+   "restrictor_plate": 161,
+   "manifold": 208,
+   "valves": 220,
+   "pistons": 224,
+   "oil_cooling": 232,
+   "twin_turbo": 236,
+   "rear_arb": 244,
+   "roll_cage": 248,
+   "rear_rim_size": 257,
+   "motor_parts": 259,
+   "front_track_width": 282,
+   "rear_track_width": 284,
+   "front_tire_profile": 304,
+   "rear_tire_profile": 308,
+   "motor": 314,
+   "engine": 1
+  },
+  "extended_tiers": {
+   "springs_dampers": {
+    "4": 272,
+    "5": 278
+   },
+   "differential": {
+    "4": 291,
+    "5": 292,
+    "6": 301
+   },
+   "transmission": {
+    "0": 55,
+    "1": 56,
+    "2": 57,
+    "3": 293,
+    "4": 294,
+    "5": 295,
+    "6": 296,
+    "7": 297,
+    "8": 302,
+    "9": 271
+   },
+   "tire_compound": {
+    "0": 78,
+    "1": 79,
+    "2": 80,
+    "3": 81,
+    "5": 273,
+    "6": 299,
+    "7": 274,
+    "8": 277,
+    "9": 280,
+    "10": 275,
+    "15": 298
+   },
+   "weight_reduction": {
+    "0": 75,
+    "1": 77,
+    "2": 113
+   },
+   "single_turbo": {
+    "4": 312
+   },
+   "twin_turbo": {
+    "4": 313
+   },
+   "restrictor_plate": {
+    "0": 161,
+    "1": 162
+   },
+   "tire_compound_unproven_catalogue_order": {
+    "unplaced_rows": [
+     281,
+     300,
+     303
+    ],
+    "unseen_indices": [
+     4,
+     11,
+     12,
+     13,
+     14
+    ]
+   },
+   "_note_tire_compound": "All 11 NSX-R compounds proven by cmpN saves 2026-09-02. Catalogue order was right for 8 Snow and 9 Drag only; wrong at 6, 7, 10, 15."
+  },
+  "extended_confidence": {
+   "transmission": "derived: 4..8 pinned by gear counts (7/8/9/10-speed, Drift 4); 0..3 and 9 by catalogue order",
+   "tire_compound": "derived: 5=Rally confirmed on the completed clone; the rest follow catalogue order and are UNVERIFIED",
+   "weight_reduction": "verified by the completed clone (dense: Stock/Sport/Race)",
+   "springs_dampers": "verified (Rally/Drift read from the NSX-R menu)",
+   "differential": "verified (Stock/Race/Drift/Offroad read from the NSX-R menu)",
+   "single_turbo": "tier 4 = 'Race Turbo With Anti-Lag' (312), derived from catalogue order"
+  },
+  "verified_slots": [
+   "exhaust",
+   "camshaft",
+   "displacement",
+   "pistons",
+   "brakes",
+   "front_arb",
+   "rear_arb",
+   "weight_reduction",
+   "centrifugal_supercharger",
+   "springs_dampers",
+   "differential",
+   "transmission",
+   "intake",
+   "fuel_system",
+   "ignition",
+   "valves",
+   "oil_cooling",
+   "flywheel",
+   "intercooler",
+   "driveline"
+  ],
+  "verified_pairs": [
+   [
+    "exhaust",
+    3,
+    "Race Exhaust"
+   ],
+   [
+    "camshaft",
+    2,
+    "Sport Cams and Valves"
+   ],
+   [
+    "displacement",
+    3,
+    "Race Engine Block"
+   ],
+   [
+    "pistons",
+    3,
+    "Race Pistons / Compression"
+   ],
+   [
+    "brakes",
+    3,
+    "Race Brakes"
+   ],
+   [
+    "front_arb",
+    3,
+    "Race Front Anti-roll Bars"
+   ],
+   [
+    "rear_arb",
+    3,
+    "Race Rear Anti-roll Bars"
+   ],
+   [
+    "weight_reduction",
+    2,
+    "Race Weight Reduction"
+   ],
+   [
+    "centrifugal_supercharger",
+    3,
+    "Race Centrifugal Supercharger"
+   ],
+   [
+    "centrifugal_supercharger",
+    1,
+    "Street Centrifugal Supercharger"
+   ],
+   [
+    "springs_dampers",
+    3,
+    "Race Spring and Dampers"
+   ],
+   [
+    "springs_dampers",
+    5,
+    "Drift Spring and Dampers"
+   ],
+   [
+    "intake",
+    0,
+    "Stock Intake"
+   ],
+   [
+    "fuel_system",
+    3,
+    "Race Fuel System"
+   ],
+   [
+    "ignition",
+    3,
+    "Race Ignition"
+   ],
+   [
+    "valves",
+    3,
+    "Race Valves"
+   ],
+   [
+    "oil_cooling",
+    3,
+    "Race Oil / Cooling"
+   ],
+   [
+    "flywheel",
+    3,
+    "Race Flywheel"
+   ],
+   [
+    "intercooler",
+    3,
+    "Race Intercooler"
+   ],
+   [
+    "camshaft",
+    3,
+    "Race Cams and Valves"
+   ],
+   [
+    "driveline",
+    0,
+    "Stock Driveline"
+   ],
+   [
+    "driveline",
+    3,
+    "Race Driveline"
+   ]
+  ],
+  "rims": "Model names are NOT in EN.zip. The rim catalogue is the directory Content/media/cars/_library/scene/wheels/<MFR>_<MODEL>.zip (e.g. ASA_AF134, WOR_MeisterCR01, AME_VF300, 5ZI_5ZRCopse) with matching icons in ui/textures/data_bound/Upgrade_Parts.zip/Tire_Rims/Licensed_Rims/. The numeric rim_style id -> stem mapping is in no readable text entry; it still needs fit -> save -> diff per wheel.",
+  "pair_families": {
+   "_rule": "Stock/Upgraded pairs, not 4-tier runs: tier 0 -> Stock row, tier >= 1 -> the 'Upgraded ...' row. The game itself labels every non-stock option just 'Upgraded'; the size is only on the tile.",
+   "front_rim_size": [
+    82,
+    83
+   ],
+   "rear_rim_size": [
+    257,
+    258
+   ],
+   "front_tire_width": [
+    84,
+    85
+   ],
+   "rear_tire_width": [
+    149,
+    145
+   ],
+   "front_track_width": [
+    282,
+    283
+   ],
+   "rear_track_width": [
+    284,
+    285
+   ],
+   "front_tire_profile": [
+    304,
+    305
+   ],
+   "rear_tire_profile": [
+    308,
+    309
+   ],
+   "rim_style": [
+    114,
+    115
+   ]
+  },
+  "brand_slots": {
+   "_rule": "Per-car lists of brand parts ('Rocket Bunny - Widebody Kit', 'Forza Horizon 6 - Race Rear Wing'). The 4-tier family rows exist in the catalogue but the tile the player sees is <Manufacturer> - <row>, and the save index is a dense per-car position, so the row alone is NOT the name. Resolver returns no name rather than a plausible wrong one.",
+   "slots": [
+    "rear_wing",
+    "front_bumper",
+    "rear_bumper",
+    "hood",
+    "side_skirts",
+    "car_body",
+    "engine"
+   ]
+  },
+  "per_car_option_lists": "Each car archive Content/media/cars/<CAR>.zip carries Manifest.xml with <UpgradeablePart PartEnum=... PartId=...> rows listing that car's VISUAL upgrade options by the exact save part id -- CarBody, RearWing, FrontBumper, RearBumper, Hood, SideSkirts, ChassisStiffness (including the variant-100 ids) -- 660 archives. So the option LISTS for the brand-composed slots are file-derivable for every car; the model basenames are generic (bumperfcustom_b, trunk_b), so the brand LABEL per option is still menu-only.",
+  "_engine_note_2026_09_02": "NSX-R Engine menus (name bar, no saves needed): every engine family except Intercooler sells 3 tiles Stock/Sport/Race; installed tiles match save ids on the global ladder (cams tile 2 = index 2, pistons/block/exhaust/supercharger tile 3 = index 3), so the Street tier is absent, not renumbered. Intercooler sells 4 tiles. PI previews with the top tile: fuel 691, ignition 690, valves 689, oil 686, flywheel 685, intercooler 685, cams 695 (from Sport); baseline 683. Power chips: fuel +20, ignition +16, valves +15, oil +9, intercooler +26, cams +34; flywheel -4 lb."
+ },
+ "fallback_identification": {
+  "rule": "When a slot's tile cannot be named or positioned, identify it by EFFECT: read the source car's Power/Weight page (power, torque, weight, front %, displacement, PI) and Braking/Lateral G page once; on the clone, leave ambiguous slots for last, then pick the tile whose preview reproduces the source numbers. Tile chips (POWER +N hp, Weight -N lb) are deltas against the current state and must close the remaining difference. PI is verifiable live: the daemon receives menu preview configs while tiles are highlighted.",
+  "why": "Jett 2026-09-02: 'if we know that the correct upgrade would result in XXX HP or X torque, that is almost as good and will suffice for right now'. Rims (weight class) were the first application.",
+  "known_effects_nsxr": {
+   "engine_top_tiles_hp": {
+    "fuel_system": 20,
+    "ignition": 16,
+    "valves": 15,
+    "oil_cooling": 9,
+    "intercooler": 26,
+    "camshaft_from_sport": 34,
+    "flywheel_lb": -4
+   },
+   "engine_swaps_hp": {
+    "1.6L I4 - Turbo Rally": -140,
+    "2.0L I4-T": -125,
+    "3.2L I6": -119,
+    "6.2L V8": 179
+   },
+   "aspiration_hp": {
+    "Twin Turbo": 55,
+    "Positive-Displacement Supercharger": 33,
+    "Centrifugal Supercharger": 29
+   },
+   "rims_lb": {
+    "class1": -11,
+    "class2": -22,
+    "class3": -33
+   }
+  }
+ },
+ "size_slots": {
+  "_scheme": "DENSE per car: index = step k from stock in the car's own list (variant digit = body kit). Proven on the NSX-R clone frames: rear_tire_width 106 = tile 7 of 7 (345 mm), rear_rim_size 4 = tile 5 (20 in), front_rim_size 3 = tile 4 (18 in). Front tire width, track width and tire profile dense by construction (fleet uses exactly tiers 0..N with N = catalogue 'Upgraded' row count).",
+  "row_counts": {
+   "front_tire_width": 6,
+   "rear_tire_width": 6,
+   "front_rim_size": 8,
+   "rear_rim_size": 8,
+   "front_track_width": 3,
+   "rear_track_width": 3,
+   "front_tire_profile": 3,
+   "rear_tire_profile": 3
+  },
+  "nsxr_412": {
+   "front_tire_width_stock_body": [
+    "205 (205/50R15)",
+    "225 (225/45R15)",
+    "245",
+    "255 (255/40R15)"
+   ],
+   "front_tire_width_widebody": [
+    "205",
+    "225",
+    "?",
+    "?",
+    "275 (275/35R15)",
+    "?",
+    "295 (295/35R15)"
+   ],
+   "rear_tire_width_stock_body": [
+    "225 (225/50R16)",
+    "245 (245/45R16)",
+    "265",
+    "285 (285/40R16)",
+    "305 (305/35R16)"
+   ],
+   "rear_tire_width_widebody": [
+    "285 (stock for kit)",
+    "295",
+    "305",
+    "315",
+    "325",
+    "335",
+    "345"
+   ],
+   "front_rim_size": "index 3 = 18 in Front Rims (tile 4)",
+   "rear_rim_size": "index 4 = 20 in Rear Rims (tile 5)",
+   "note": "rim menus do not change with the kit; the NSX-R sells no track width or tire profile menu"
+  },
+  "track_width_and_profile": "Separate car-dependent shop menus, not consequences of width or rim size (47 containers have non-stock front track width with stock front tire width). Only cars whose category shows the tile carry them; at a widebody variant tier 0 is the kit's own stock.",
+  "corrections": "part-index-vocabulary.json basket rows were wrong: front_rim_size 3 is 18 in (not 17), rear_rim_size 4 is 20 in (not 19)."
+ },
+ "drivetrain_partset_caveat": "Transmission, differential, driveline and clutch share ONE partset per container that is never the car's ordinal. Set 2102 is used by swapped drivetrains (313 of 574 containers); stock drivetrains use a per-car set (94 sets, 238 containers). Every proven Drivetrain ladder (trm/dif/drv saves 2026-09-02) was made on the AWD-swapped NSX-R, i.e. set 2102. The index digits look identical across sets in the corpus histograms, but treat differential/transmission/driveline names on non-2102 sets as 'verified on 2102 only' until one stock-set capture. The transmission speed count is set-independent: count the non-sentinel gear slots."
+}

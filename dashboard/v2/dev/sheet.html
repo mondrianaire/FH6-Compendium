@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GameSheet fixture</title>
+<link rel="stylesheet" href="../sheet.css?v=9">
+<style>
+  html,body{margin:0;height:100%;background:#05070a;color:#dfe7ef;
+    font:13px/1.45 "Segoe UI",system-ui,sans-serif}
+  #bar{display:flex;gap:10px;align-items:center;padding:6px 12px;background:#0d1117;
+    border-bottom:1px solid #232d39;height:36px}
+  #bar b{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#7d8b9c}
+  #bar button{background:#1a222c;border:1px solid #2e3a48;color:#dfe7ef;border-radius:4px;
+    padding:3px 9px;font:12px inherit;cursor:pointer}
+  #bar .src{margin-left:auto;font:11px ui-monospace,Consolas,monospace;color:#576372}
+  #sheet{height:calc(100vh - 36px)}
+</style>
+</head>
+<body>
+<div id="bar">
+  <b>GameSheet fixture</b>
+  <button id="tglLock">toggle locked</button>
+  <button id="tglStats">toggle stats</button>
+  <button id="tglKit">toggle body kit</button>
+  <button id="tglAsp">toggle supercharger</button>
+  <button id="reset">reset checklist</button>
+  <span class="src" id="src">…</span>
+</div>
+<div id="sheet"></div>
+
+<script src="../sheet.js?v=9"></script>
+<script>
+/* A fixture built from docs/fh6-ui-spec.md — the 1992 Honda NSX-R (ordinal 412) with the
+   centrifugal-supercharger conversion and the Rocket Bunny widebody fitted. Every string,
+   price, chip and grid length below is quoted from the spec (§2, §10). If
+   api/options/412.json or api/options/3212.json exists it is used instead. */
+let PID = 900000;
+const p = () => ++PID;
+
+// three-tile ladder: Stock / Sport / Race (§10.5 — the Street tier is absent, not renumbered)
+function ladder(base, prices, effects, extra) {
+  const tiers = ["Stock", "Sport", "Race"];
+  return tiers.map((t, i) => Object.assign({
+    pos: i + 1, pid: p(), level: i === 0 ? 0 : i + 1, name: t + " " + base,
+    price: i === 0 ? 0 : prices[i - 1], stock: i === 0, mass_lb: null,
+    effect: effects ? effects[i - 1] || null : null
+  }, (extra && extra[i]) || {}));
+}
+function tiles(list) { return list.map((t, i) => Object.assign({ pos: i + 1, pid: p(), stock: i === 0,
+  level: i, mass_lb: null, effect: null, price: 0 }, t)); }
+
+const ENGINE_MENUS = [
+  { slot: "intake", title: "Intake", tile_label: "Intake", pos: 1, tile_count: 3,
+    tiles: ladder("Intake", [1200, 1800], ["POWER +6 hp", "POWER +10 hp"]) },
+  { slot: "fuel_system", title: "Fuel System", tile_label: "Fuel System", pos: 2, tile_count: 3,
+    tiles: ladder("Fuel System", [1500, 2200], [null, "POWER +20 hp"]) },
+  { slot: "ignition", title: "Ignition", tile_label: "Ignition", pos: 3, tile_count: 3,
+    tiles: ladder("Ignition", [1300, 1950], [null, "POWER +16 hp"]) },
+  { slot: "exhaust", title: "Exhaust", tile_label: "Exhaust", pos: 4, tile_count: 3,
+    tiles: ladder("Exhaust", [1400, 2050], [null, "POWER +12 hp"]) },
+  { slot: "camshaft", title: "Camshaft", tile_label: "Camshaft", pos: 5, tile_count: 3,
+    tiles: ladder("Cams and Valves", [2000, 3000], [null, "POWER +34 hp"]) },
+  { slot: "valves", title: "Valves", tile_label: "Valves", pos: 6, tile_count: 3,
+    tiles: ladder("Valves", [2000, 3000], [null, "POWER +15 hp"]) },
+  { slot: "displacement", title: "Displacement", tile_label: "Displacement", pos: 7, tile_count: 3,
+    tiles: ladder("Engine Block", [2100, 3200]) },
+  { slot: "pistons", title: "Pistons / Compression", tile_label: "Pistons", pos: 8, tile_count: 3,
+    tiles: ladder("Pistons / Compression", [2100, 3200]) },
+  // §9.1 / §10.5 — this sub-menu exists only while that aspiration conversion is installed
+  { slot: "centrifugal_supercharger", title: "Centrifugal Supercharger",
+    tile_label: "Centrifugal Supercharger", pos: 9, tile_count: 3,
+    requires_aspiration: "centrifugal_supercharger",
+    tiles: ladder("Centrifugal Supercharger", [4200, 5400]) },
+  { slot: "single_turbo", title: "Single Turbo", tile_label: "Single Turbo", pos: 9,
+    tile_count: 3, requires_aspiration: "single_turbo",
+    tiles: ladder("Turbo", [4000, 5400]) },
+  { slot: "intercooler", title: "Intercooler", tile_label: "Intercooler", pos: 10, tile_count: 4,
+    requires_aspiration: "any",
+    tiles: tiles([{ name: "Stock Intercooler" }, { name: null, unknown: true },
+                  { name: "Sport Intercooler", price: 1600, stock: false },
+                  { name: "Race Intercooler", price: 2400, stock: false, effect: "POWER +26 hp" }]) },
+  { slot: "oil_cooling", title: "Oil / Cooling", tile_label: "Oil / Cooling", pos: 11, tile_count: 3,
+    tiles: tiles([{ name: "Stock Oil / Cooling" },
+                  { name: "Sport Oil / Cooling", price: 1400, stock: false, effect: "POWER +4 hp" },
+                  { name: null, unknown: true, stock: false }]) },
+  { slot: "flywheel", title: "Flywheel", tile_label: "Flywheel", pos: 12, tile_count: 3,
+    tiles: tiles([{ name: "Stock Flywheel" }, { name: null, unknown: true },
+                  { name: "Race Flywheel", price: 2400, stock: false, effect: "Weight -4 lb" }]) }
+];
+
+const OPTIONS = {
+  ordinal: 412, name: "1992 Honda NSX-R", generated: new Date().toISOString(),
+  shop: [
+    { area: "Engine", pos: 1, menus: ENGINE_MENUS },
+    { area: "Platform and Handling", pos: 2, menus: [
+      { slot: "brakes", title: "Brakes", tile_label: "Brakes", pos: 1, tile_count: 3,
+        unlock: "UNLOCKS BRAKE TUNING",
+        tiles: tiles([{ name: "Stock Brakes" },
+                      { name: "Sport Brakes", price: 1300, stock: false, effect: "EFFICIENCY -13%" },
+                      { name: "Race Brakes", price: 1950, stock: false, effect: "EFFICIENCY +33%",
+                        unlock: "UNLOCKS BRAKE TUNING" }]) },
+      { slot: "springs_dampers", title: "Spring and Dampers", tile_label: "Spring and Dampers",
+        pos: 2, tile_count: 4, unlock: "UNLOCKS SPRING, DAMPER, AND ALIGNMENT TUNING",
+        tiles: tiles([{ name: "Stock Spring and Dampers" },
+                      { name: "Race Spring and Dampers", price: 2050, stock: false },
+                      { name: "Rally Spring and Dampers", price: 2050, stock: false },
+                      { name: "Drift Spring and Dampers", price: 2050, stock: false,
+                        effect: "RIDE HEIGHT -1.41 in" }]) },
+      { slot: "front_arb", title: "Front Anti-roll Bars", tile_label: "Front Anti-roll Bars",
+        pos: 3, tile_count: 2, unlock: "UNLOCKS FRONT ANTI-ROLL BAR STIFFNESS TUNING",
+        tiles: tiles([{ name: "Stock Front Anti-roll Bars" },
+                      { name: "Race Front Anti-roll Bars", price: 1900, stock: false }]) },
+      { slot: "rear_arb", title: "Rear Anti-roll Bars", tile_label: "Rear Anti-roll Bars",
+        pos: 4, tile_count: 2, unlock: "UNLOCKS REAR ANTIROLL BAR STIFFNESS TUNING",
+        tiles: tiles([{ name: "Stock Rear Anti-roll Bars" },
+                      { name: "Race Rear Anti-roll Bars", price: 1900, stock: false }]) },
+      { slot: "roll_cage", title: "Chassis Reinforcement / Roll Cage",
+        tile_label: "Chassis Reinforcement / Roll Cage", pos: 5, tile_count: 3,
+        tiles: tiles([{ name: "Stock Chassis Reinforcement / Roll Cage" },
+                      { name: "Sport Chassis Reinforcement / Roll Cage", price: 1500, stock: false },
+                      { name: "Race Chassis Reinforcement / Roll Cage", price: 2100, stock: false,
+                        effect: "Weight +80 lb" }]) },
+      { slot: "weight_reduction", title: "Weight Reduction", tile_label: "Weight Reduction",
+        pos: 6, tile_count: 3,
+        tiles: tiles([{ name: "Stock Weight Reduction" },
+                      { name: "Sport Weight Reduction", price: 1600, stock: false },
+                      { name: "Race Weight Reduction", price: 2350, stock: false,
+                        effect: "Weight -362 lb" }]) }
+    ] },
+    { area: "Drivetrain", pos: 3, menus: [
+      { slot: "transmission", title: "Transmission", tile_label: "Transmission", pos: 1,
+        tile_count: 6, unlock: "UNLOCKS FULL GEAR RATIO TUNING",
+        tiles: tiles([{ name: "Stock Transmission" },
+                      { name: "Race Transmission: 7 Speed", price: 15000, stock: false },
+                      { name: "Race Transmission: 8 Speed", price: 20000, stock: false },
+                      { name: "Race Transmission: 9 Speed", price: 25000, stock: false },
+                      { name: "Race Transmission: 10 Speed", price: 30000, stock: false },
+                      { name: "Drift Transmission: 4 Speed", price: 12000, stock: false }]) },
+      { slot: "driveline", title: "Driveline", tile_label: "Driveline", pos: 2, tile_count: 2,
+        tiles: tiles([{ name: "Stock Driveline" },
+                      { name: "Race Driveline", price: 2600, stock: false }]) },
+      { slot: "differential", title: "Differential", tile_label: "Differential", pos: 3,
+        tile_count: 4, unlock: "UNLOCKS FULL DIFFERENTIAL TUNING",
+        tiles: tiles([{ name: "Stock Diff" },
+                      { name: "Race Diff", price: 2500, stock: false, effect: "DIFFERENTIAL 2-WAY" },
+                      { name: "Drift Diff", price: 2500, stock: false, effect: "DIFFERENTIAL 2-WAY" },
+                      { name: "Offroad Diff", price: 2500, stock: false, effect: "DIFFERENTIAL 2-WAY" }]) }
+    ] },
+    { area: "Tires and Rims", pos: 4, menus: [
+      { slot: "tire_compound", title: "Tire Compound", tile_label: "Tire Compound", pos: 1,
+        tile_count: 11,
+        tiles: tiles([{ name: "Stock Tire Compound (Street)" }, { name: "Street Tire Compound", price: 4000, stock: false },
+                      { name: "Sport Tire Compound", price: 6000, stock: false },
+                      { name: "Semi-Slick Race Tire Compound", price: 8000, stock: false },
+                      { name: "'Horizon' Semi-Slick Race Tire Compound", price: 8000, stock: false },
+                      { name: "Slick Race Tire Compound", price: 10000, stock: false },
+                      { name: "Drift Tire Compound", price: 10000, stock: false },
+                      { name: "Rally Tire Compound", price: 10000, stock: false },
+                      { name: "Offroad Race Tire Compound", price: 10000, stock: false },
+                      { name: "Snow Tire Compound", price: 10000, stock: false, effect: "GRIP -0.13" },
+                      { name: "Drag Tire Compound", price: 10000, stock: false }]) },
+      { slot: "front_tire_width", title: "Front Tire Width", tile_label: "Front Tire Width",
+        pos: 2, tile_count: 4,
+        tiles: tiles([{ name: "205 mm Front Tires", effect: "205/50R15" },
+                      { name: "225 mm Front Tires", price: 1800, stock: false, effect: "225/45R15" },
+                      { name: "245 mm Front Tires", price: 2200, stock: false, effect: "245/40R15" },
+                      { name: "255 mm Front Tires", price: 2400, stock: false, effect: "255/40R15" }]) },
+      { slot: "rear_tire_width", title: "Rear Tire Width", tile_label: "Rear Tire Width",
+        pos: 3, tile_count: 4,
+        tiles: tiles([{ name: "225 mm Rear Tires", effect: "225/50R16" },
+                      { name: "265 mm Rear Tires", price: 2600, stock: false, effect: "265/40R16" },
+                      { name: "285 mm Rear Tires", price: 3000, stock: false, effect: "285/40R16" },
+                      { name: "325 mm Rear Tires", price: 3400, stock: false, effect: "325/20R20" }]) },
+      // §5.2 — the tile reads `Front Rim Style`, the screen it opens is titled `Rim Style`
+      { slot: "rim_style", title: "Rim Style", tile_label: "Front Rim Style", pos: 5,
+        tile_count: null, tiles: [] },
+      { slot: "front_rim_size", title: "Front Rim Size", tile_label: "Front Rim Size", pos: 7,
+        tile_count: 2,
+        tiles: tiles([{ name: "15 in Front Rims" },
+                      { name: "18 in Front Rims", price: 2000, stock: false, effect: "205/30R18" }]) },
+      { slot: "rear_rim_size", title: "Rear Rim Size", tile_label: "Rear Rim Size", pos: 8,
+        tile_count: 3,
+        tiles: tiles([{ name: "16 in Rear Rims" },
+                      { name: "17 in Rear Rims", price: 1800, stock: false, effect: "345/30R17" },
+                      { name: "18 in Rear Rims", price: 2000, stock: false, effect: "345/25R18" }]) }
+    ] },
+    { area: "Aero and Appearance", pos: 5, menus: [
+      // §2.5 / §10.7 — this tile disappears while the body kit is on
+      { slot: "front_bumper", title: "Front Bumper", tile_label: "Front Bumper", pos: 1,
+        tile_count: 3, removed_by_body_kit: true,
+        tiles: tiles([{ name: "Honda - Stock Front Bumper" },
+                      { name: "Rocket Bunny - Race Front Bumper", price: 5000, stock: false },
+                      { name: "Forza Horizon 6 - Race Front Bumper", price: 5000, stock: false }]) },
+      { slot: "rear_wing", title: "Rear Wing", tile_label: "Rear Wing", pos: 2, tile_count: 3,
+        unlock: "UNLOCKS REAR WING DOWNFORCE TUNING",
+        tiles: tiles([{ name: "Honda - Stock Rear Wing", effect: "NONADJUSTABLE" },
+                      { name: "Rocket Bunny - Race Rear Wing", price: 5000, stock: false,
+                        effect: "ADJUSTABLE", unlock: "UNLOCKS REAR WING DOWNFORCE TUNING" },
+                      { name: "Forza Horizon 6 - Race Rear Wing", price: 5000, stock: false,
+                        effect: "ADJUSTABLE", unlock: "UNLOCKS REAR WING DOWNFORCE TUNING" }]) }
+    ] },
+    { area: "Body Kits and Conversions", pos: 6, menus: [
+      { slot: "engine", title: "Engine Swap", tile_label: "Engine Swap", pos: 1, tile_count: 5,
+        tiles: tiles([{ name: "Stock Powertrain Swap" },
+                      { name: "1.6L I4 - Turbo Rally", price: 25000, stock: false, effect: "POWER -13 hp" },
+                      { name: "2.0L I4-T", price: 25000, stock: false, effect: "POWER +2 hp" },
+                      { name: "3.2L I6", price: 25000, stock: false, effect: "POWER +8 hp" },
+                      { name: "6.2L V8", price: 35000, stock: false, effect: "POWER +142 hp", owned: true }]) },
+      { slot: "drivetrain", title: "Drivetrain Swap", tile_label: "Drivetrain Swap", pos: 2,
+        tile_count: 2,
+        tiles: tiles([{ name: "Stock Drivetrain" },
+                      { name: "AWD Drivetrain", price: 10000, stock: false, owned: true }]) },
+      { slot: "aspiration", title: "Aspiration", tile_label: "Aspiration", pos: 3, tile_count: 4,
+        tiles: tiles([{ name: "Stock - Naturally Aspirated" },
+                      { name: "Twin Turbo", price: 1800, stock: false, effect: "POWER +55 hp" },
+                      { name: "Positive-Displacement Supercharger", price: 1500, stock: false,
+                        effect: "POWER +33 hp" },
+                      { name: "Centrifugal Supercharger", price: 1500, stock: false,
+                        effect: "POWER +29 hp" }]) },
+      { slot: "car_body", title: "Body Kit", tile_label: "Body Kit", pos: 4, tile_count: 2,
+        tiles: tiles([{ name: "Honda - Stock Body" },
+                      { name: "Rocket Bunny - Widebody Kit", price: 20000, stock: false }]) }
+    ] }
+  ],
+  rims: { brands: [
+    { brand: "Advan", tagline: "Yokohama", rims: [
+      { pid: 13675, name: "TC-4", mass_level: 1, mass_lb: -11, price: 3000 },
+      { pid: 13676, name: "RZ-F2", mass_level: 2, mass_lb: -22, price: 3200 },
+      { pid: 13677, name: "RGII", mass_level: 3, mass_lb: -33, price: 3400 }] },
+    { brand: "5Zigen", tagline: "Team", rims: [
+      { pid: 13701, name: "5ZR Copse", mass_level: 2, mass_lb: -22, price: 3200 }] },
+    { brand: "American Racing", tagline: "Since 1956", rims: [
+      { pid: 13721, name: "VF300", mass_level: 1, mass_lb: -8, price: 3300 },
+      { pid: 13722, name: null, unknown: true, mass_level: null, mass_lb: null, price: null }] }
+  ] },
+  index_scheme: { engine: "position", drivetrain: "position", car_body: "position",
+                  brakes: "ladder", springs_dampers: "ladder", tire_compound: "ladder" },
+  unknown: ["Engine > Intercooler tile 2", "Engine > Oil / Cooling tile 3",
+            "Engine > Flywheel tile 2", "Tires and Rims tiles 4 and 6",
+            "American Racing rim 2", "Transmission and Driveline descriptions"]
+};
+
+/* ---- the fitted build (api/build/<hw>.json parts[] where pid != null) ------- */
+function pidOf(slot, name) {
+  const all = [];
+  OPTIONS.shop.forEach(a => a.menus.forEach(m => { if (m.slot === slot) all.push(...(m.tiles || [])); }));
+  const t = all.find(t => t.name === name);
+  return t ? t.pid : null;
+}
+const FITTED = {
+  intake: pidOf("intake", "Race Intake"),
+  fuel_system: pidOf("fuel_system", "Race Fuel System"),
+  ignition: pidOf("ignition", "Sport Ignition"),
+  exhaust: pidOf("exhaust", "Race Exhaust"),
+  camshaft: pidOf("camshaft", "Race Cams and Valves"),
+  valves: pidOf("valves", "Race Valves"),
+  displacement: pidOf("displacement", "Race Engine Block"),
+  pistons: pidOf("pistons", "Race Pistons / Compression"),
+  centrifugal_supercharger: pidOf("centrifugal_supercharger", "Race Centrifugal Supercharger"),
+  oil_cooling: pidOf("oil_cooling", "Sport Oil / Cooling"),
+  flywheel: pidOf("flywheel", "Race Flywheel"),
+  brakes: pidOf("brakes", "Race Brakes"),
+  springs_dampers: pidOf("springs_dampers", "Race Spring and Dampers"),
+  front_arb: pidOf("front_arb", "Race Front Anti-roll Bars"),
+  rear_arb: pidOf("rear_arb", "Race Rear Anti-roll Bars"),
+  roll_cage: pidOf("roll_cage", "Stock Chassis Reinforcement / Roll Cage"),
+  weight_reduction: pidOf("weight_reduction", "Race Weight Reduction"),
+  transmission: pidOf("transmission", "Race Transmission: 9 Speed"),
+  driveline: pidOf("driveline", "Race Driveline"),
+  differential: pidOf("differential", "Race Diff"),
+  tire_compound: pidOf("tire_compound", "Rally Tire Compound"),
+  front_tire_width: pidOf("front_tire_width", "245 mm Front Tires"),
+  rear_tire_width: pidOf("rear_tire_width", "285 mm Rear Tires"),
+  front_rim_size: pidOf("front_rim_size", "18 in Front Rims"),
+  rear_rim_size: pidOf("rear_rim_size", "18 in Rear Rims"),
+  rim_style: 13676,
+  front_bumper: pidOf("front_bumper", "Rocket Bunny - Race Front Bumper"),
+  rear_wing: pidOf("rear_wing", "Forza Horizon 6 - Race Rear Wing"),
+  engine: pidOf("engine", "6.2L V8"),
+  drivetrain: pidOf("drivetrain", "AWD Drivetrain"),
+  aspiration: pidOf("aspiration", "Centrifugal Supercharger"),
+  car_body: pidOf("car_body", "Rocket Bunny - Widebody Kit")
+};
+
+/* ---- the daemon's deliverable (values quoted from spec §3) ------------------ */
+function row(field, label, section, value, unit, fill, poles) {
+  return { field, label, section, value, unit, fill, poles };
+}
+const GEARS = [4.17, 2.95, 2.31, 1.88, 1.58, 1.33, 1.13, 0.90, 0.75];
+const DELIVERABLE = {
+  locked: false, gear_count: 9,
+  tabs: [
+    { tab: "Tires", rows: [
+      row("front_tire_pressure", "Front tire pressure", "Tire Pressure", 26.0, "psi", 0.40, ["Low", "High"]),
+      row("rear_tire_pressure", "Rear tire pressure", "Tire Pressure", 28.0, "psi", 0.45, ["Low", "High"])] },
+    { tab: "Springs", rows: [
+      row("front_spring", "Front spring rate", "Springs", 602.4, "lb/in", 0.38, ["Soft", "Stiff"]),
+      row("rear_spring", "Rear spring rate", "Springs", 921.6, "lb/in", 0.62, ["Soft", "Stiff"]),
+      row("front_ride_height", "Front ride height", "Ride Height", 4.0, "in", 0.33, ["Low", "High"]),
+      row("rear_ride_height", "Rear ride height", "Ride Height", 3.9, "in", 0.31, ["Low", "High"])] },
+    { tab: "Alignment", rows: [
+      row("front_camber", "Front camber", "Camber", -1.8, "deg", 0.41, ["Negative", "Positive"]),
+      row("rear_camber", "Rear camber", "Camber", -1.5, "deg", 0.44, ["Negative", "Positive"]),
+      row("front_toe", "Front toe", "Toe", 0.0, "deg", 0.50, ["In", "Out"]),
+      row("rear_toe", "Rear toe", "Toe", 0.0, "deg", 0.50, ["In", "Out"]),
+      row("front_caster", "Front caster", "Front Caster", 6.3, "deg", 0.66, ["Low", "High"])] },
+    { tab: "Anti-roll bars", rows: [
+      row("front_arb", "Front ARB", "Antiroll Bars", 5.80, "", 0.08, ["Soft", "Stiff"]),
+      row("rear_arb", "Rear ARB", "Antiroll Bars", 65.00, "", 0.96, ["Soft", "Stiff"])] },
+    { tab: "Damping", rows: [
+      row("front_rebound", "Front rebound", "Rebound Stiffness", 11.9, "", 0.72, ["Soft", "Stiff"]),
+      row("rear_rebound", "Rear rebound", "Rebound Stiffness", 9.2, "", 0.55, ["Soft", "Stiff"]),
+      row("front_bump", "Front bump", "Bump Stiffness", 2.0, "", 0.12, ["Soft", "Stiff"]),
+      row("rear_bump", "Rear bump", "Bump Stiffness", 2.4, "", 0.15, ["Soft", "Stiff"])] },
+    { tab: "Aero", rows: [
+      row("front_downforce", "Front downforce", "Downforce", 163, "lb", 0.35, ["Speed", "Cornering"]),
+      row("rear_downforce", "Rear downforce", "Downforce", 245, "lb", 0.58, ["Speed", "Cornering"])] },
+    // BRAKE rows are deliberately absent — the spec's frames show the tab LOCKED (§3, §5.8)
+    { tab: "Differential", rows: [
+      row("front_diff_accel", "Front acceleration", "Front Differential", 100, "%", 1.0, ["Low", "High"]),
+      row("front_diff_decel", "Front deceleration", "Front Differential", 0, "%", 0.0, ["Low", "High"]),
+      row("rear_diff_accel", "Rear acceleration", "Rear Differential", 100, "%", 1.0, ["Low", "High"]),
+      row("rear_diff_decel", "Rear deceleration", "Rear Differential", 3, "%", 0.03, ["Low", "High"]),
+      row("center_diff", "Center balance", "Center", 63, "%", 0.63, ["Front", "Rear"])] },
+    { tab: "Gearing", rows: [
+      row("final_drive", "Final drive", "Forward Gears", 4.56, ":1", 0.55, ["Speed", "Acceleration"])]
+      .concat(GEARS.map((g, i) => row("gear_" + (i + 1), (i + 1) + " gear", "Forward Gears", g, ":1",
+        Math.max(0.03, Math.min(0.97, (g - 0.5) / 4.2)), ["Speed", "Acceleration"]))) }
+  ],
+  summary: { parts_installed: 30 }
+};
+
+const STATS = {                                   // §4.2 / §10, page-2 and page-3 figures
+  pi: "A 700", ratings: { speed: 6.2, handling: 6.7, acceleration: 8.9, launch: 8.3,
+                          braking: 6.2, offroad: 5.5 },
+  power: 440, torque: 307, weight: 2547, front_pct: 45, pwr: 0.17, displacement: 3400,
+  braking_60_0: 81.1, braking_100_0: 189.1, lat_g_60: 1.22, lat_g_120: 1.49,
+  accel_0_60: 2.950, accel_0_100: 6.783, top_speed: 170.0,
+  mech_balance: 0.59, aero_balance: 0.42, aero_efficiency: 0.809
+};
+
+/* ---- boot ------------------------------------------------------------------ */
+const host = document.getElementById("sheet");
+const model = {
+  options: OPTIONS, fitted: FITTED, fittedNames: {}, deliverable: DELIVERABLE,
+  name: "eliminator-9spd", locked: false, stats: STATS,
+  done: { intake: true, brakes: true, front_arb: true },
+  onDone: (slot, on) => console.log("onDone", slot, on)
+};
+
+// With a real export the fixture's NSX-R pids mean nothing, so synthesise a plausible
+// clone target out of that car's own grids: the top non-stock tile of every menu, plus one rim.
+function fittedFromOptions(o) {
+  const f = {};
+  (o.shop || []).forEach(a => (a.menus || []).forEach(mu => {
+    const buy = (mu.tiles || []).filter(t => !t.stock && t.pid != null);
+    if (buy.length) f[mu.slot] = buy[buy.length - 1].pid;
+  }));
+  const b = ((o.rims || {}).brands || [])[0];
+  if (b && (b.rims || []).length) { f.rim_style = b.rims[0].pid; f.rear_rim_style = b.rims[0].pid; }
+  return f;
+}
+async function tryReal() {
+  // ?fixture forces the spec-built NSX-R (the toggles below only drive that one)
+  if (/[?&]fixture/.test(location.search)) {
+    document.getElementById("src").textContent = "fixture (spec-built, NSX-R 412) — forced";
+    return false;
+  }
+  const want = (/[?&]ord=(\d+)/.exec(location.search) || [])[1];
+  for (const ord of (want ? [want] : [3212, 412])) {
+    try {
+      const r = await fetch("../api/options/" + ord + ".json");
+      if (r.ok) {
+        const j = await r.json();
+        model.options = j;
+        model.fitted = fittedFromOptions(j);
+        model.done = {};
+        document.getElementById("src").textContent = "api/options/" + ord + ".json";
+        return true;
+      }
+    } catch (e) {}
+  }
+  document.getElementById("src").textContent = "fixture (spec-built, NSX-R 412)";
+  return false;
+}
+tryReal().then(() => GameSheet.render(host, model));
+
+document.getElementById("tglLock").onclick = () => {
+  model.locked = !model.locked; GameSheet.render(host, model);
+};
+document.getElementById("tglStats").onclick = () => {
+  model.stats = model.stats ? null : STATS; GameSheet.render(host, model);
+};
+document.getElementById("tglKit").onclick = () => {
+  model.fitted.car_body = model.fitted.car_body === pidOf("car_body", "Rocket Bunny - Widebody Kit")
+    ? pidOf("car_body", "Honda - Stock Body")
+    : pidOf("car_body", "Rocket Bunny - Widebody Kit");
+  GameSheet.render(host, model);
+};
+document.getElementById("tglAsp").onclick = () => {
+  model.fitted.centrifugal_supercharger = model.fitted.centrifugal_supercharger == null
+    ? pidOf("centrifugal_supercharger", "Race Centrifugal Supercharger") : null;
+  GameSheet.render(host, model);
+};
+document.getElementById("reset").onclick = () => { model.done = {}; GameSheet.render(host, model); };
+</script>
+</body>
+</html>

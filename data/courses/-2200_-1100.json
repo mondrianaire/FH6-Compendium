@@ -1,0 +1,219 @@
+{
+ "route_key": "-2200_-1100",
+ "name": null,
+ "turns": [
+  {
+   "id": "T1",
+   "pos": [
+    -2256,
+    -1067
+   ],
+   "dir": "R",
+   "type": "medium",
+   "radius_m": 50,
+   "n": 34,
+   "best": {
+    "mph_in": 49,
+    "mph_min": 49,
+    "mph_out": 59,
+    "brake_on_m": null,
+    "throttle_on_m": 0,
+    "lat_g": 1.27,
+    "apex": [
+     -2256,
+     -1067
+    ],
+    "t0": 23275.5,
+    "stint": 85,
+    "first_red": "front ph1",
+    "session": "fh6_20260831_172011"
+   },
+   "sessions": 2,
+   "best_by_car": {
+    "3859|0|4|487": {
+     "mph_in": 49,
+     "mph_min": 49,
+     "mph_out": 59,
+     "brake_on_m": null,
+     "throttle_on_m": 0,
+     "lat_g": 1.27,
+     "apex": [
+      -2256,
+      -1067
+     ],
+     "t0": 23275.5,
+     "stint": 85,
+     "first_red": "front ph1",
+     "session": "fh6_20260831_172011"
+    }
+   },
+   "cars": [
+    "3859|0|4|487"
+   ],
+   "status": "turn",
+   "by_session": {
+    "fh6_20260831_172011": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 49,
+     "usi": 0.122,
+     "cars": [
+      "3859|0|4|487"
+     ]
+    },
+    "fh6_20260831_172011.csv": {
+     "n": 1,
+     "laps_seen": 1,
+     "laps": 1,
+     "fr": {
+      "front": 1,
+      "rear": 0,
+      "none": 0
+     },
+     "lim": "tune",
+     "multi": 0.0,
+     "mph_min": 49,
+     "usi": 0.122,
+     "cars": [
+      "3859|0|4|487"
+     ]
+    }
+   },
+   "track": {
+    "passes": 2,
+    "laps_seen": 2,
+    "sessions": 2,
+    "fr": {
+     "front": 2,
+     "rear": 0,
+     "none": 0
+    },
+    "lim": {
+     "tune": 2
+    },
+    "dominant": "front",
+    "consistency": 1.0,
+    "cars": [
+     "3859|0|4|487"
+    ],
+    "laps_track": 2,
+    "presence": 1.0
+   },
+   "established": true,
+   "est_by": "behaviour"
+  }
+ ],
+ "laps": 2,
+ "sessions": [
+  "fh6_20260831_172011",
+  "fh6_20260831_172011.csv"
+ ],
+ "updated": "fh6_20260831_172011",
+ "best_laps": {},
+ "visits": [
+  {
+   "session": "fh6_20260831_172011",
+   "laps": 1,
+   "attempts": 1,
+   "cars": [
+    "3859|0|4|487"
+   ],
+   "best_lap": null,
+   "best_car": null
+  },
+  {
+   "session": "fh6_20260831_172011.csv",
+   "laps": 1,
+   "attempts": 1,
+   "cars": [
+    "3859|0|4|487"
+   ],
+   "best_lap": null,
+   "best_car": null
+  }
+ ],
+ "cars": {
+  "3859|0|4|487": {
+   "name": "1984 Honda City",
+   "class": "C",
+   "pi": 487,
+   "drivetrain": "FWD"
+  }
+ },
+ "speed_traces": {},
+ "geo_turns": {},
+ "turn_count_delta": null,
+ "turn_count": 1,
+ "profile": {
+  "dims": {
+   "low_corner": {
+    "frac": 0.25,
+    "band": "heavy"
+   },
+   "mid_corner": {
+    "frac": 0.122,
+    "band": "moderate"
+   },
+   "fast_corner": {
+    "frac": 0.0,
+    "band": "absent"
+   },
+   "braking": {
+    "frac": 0.085,
+    "band": "light"
+   },
+   "straight": {
+    "frac": 0.08,
+    "band": "light"
+   },
+   "elevation": {
+    "frac": null,
+    "band": "absent",
+    "range_m": 0.1
+   },
+   "launch": {
+    "frac": null,
+    "band": "absent"
+   }
+  },
+  "heavy": [
+   "low-speed corners"
+  ],
+  "absent": [
+   "fast sweepers",
+   "elevation (crests)"
+  ],
+  "gears_used": [
+   1,
+   2,
+   3,
+   4,
+   11
+  ],
+  "top_gear_used": 11,
+  "max_gear": 6,
+  "top_speed": 68,
+  "elevation_range_m": 0.1,
+  "notes": [
+   "no real straight (top speed only 68 mph, gears used [1, 2, 3, 4, 11]/6) — top-end gearing & drag are irrelevant here; tune the gears you use",
+   "flat (no crests) — spring/damper vertical behaviour isn't tested on this course",
+   "no fast corners — understeer here is mechanical, not aero"
+  ],
+  "priority": [
+   "low-speed corners",
+   "medium corners"
+  ],
+  "rough_frac": 0.0,
+  "rough_n": 1
+ },
+ "profile_laps": 1,
+ "profile_session": "fh6_20260831_172011"
+}

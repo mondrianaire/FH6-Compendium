@@ -1,0 +1,896 @@
+{
+ "schema": 1,
+ "created_utc": "2026-09-18T17:13:56Z",
+ "car": {
+  "ordinal": 2866,
+  "name": "Exomotive Exocet Sport V8 XP-5",
+  "drivetype": "AWD",
+  "class": "S2",
+  "pi": 841,
+  "gears": 10,
+  "stock_drivetype": "RWD",
+  "drivetrain_source": "build (drivetrain_id 2102)"
+ },
+ "route_key": "route:6001",
+ "course": {
+  "name": "Edamame Circuit",
+  "length_m": 1084.0,
+  "turns": 11
+ },
+ "hw_hash": "b309f89c1c29de60",
+ "baseline_from": "Tuning_2866_20260911191636",
+ "laps_per_cell": 3,
+ "re_anchor_every": 5,
+ "baseline_sliders": {
+  "brake_balance": 50.0,
+  "brake_pressure": 115.0,
+  "center_diff": 60.0,
+  "final_drive": 4.15,
+  "front_arb": 33.0,
+  "front_bump": 10.5,
+  "front_camber": -1.0,
+  "front_caster": 4.0,
+  "front_diff_accel": 50.0,
+  "front_diff_decel": 50.0,
+  "front_downforce": 135.0,
+  "front_rebound": 10.5,
+  "front_ride_height": 0.1429,
+  "front_spring": 60.0,
+  "front_tire_pressure": 30.0,
+  "front_toe": 0.0,
+  "rear_arb": 33.0,
+  "rear_bump": 10.5,
+  "rear_camber": -1.0,
+  "rear_caster": 1.0,
+  "rear_diff_accel": 50.0,
+  "rear_diff_decel": 50.0,
+  "rear_downforce": 144.0,
+  "rear_rebound": 10.5,
+  "rear_ride_height": 0.1351,
+  "rear_spring": 70.25,
+  "rear_tire_pressure": 30.0,
+  "rear_toe": 0.0
+ },
+ "swept": [
+  "front_tire_pressure",
+  "rear_tire_pressure",
+  "final_drive",
+  "front_camber",
+  "rear_camber",
+  "front_toe",
+  "rear_toe",
+  "front_caster",
+  "front_arb",
+  "rear_arb",
+  "front_spring",
+  "rear_spring",
+  "front_ride_height",
+  "rear_ride_height",
+  "front_bump",
+  "rear_bump",
+  "front_rebound",
+  "rear_rebound",
+  "front_downforce",
+  "rear_downforce",
+  "brake_balance",
+  "brake_pressure",
+  "center_diff",
+  "front_diff_accel",
+  "front_diff_decel",
+  "rear_diff_accel",
+  "rear_diff_decel"
+ ],
+ "skipped": [
+  {
+   "slider": "handbrake",
+   "why": "not an independently settable tuning slider"
+  },
+  {
+   "slider": "rear_caster",
+   "why": "not an independently settable tuning slider"
+  },
+  {
+   "slider": "tcs_slip",
+   "why": "not an independently settable tuning slider"
+  }
+ ],
+ "cells": [
+  {
+   "cell_id": "baseline",
+   "slider": null,
+   "level": "mid",
+   "value": null,
+   "unit": null,
+   "laps_wanted": 3,
+   "note": "build this once and save it; every other cell is this tune with ONE slider moved"
+  },
+  {
+   "cell_id": "front_tire_pressure:low",
+   "slider": "front_tire_pressure",
+   "level": "low",
+   "value": 20.0,
+   "unit": "psi",
+   "baseline_value": 30.0,
+   "range": [
+    15.0,
+    55.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_tire_pressure:high",
+   "slider": "front_tire_pressure",
+   "level": "high",
+   "value": 45.0,
+   "unit": "psi",
+   "baseline_value": 30.0,
+   "range": [
+    15.0,
+    55.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_tire_pressure:low",
+   "slider": "rear_tire_pressure",
+   "level": "low",
+   "value": 20.0,
+   "unit": "psi",
+   "baseline_value": 30.0,
+   "range": [
+    15.0,
+    55.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_tire_pressure:high",
+   "slider": "rear_tire_pressure",
+   "level": "high",
+   "value": 45.0,
+   "unit": "psi",
+   "baseline_value": 30.0,
+   "range": [
+    15.0,
+    55.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "final_drive:low",
+   "slider": "final_drive",
+   "level": "low",
+   "value": 3.175,
+   "unit": "ratio",
+   "baseline_value": 4.15,
+   "range": [
+    2.2,
+    6.1
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "final_drive:high",
+   "slider": "final_drive",
+   "level": "high",
+   "value": 5.125,
+   "unit": "ratio",
+   "baseline_value": 4.15,
+   "range": [
+    2.2,
+    6.1
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "baseline@6",
+   "slider": null,
+   "level": "mid",
+   "value": null,
+   "unit": null,
+   "laps_wanted": 1,
+   "note": "re-anchor: restore the baseline tune and drive one lap"
+  },
+  {
+   "cell_id": "front_camber:low",
+   "slider": "front_camber",
+   "level": "low",
+   "value": -3.0,
+   "unit": "deg",
+   "baseline_value": -1.0,
+   "range": [
+    -5.0,
+    5.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_camber:high",
+   "slider": "front_camber",
+   "level": "high",
+   "value": 0.5,
+   "unit": "deg",
+   "baseline_value": -1.0,
+   "range": [
+    -5.0,
+    5.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_camber:low",
+   "slider": "rear_camber",
+   "level": "low",
+   "value": -3.0,
+   "unit": "deg",
+   "baseline_value": -1.0,
+   "range": [
+    -5.0,
+    5.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_camber:high",
+   "slider": "rear_camber",
+   "level": "high",
+   "value": 0.5,
+   "unit": "deg",
+   "baseline_value": -1.0,
+   "range": [
+    -5.0,
+    5.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_toe:low",
+   "slider": "front_toe",
+   "level": "low",
+   "value": -0.5,
+   "unit": "deg",
+   "baseline_value": 0.0,
+   "range": [
+    -5.0,
+    5.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_toe:high",
+   "slider": "front_toe",
+   "level": "high",
+   "value": 0.5,
+   "unit": "deg",
+   "baseline_value": 0.0,
+   "range": [
+    -5.0,
+    5.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "baseline@12",
+   "slider": null,
+   "level": "mid",
+   "value": null,
+   "unit": null,
+   "laps_wanted": 1,
+   "note": "re-anchor: restore the baseline tune and drive one lap"
+  },
+  {
+   "cell_id": "rear_toe:low",
+   "slider": "rear_toe",
+   "level": "low",
+   "value": -0.5,
+   "unit": "deg",
+   "baseline_value": 0.0,
+   "range": [
+    -5.0,
+    5.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_toe:high",
+   "slider": "rear_toe",
+   "level": "high",
+   "value": 0.5,
+   "unit": "deg",
+   "baseline_value": 0.0,
+   "range": [
+    -5.0,
+    5.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_caster:low",
+   "slider": "front_caster",
+   "level": "low",
+   "value": 1.0,
+   "unit": "deg",
+   "baseline_value": 4.0,
+   "range": [
+    1.0,
+    7.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_caster:high",
+   "slider": "front_caster",
+   "level": "high",
+   "value": 7.0,
+   "unit": "deg",
+   "baseline_value": 4.0,
+   "range": [
+    1.0,
+    7.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_arb:low",
+   "slider": "front_arb",
+   "level": "low",
+   "value": 7.4,
+   "unit": "scale",
+   "baseline_value": 33.0,
+   "range": [
+    1.0,
+    65.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_arb:high",
+   "slider": "front_arb",
+   "level": "high",
+   "value": 58.6,
+   "unit": "scale",
+   "baseline_value": 33.0,
+   "range": [
+    1.0,
+    65.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "baseline@18",
+   "slider": null,
+   "level": "mid",
+   "value": null,
+   "unit": null,
+   "laps_wanted": 1,
+   "note": "re-anchor: restore the baseline tune and drive one lap"
+  },
+  {
+   "cell_id": "rear_arb:low",
+   "slider": "rear_arb",
+   "level": "low",
+   "value": 7.4,
+   "unit": "scale",
+   "baseline_value": 33.0,
+   "range": [
+    1.0,
+    65.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_arb:high",
+   "slider": "rear_arb",
+   "level": "high",
+   "value": 58.6,
+   "unit": "scale",
+   "baseline_value": 33.0,
+   "range": [
+    1.0,
+    65.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_spring:low",
+   "slider": "front_spring",
+   "level": "low",
+   "value": 28.0,
+   "unit": "N/mm",
+   "baseline_value": 60.0,
+   "range": [
+    20.0,
+    100.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_spring:high",
+   "slider": "front_spring",
+   "level": "high",
+   "value": 92.0,
+   "unit": "N/mm",
+   "baseline_value": 60.0,
+   "range": [
+    20.0,
+    100.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_spring:low",
+   "slider": "rear_spring",
+   "level": "low",
+   "value": 46.45,
+   "unit": "N/mm",
+   "baseline_value": 70.25,
+   "range": [
+    40.5,
+    100.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_spring:high",
+   "slider": "rear_spring",
+   "level": "high",
+   "value": 94.05,
+   "unit": "N/mm",
+   "baseline_value": 70.25,
+   "range": [
+    40.5,
+    100.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "baseline@24",
+   "slider": null,
+   "level": "mid",
+   "value": null,
+   "unit": null,
+   "laps_wanted": 1,
+   "note": "re-anchor: restore the baseline tune and drive one lap"
+  },
+  {
+   "cell_id": "front_ride_height:low",
+   "slider": "front_ride_height",
+   "level": "low",
+   "value": 0.1235,
+   "unit": "m",
+   "baseline_value": 0.1429,
+   "range": [
+    0.1235,
+    0.1623
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_ride_height:high",
+   "slider": "front_ride_height",
+   "level": "high",
+   "value": 0.1623,
+   "unit": "m",
+   "baseline_value": 0.1429,
+   "range": [
+    0.1235,
+    0.1623
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_ride_height:low",
+   "slider": "rear_ride_height",
+   "level": "low",
+   "value": 0.1135,
+   "unit": "m",
+   "baseline_value": 0.1351,
+   "range": [
+    0.1135,
+    0.1567
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_ride_height:high",
+   "slider": "rear_ride_height",
+   "level": "high",
+   "value": 0.1567,
+   "unit": "m",
+   "baseline_value": 0.1351,
+   "range": [
+    0.1135,
+    0.1567
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_bump:low",
+   "slider": "front_bump",
+   "level": "low",
+   "value": 2.9,
+   "unit": "scale",
+   "baseline_value": 10.5,
+   "range": [
+    1.0,
+    20.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_bump:high",
+   "slider": "front_bump",
+   "level": "high",
+   "value": 18.1,
+   "unit": "scale",
+   "baseline_value": 10.5,
+   "range": [
+    1.0,
+    20.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "baseline@30",
+   "slider": null,
+   "level": "mid",
+   "value": null,
+   "unit": null,
+   "laps_wanted": 1,
+   "note": "re-anchor: restore the baseline tune and drive one lap"
+  },
+  {
+   "cell_id": "rear_bump:low",
+   "slider": "rear_bump",
+   "level": "low",
+   "value": 2.9,
+   "unit": "scale",
+   "baseline_value": 10.5,
+   "range": [
+    1.0,
+    20.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_bump:high",
+   "slider": "rear_bump",
+   "level": "high",
+   "value": 18.1,
+   "unit": "scale",
+   "baseline_value": 10.5,
+   "range": [
+    1.0,
+    20.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_rebound:low",
+   "slider": "front_rebound",
+   "level": "low",
+   "value": 2.9,
+   "unit": "scale",
+   "baseline_value": 10.5,
+   "range": [
+    1.0,
+    20.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_rebound:high",
+   "slider": "front_rebound",
+   "level": "high",
+   "value": 18.1,
+   "unit": "scale",
+   "baseline_value": 10.5,
+   "range": [
+    1.0,
+    20.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_rebound:low",
+   "slider": "rear_rebound",
+   "level": "low",
+   "value": 2.9,
+   "unit": "scale",
+   "baseline_value": 10.5,
+   "range": [
+    1.0,
+    20.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_rebound:high",
+   "slider": "rear_rebound",
+   "level": "high",
+   "value": 18.1,
+   "unit": "scale",
+   "baseline_value": 10.5,
+   "range": [
+    1.0,
+    20.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "baseline@36",
+   "slider": null,
+   "level": "mid",
+   "value": null,
+   "unit": null,
+   "laps_wanted": 1,
+   "note": "re-anchor: restore the baseline tune and drive one lap"
+  },
+  {
+   "cell_id": "front_downforce:low",
+   "slider": "front_downforce",
+   "level": "low",
+   "value": 86.0,
+   "unit": "kgf",
+   "baseline_value": 135.0,
+   "range": [
+    86.0,
+    184.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_downforce:high",
+   "slider": "front_downforce",
+   "level": "high",
+   "value": 184.0,
+   "unit": "kgf",
+   "baseline_value": 135.0,
+   "range": [
+    86.0,
+    184.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_downforce:low",
+   "slider": "rear_downforce",
+   "level": "low",
+   "value": 91.0,
+   "unit": "kgf",
+   "baseline_value": 144.0,
+   "range": [
+    91.0,
+    197.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_downforce:high",
+   "slider": "rear_downforce",
+   "level": "high",
+   "value": 197.0,
+   "unit": "kgf",
+   "baseline_value": 144.0,
+   "range": [
+    91.0,
+    197.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "brake_balance:low",
+   "slider": "brake_balance",
+   "level": "low",
+   "value": 40.0,
+   "unit": "% front",
+   "baseline_value": 50.0,
+   "range": [
+    0.0,
+    100.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "brake_balance:high",
+   "slider": "brake_balance",
+   "level": "high",
+   "value": 60.0,
+   "unit": "% front",
+   "baseline_value": 50.0,
+   "range": [
+    0.0,
+    100.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "baseline@42",
+   "slider": null,
+   "level": "mid",
+   "value": null,
+   "unit": null,
+   "laps_wanted": 1,
+   "note": "re-anchor: restore the baseline tune and drive one lap"
+  },
+  {
+   "cell_id": "brake_pressure:low",
+   "slider": "brake_pressure",
+   "level": "low",
+   "value": 80.0,
+   "unit": "%",
+   "baseline_value": 115.0,
+   "range": [
+    0.0,
+    200.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "brake_pressure:high",
+   "slider": "brake_pressure",
+   "level": "high",
+   "value": 165.0,
+   "unit": "%",
+   "baseline_value": 115.0,
+   "range": [
+    0.0,
+    200.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "center_diff:low",
+   "slider": "center_diff",
+   "level": "low",
+   "value": 30.0,
+   "unit": "% rear",
+   "baseline_value": 60.0,
+   "range": [
+    0.0,
+    100.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "center_diff:high",
+   "slider": "center_diff",
+   "level": "high",
+   "value": 90.0,
+   "unit": "% rear",
+   "baseline_value": 60.0,
+   "range": [
+    0.0,
+    100.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_diff_accel:low",
+   "slider": "front_diff_accel",
+   "level": "low",
+   "value": 10.0,
+   "unit": "%",
+   "baseline_value": 50.0,
+   "range": [
+    0.0,
+    100.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_diff_accel:high",
+   "slider": "front_diff_accel",
+   "level": "high",
+   "value": 90.0,
+   "unit": "%",
+   "baseline_value": 50.0,
+   "range": [
+    0.0,
+    100.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "baseline@48",
+   "slider": null,
+   "level": "mid",
+   "value": null,
+   "unit": null,
+   "laps_wanted": 1,
+   "note": "re-anchor: restore the baseline tune and drive one lap"
+  },
+  {
+   "cell_id": "front_diff_decel:low",
+   "slider": "front_diff_decel",
+   "level": "low",
+   "value": 10.0,
+   "unit": "%",
+   "baseline_value": 50.0,
+   "range": [
+    0.0,
+    100.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "front_diff_decel:high",
+   "slider": "front_diff_decel",
+   "level": "high",
+   "value": 90.0,
+   "unit": "%",
+   "baseline_value": 50.0,
+   "range": [
+    0.0,
+    100.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_diff_accel:low",
+   "slider": "rear_diff_accel",
+   "level": "low",
+   "value": 10.0,
+   "unit": "%",
+   "baseline_value": 50.0,
+   "range": [
+    0.0,
+    100.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_diff_accel:high",
+   "slider": "rear_diff_accel",
+   "level": "high",
+   "value": 90.0,
+   "unit": "%",
+   "baseline_value": 50.0,
+   "range": [
+    0.0,
+    100.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_diff_decel:low",
+   "slider": "rear_diff_decel",
+   "level": "low",
+   "value": 10.0,
+   "unit": "%",
+   "baseline_value": 50.0,
+   "range": [
+    0.0,
+    100.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "rear_diff_decel:high",
+   "slider": "rear_diff_decel",
+   "level": "high",
+   "value": 90.0,
+   "unit": "%",
+   "baseline_value": 50.0,
+   "range": [
+    0.0,
+    100.0
+   ],
+   "laps_wanted": 3
+  },
+  {
+   "cell_id": "baseline@54",
+   "slider": null,
+   "level": "mid",
+   "value": null,
+   "unit": null,
+   "laps_wanted": 1,
+   "note": "re-anchor: restore the baseline tune and drive one lap"
+  }
+ ],
+ "totals": {
+  "cells": 64,
+  "sliders": 27,
+  "laps": 174
+ }
+}

@@ -1,0 +1,168 @@
+{
+ "session": "fh6_20260903_022117",
+ "built_utc": "2026-09-18T18:29:40Z",
+ "capture": "fh6_20260903_022117.csv.gz",
+ "laps": 3,
+ "findings": [
+  {
+   "fault": "gear-under-revved",
+   "severity": 0.2350640859407664,
+   "detail": "top gear reached only 83% of the 8469 rpm redline (peak 7025); the gear is carried but never used",
+   "fix": "shorten the final drive (raise the ratio) so top gear reaches the power band, or accept it as a cruising gear this course does not need",
+   "measure": {
+    "peak_rpm": 7025,
+    "redline": 8469,
+    "frac": 0.829
+   },
+   "lap_id": 529,
+   "cid": "3212|2|8|800",
+   "route_key": "route:5555",
+   "container": null,
+   "hw_hash": null
+  },
+  {
+   "fault": "brake-lock-all-four",
+   "severity": 1.0,
+   "t": 2056.75,
+   "x": 4191.0234375,
+   "z": -5486.88232421875,
+   "detail": "all four locked at full pedal, 575 samples over 3.83 s from 25 mph; worst wheel turning at -220% of road speed",
+   "fix": "brake pressure down a step",
+   "measure": {
+    "end": "all four",
+    "worst_ratio": -2.197,
+    "samples": 575,
+    "held_s": 3.831,
+    "entry_mph": 25.1
+   },
+   "shallow_excursions": 2,
+   "lap_id": 529,
+   "cid": "3212|2|8|800",
+   "route_key": "route:5555",
+   "container": null,
+   "hw_hash": null
+  },
+  {
+   "fault": "brake-lock-all-four",
+   "severity": 0.4782219230487661,
+   "t": 2069.5,
+   "x": 4342.11328125,
+   "z": -5807.1328125,
+   "detail": "all four locked at full pedal, 22 samples over 0.14 s from 124 mph; worst wheel turning at 61% of road speed",
+   "fix": "brake pressure down a step",
+   "measure": {
+    "end": "all four",
+    "worst_ratio": 0.611,
+    "samples": 22,
+    "held_s": 0.144,
+    "entry_mph": 124.1
+   },
+   "shallow_excursions": 2,
+   "lap_id": 529,
+   "cid": "3212|2|8|800",
+   "route_key": "route:5555",
+   "container": null,
+   "hw_hash": null
+  },
+  {
+   "fault": "brake-lock-all-four",
+   "severity": 0.5697432267562375,
+   "t": 2069.73,
+   "x": 4351.34375,
+   "z": -5815.43017578125,
+   "detail": "all four locked at full pedal, 108 samples over 0.72 s from 114 mph; worst wheel turning at 57% of road speed",
+   "fix": "brake pressure down a step",
+   "measure": {
+    "end": "all four",
+    "worst_ratio": 0.565,
+    "samples": 108,
+    "held_s": 0.718,
+    "entry_mph": 113.6
+   },
+   "shallow_excursions": 2,
+   "lap_id": 529,
+   "cid": "3212|2|8|800",
+   "route_key": "route:5555",
+   "container": null,
+   "hw_hash": null
+  },
+  {
+   "fault": "brake-lock-all-four",
+   "severity": 0.6063470546362817,
+   "t": 2070.85,
+   "x": 4382.37841796875,
+   "z": -5845.14697265625,
+   "detail": "all four locked at full pedal, 36 samples over 0.23 s from 60 mph; worst wheel turning at 55% of road speed",
+   "fix": "brake pressure down a step",
+   "measure": {
+    "end": "all four",
+    "worst_ratio": 0.547,
+    "samples": 36,
+    "held_s": 0.235,
+    "entry_mph": 60.1
+   },
+   "shallow_excursions": 2,
+   "lap_id": 529,
+   "cid": "3212|2|8|800",
+   "route_key": "route:5555",
+   "container": null,
+   "hw_hash": null
+  },
+  {
+   "fault": "brake-lock-all-four",
+   "severity": 0.3939963237532995,
+   "t": 2071.1,
+   "x": 4386.298828125,
+   "z": -5849.99365234375,
+   "detail": "all four locked at full pedal, 8 samples over 0.05 s from 49 mph; worst wheel turning at 65% of road speed",
+   "fix": "brake pressure down a step",
+   "measure": {
+    "end": "all four",
+    "worst_ratio": 0.653,
+    "samples": 8,
+    "held_s": 0.05,
+    "entry_mph": 49.4
+   },
+   "shallow_excursions": 2,
+   "lap_id": 529,
+   "cid": "3212|2|8|800",
+   "route_key": "route:5555",
+   "container": null,
+   "hw_hash": null
+  },
+  {
+   "fault": "brake-lock-all-four",
+   "severity": 0.6105940223209063,
+   "t": 2071.16,
+   "x": 4387.150390625,
+   "z": -5851.166015625,
+   "detail": "all four locked at full pedal, 72 samples over 0.47 s from 47 mph; worst wheel turning at 54% of road speed",
+   "fix": "brake pressure down a step",
+   "measure": {
+    "end": "all four",
+    "worst_ratio": 0.545,
+    "samples": 72,
+    "held_s": 0.471,
+    "entry_mph": 47.2
+   },
+   "shallow_excursions": 2,
+   "lap_id": 529,
+   "cid": "3212|2|8|800",
+   "route_key": "route:5555",
+   "container": null,
+   "hw_hash": null
+  }
+ ],
+ "calibration": {
+  "3212": {
+   "redline": 8469.2841796875,
+   "declared": 8999.9951171875,
+   "radii": {
+    "FL": 0.3411530865556329,
+    "FR": 0.34162842567891294,
+    "RL": 0.3682148730582457,
+    "RR": 0.36867188755905755
+   }
+  }
+ }
+}

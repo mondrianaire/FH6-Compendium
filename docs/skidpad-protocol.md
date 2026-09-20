@@ -179,3 +179,47 @@ If they don't agree, something in the setup is off (most likely camber in the su
 that out in three minutes instead of forty.
 
 Either way: **don't drive all twenty-five until the first two come back clean.**
+
+
+---
+
+# The other run: understeer gradient (constant steer)
+
+*Added 2026-09-20. Analysis: `scripts/analysis/understeer.py`.*
+
+The skidpad measures the **grip ceiling** — how much lateral g the tyres hold. It does **not** measure
+understeer in the SAE J670 / ISO 8855 sense, and the "front-limited" word it prints is a balance indicator,
+not that. The standard's quantity is the **understeer gradient** `K = d(understeer angle)/d(a_y)`, and it
+needs a *different drive*.
+
+**Why a different drive.** ISO 8855 lists three procedures — constant radius, constant speed, constant
+steer — and warns the answer depends on which you ran. The skidpad holds the **radius** constant, and on a
+constant-radius run the curvature cannot vary, so the gradient comes out zero whatever the car does. That
+isn't theory: the Exocet's clean circles all returned 0.0 ± 0.5 deg/g.
+
+**The run — about 60 seconds each way**
+
+1. Same conditions as the skidpad: flat, paved, dry, assists off. But leave **twice the room** — the whole
+   point is that the circle grows.
+2. Roll in around **25 mph**, wind on a **moderate lock — about half** — and then **do not move the wheel
+   again.** Freezing the lock *is* the measurement.
+3. Squeeze the speed up **smoothly over fifteen or twenty seconds** until the car reaches its limit. Gentle
+   throttle; hard acceleration eats sideways grip and biases the fit.
+4. **Let the line run wide.** If the car understeers the circle opens out, and that widening is the signal.
+   Correcting with more lock destroys the run.
+5. Both directions.
+
+**Don't use full lock.** At full lock the controller axis pins at 127 and reads as perfectly "held" no matter
+what your hands do — the first version of this tool matched eighteen skidpad circles that way and reported a
+confident, wrong answer. A saturated lock is now rejected.
+
+```bash
+python scripts/analysis/understeer.py captures/fh6_*.csv
+```
+
+**What it gives you**, all from `K` and the wheelbase: the gradient in deg/g, the **characteristic speed**
+(understeer cars — where the steer needed is twice Ackermann), the **critical speed** (oversteer cars —
+above which they are directionally unstable), and **yaw velocity gain** and **lateral acceleration gain** at
+40 / 60 / 80 mph.
+
+A run is only quoted if the fit explains the curvature (r² ≥ 0.70). A poor fit means the lock moved.

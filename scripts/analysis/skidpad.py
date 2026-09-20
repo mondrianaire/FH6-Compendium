@@ -246,6 +246,11 @@ def plateau(run):
         status = f"never reached the limit (limiting slip {slip:.2f}) -- reads LOW, carry more speed"
     else:
         status = None
+    # "limiting" IS NOT UNDERSTEER IN THE SAE SENSE (SAE J670 / ISO 8855). It is which axle sits closer to
+    # -- or further past -- its own limit, from the normalised CombinedSlip. The standard's understeer
+    # gradient is d(understeer angle)/d(a_y), where the understeer angle is the steer beyond Ackermann,
+    # and it needs a road-wheel steer angle we do not have: the capture's Steer is a controller axis and
+    # SlipAngle* is normalised like CombinedSlip, not degrees. See the note at the foot of this file.
     return {"a": round(a, 3), "slip_front": round(sf, 2), "slip_rear": round(sr, 2),
             "limiting": "front" if sf >= sr else "rear", "slip": round(slip, 2), "status": status,
             "soft": 1.25 < slip <= 1.6}
@@ -267,14 +272,14 @@ def render(found, pooled):
         return ("  nothing yet. The detector wants a steady radius held for 4 s or more, one direction,\n"
                 "  no braking and |long g| under 0.20 -- see docs/skidpad-protocol.md.")
     out = [f"{'car':>5} {'PI':>4} {'dir':>3} {'s':>5} {'radius':>7} {'mph':>5} "
-           f"{'a_max':>7} {'slip F/R':>9}  limited by"]
+           f"{'a_max':>7} {'slip F/R':>9}  balance"]
     for rec, _ in found:
         pl = rec["plateau"]
         out.append(f"{str(rec['car']):>5} {str(rec['pi']):>4} {rec['dir']:>3} "
                    f"{rec['s']:5.1f} {rec['radius_m']:7.1f} {rec['mph']:5.1f} "
                    f"{pl['a']:6.2f}{'!' if pl['status'] else ('~' if pl['soft'] else ' ')} "
                    f"{pl['slip_front']:4.2f}/{pl['slip_rear']:<4.2f}  "
-                   f"{pl['limiting']} ({'understeer' if pl['limiting'] == 'front' else 'oversteer'})")
+                   f"{pl['limiting']}-limited")
     warns = [(rec, rec["plateau"]["status"]) for rec, _ in found if rec["plateau"]["status"]]
     if warns:
         out.append("")
@@ -421,3 +426,36 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# ---------------------------------------------------------------------------------------------------
+# WHAT "front-limited" IS, AND WHAT IT IS NOT (2026-09-20, after Jett put SAE J670 / ISO 8855 in front of me)
+#
+# This file reports which axle is nearer its limit. That is a BALANCE indicator and it is useful, but it is
+# not understeer as the standard defines it. The standard's understeer gradient U is d(understeer angle)/
+# d(a_y), the understeer angle being the steer beyond the Ackermann angle L/R. Reporting one word per car
+# also flouts the standard's own caution that a vehicle "can show understeer in some conditions and oversteer
+# in others" -- which this project's data already demonstrates: the Ginetta produced runs of each kind, and
+# the Centenario's session read 83% understeer against 11% oversteer.
+#
+# CAN WE MEASURE THE REAL GRADIENT? Nearly. The pieces:
+#     L    ref_car_body.wheelbase_m               have it
+#     a_y  lat_g                                  have it
+#     R    v / yaw_rate, at full capture rate     have it
+#     d    road-wheel steer angle                 DO NOT have it -- Steer is a controller axis, and
+#                                                 SlipAngle* is normalised like CombinedSlip, not degrees
+#
+# On a CONSTANT-STEER test the missing angle cancels, because it is held fixed:
+#     understeer angle = d - L/R   ->   U = d(angle)/d(a_y) = -L * d(1/R)/d(a_y)
+# Every term on the right is measured. Tried on the runs already driven, and the answer was a lesson rather
+# than a number: on the well-executed circles U came out 0.0 +- 0.5 deg/g, because THE DETECTOR ENFORCES A
+# CONSTANT RADIUS (radius CoV <= 25%). Hold the radius constant and 1/R cannot vary, so the constant-steer
+# formula must return zero whatever the car does. ISO 8855 lists constant radius, constant speed and constant
+# steer as three DIFFERENT procedures and warns that results depend on which was run; that warning is exactly
+# what those zeros are.
+#
+# So the gradient needs a different DRIVE, not a different channel: fix the steering lock and let the radius
+# GROW as speed rises, instead of chasing a fixed circle. Note that docs/skidpad-protocol.md currently asks
+# for both at once -- "pick a steering lock and hold it" while the detector rejects a wandering radius. For
+# the grip ceiling the constant radius is right and the conflict is harmless. For an understeer gradient it
+# is fatal, and that run wants its own mode with the radius test relaxed.
